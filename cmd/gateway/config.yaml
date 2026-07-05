@@ -1,0 +1,6 @@
+http:
+  address: ":80"
+  timeout: 5s
+
+log_lecel: DEBUG
+storage_address: "storage:80"
