@@ -47,7 +47,7 @@ func (h *Handler) PutObject(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = h.gateway.PutObject(bucket, key, data)
+	err = h.gateway.PutObject(req.Context(), bucket, key, data)
 	if err != nil {
 		h.log.Error("put object",
 			"bucket", bucket,
@@ -78,7 +78,7 @@ func (h *Handler) GetObject(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	object, err := h.gateway.GetObject(bucket, key)
+	object, err := h.gateway.GetObject(req.Context(), bucket, key)
 	if err != nil {
 		h.log.Error("get object",
 			"bucket", bucket,
@@ -110,7 +110,7 @@ func (h *Handler) DeleteObject(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err := h.gateway.DeleteObject(bucket, key)
+	err := h.gateway.DeleteObject(req.Context(), bucket, key)
 	if err != nil {
 		h.log.Error("delete objec",
 			"bucket", bucket,

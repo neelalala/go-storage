@@ -8,9 +8,9 @@ import (
 )
 
 type Gateway interface {
-	PutObject(bucket, key string, data []byte) error
-	GetObject(bucket, key string) ([]byte, error)
-	DeleteObject(bucket, key string) error
+	PutObject(ctx context.Context, bucket, key string, data []byte) error
+	GetObject(ctx context.Context, bucket, key string) ([]byte, error)
+	DeleteObject(ctx context.Context, bucket, key string) error
 }
 
 type Server struct {
