@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"time"
 )
 
 type Gateway interface {
@@ -20,7 +21,7 @@ type Server struct {
 	log *slog.Logger
 }
 
-func NewServer(gateway Gateway, addr string, log *slog.Logger) *Server {
+func NewServer(gateway Gateway, addr string, timeout time.Duration, log *slog.Logger) *Server {
 	handler := NewHandler(gateway, log)
 
 	mux := http.NewServeMux()
@@ -29,8 +30,9 @@ func NewServer(gateway Gateway, addr string, log *slog.Logger) *Server {
 	mux.HandleFunc("DELETE /{bucket}/{key...}", handler.DeleteObject)
 
 	server := &http.Server{
-		Addr:    addr,
-		Handler: mux,
+		Addr:        addr,
+		ReadTimeout: timeout,
+		Handler:     mux,
 	}
 
 	return &Server{
