@@ -22,7 +22,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type SaveRequest struct {
+type Object struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Data          []byte                 `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
@@ -30,9 +30,60 @@ type SaveRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
+func (x *Object) Reset() {
+	*x = Object{}
+	mi := &file_pkg_proto_storage_storage_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Object) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Object) ProtoMessage() {}
+
+func (x *Object) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_storage_storage_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Object.ProtoReflect.Descriptor instead.
+func (*Object) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_storage_storage_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *Object) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Object) GetData() []byte {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+type SaveRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Object        *Object                `protobuf:"bytes,1,opt,name=object,proto3" json:"object,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
 func (x *SaveRequest) Reset() {
 	*x = SaveRequest{}
-	mi := &file_pkg_proto_storage_storage_proto_msgTypes[0]
+	mi := &file_pkg_proto_storage_storage_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -44,7 +95,7 @@ func (x *SaveRequest) String() string {
 func (*SaveRequest) ProtoMessage() {}
 
 func (x *SaveRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_storage_storage_proto_msgTypes[0]
+	mi := &file_pkg_proto_storage_storage_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -57,19 +108,12 @@ func (x *SaveRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SaveRequest.ProtoReflect.Descriptor instead.
 func (*SaveRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_storage_storage_proto_rawDescGZIP(), []int{0}
+	return file_pkg_proto_storage_storage_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *SaveRequest) GetName() string {
+func (x *SaveRequest) GetObject() *Object {
 	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *SaveRequest) GetData() []byte {
-	if x != nil {
-		return x.Data
+		return x.Object
 	}
 	return nil
 }
@@ -83,7 +127,7 @@ type GetRequest struct {
 
 func (x *GetRequest) Reset() {
 	*x = GetRequest{}
-	mi := &file_pkg_proto_storage_storage_proto_msgTypes[1]
+	mi := &file_pkg_proto_storage_storage_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -95,7 +139,7 @@ func (x *GetRequest) String() string {
 func (*GetRequest) ProtoMessage() {}
 
 func (x *GetRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_storage_storage_proto_msgTypes[1]
+	mi := &file_pkg_proto_storage_storage_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -108,7 +152,7 @@ func (x *GetRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRequest.ProtoReflect.Descriptor instead.
 func (*GetRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_storage_storage_proto_rawDescGZIP(), []int{1}
+	return file_pkg_proto_storage_storage_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *GetRequest) GetName() string {
@@ -120,14 +164,14 @@ func (x *GetRequest) GetName() string {
 
 type GetResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Data          []byte                 `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	Object        *Object                `protobuf:"bytes,1,opt,name=object,proto3" json:"object,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetResponse) Reset() {
 	*x = GetResponse{}
-	mi := &file_pkg_proto_storage_storage_proto_msgTypes[2]
+	mi := &file_pkg_proto_storage_storage_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -139,7 +183,7 @@ func (x *GetResponse) String() string {
 func (*GetResponse) ProtoMessage() {}
 
 func (x *GetResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_storage_storage_proto_msgTypes[2]
+	mi := &file_pkg_proto_storage_storage_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -152,12 +196,12 @@ func (x *GetResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetResponse.ProtoReflect.Descriptor instead.
 func (*GetResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_storage_storage_proto_rawDescGZIP(), []int{2}
+	return file_pkg_proto_storage_storage_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *GetResponse) GetData() []byte {
+func (x *GetResponse) GetObject() *Object {
 	if x != nil {
-		return x.Data
+		return x.Object
 	}
 	return nil
 }
@@ -171,7 +215,7 @@ type DeleteRequest struct {
 
 func (x *DeleteRequest) Reset() {
 	*x = DeleteRequest{}
-	mi := &file_pkg_proto_storage_storage_proto_msgTypes[3]
+	mi := &file_pkg_proto_storage_storage_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -183,7 +227,7 @@ func (x *DeleteRequest) String() string {
 func (*DeleteRequest) ProtoMessage() {}
 
 func (x *DeleteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_storage_storage_proto_msgTypes[3]
+	mi := &file_pkg_proto_storage_storage_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -196,7 +240,7 @@ func (x *DeleteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteRequest.ProtoReflect.Descriptor instead.
 func (*DeleteRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_storage_storage_proto_rawDescGZIP(), []int{3}
+	return file_pkg_proto_storage_storage_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *DeleteRequest) GetName() string {
@@ -210,15 +254,17 @@ var File_pkg_proto_storage_storage_proto protoreflect.FileDescriptor
 
 const file_pkg_proto_storage_storage_proto_rawDesc = "" +
 	"\n" +
-	"\x1fpkg/proto/storage/storage.proto\x12\astorage\x1a\x1bgoogle/protobuf/empty.proto\"5\n" +
-	"\vSaveRequest\x12\x12\n" +
+	"\x1fpkg/proto/storage/storage.proto\x12\astorage\x1a\x1bgoogle/protobuf/empty.proto\"0\n" +
+	"\x06Object\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
-	"\x04data\x18\x02 \x01(\fR\x04data\" \n" +
+	"\x04data\x18\x02 \x01(\fR\x04data\"6\n" +
+	"\vSaveRequest\x12'\n" +
+	"\x06object\x18\x01 \x01(\v2\x0f.storage.ObjectR\x06object\" \n" +
 	"\n" +
 	"GetRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"!\n" +
-	"\vGetResponse\x12\x12\n" +
-	"\x04data\x18\x01 \x01(\fR\x04data\"#\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"6\n" +
+	"\vGetResponse\x12'\n" +
+	"\x06object\x18\x01 \x01(\v2\x0f.storage.ObjectR\x06object\"#\n" +
 	"\rDeleteRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name2\xc3\x01\n" +
 	"\aStorage\x12<\n" +
@@ -239,26 +285,29 @@ func file_pkg_proto_storage_storage_proto_rawDescGZIP() []byte {
 	return file_pkg_proto_storage_storage_proto_rawDescData
 }
 
-var file_pkg_proto_storage_storage_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_pkg_proto_storage_storage_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_pkg_proto_storage_storage_proto_goTypes = []any{
-	(*SaveRequest)(nil),   // 0: storage.SaveRequest
-	(*GetRequest)(nil),    // 1: storage.GetRequest
-	(*GetResponse)(nil),   // 2: storage.GetResponse
-	(*DeleteRequest)(nil), // 3: storage.DeleteRequest
-	(*emptypb.Empty)(nil), // 4: google.protobuf.Empty
+	(*Object)(nil),        // 0: storage.Object
+	(*SaveRequest)(nil),   // 1: storage.SaveRequest
+	(*GetRequest)(nil),    // 2: storage.GetRequest
+	(*GetResponse)(nil),   // 3: storage.GetResponse
+	(*DeleteRequest)(nil), // 4: storage.DeleteRequest
+	(*emptypb.Empty)(nil), // 5: google.protobuf.Empty
 }
 var file_pkg_proto_storage_storage_proto_depIdxs = []int32{
-	0, // 0: storage.Storage.SaveObject:input_type -> storage.SaveRequest
-	1, // 1: storage.Storage.GetObject:input_type -> storage.GetRequest
-	3, // 2: storage.Storage.DeleteObject:input_type -> storage.DeleteRequest
-	4, // 3: storage.Storage.SaveObject:output_type -> google.protobuf.Empty
-	2, // 4: storage.Storage.GetObject:output_type -> storage.GetResponse
-	4, // 5: storage.Storage.DeleteObject:output_type -> google.protobuf.Empty
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: storage.SaveRequest.object:type_name -> storage.Object
+	0, // 1: storage.GetResponse.object:type_name -> storage.Object
+	1, // 2: storage.Storage.SaveObject:input_type -> storage.SaveRequest
+	2, // 3: storage.Storage.GetObject:input_type -> storage.GetRequest
+	4, // 4: storage.Storage.DeleteObject:input_type -> storage.DeleteRequest
+	5, // 5: storage.Storage.SaveObject:output_type -> google.protobuf.Empty
+	3, // 6: storage.Storage.GetObject:output_type -> storage.GetResponse
+	5, // 7: storage.Storage.DeleteObject:output_type -> google.protobuf.Empty
+	5, // [5:8] is the sub-list for method output_type
+	2, // [2:5] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_pkg_proto_storage_storage_proto_init() }
@@ -272,7 +321,7 @@ func file_pkg_proto_storage_storage_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_proto_storage_storage_proto_rawDesc), len(file_pkg_proto_storage_storage_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

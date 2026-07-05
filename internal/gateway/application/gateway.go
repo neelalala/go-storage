@@ -32,7 +32,12 @@ func (g *Gateway) PutObject(ctx context.Context, bucket, key string, data []byte
 		"data_size", len(data),
 	)
 
-	return g.storage.SaveObject(ctx, hash, data)
+	obj := domain.Object{
+		Name: hash,
+		Data: data,
+	}
+
+	return g.storage.SaveObject(ctx, obj)
 }
 
 func (g *Gateway) GetObject(ctx context.Context, bucket, key string) ([]byte, error) {
@@ -44,7 +49,12 @@ func (g *Gateway) GetObject(ctx context.Context, bucket, key string) ([]byte, er
 		"hash", hash,
 	)
 
-	return g.storage.GetObject(ctx, hash)
+	obj, err := g.storage.GetObject(ctx, hash)
+	if err != nil {
+		return nil, err
+	}
+
+	return obj.Data, nil
 }
 
 func (g *Gateway) DeleteObject(ctx context.Context, bucket, key string) error {

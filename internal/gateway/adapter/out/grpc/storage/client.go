@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/neelalala/go-storage/internal/gateway/domain"
 	storagepb "github.com/neelalala/go-storage/pkg/proto/storage"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -30,10 +31,12 @@ func (c *Client) Close() error {
 	return c.conn.Close()
 }
 
-func (c *Client) SaveObject(ctx context.Context, name string, data []byte) error {
+func (c *Client) SaveObject(ctx context.Context, obj domain.Object) error {
 	req := &storagepb.SaveRequest{
-		Name: name,
-		Data: data,
+		Object: &storagepb.Object{
+			Name: obj.Name,
+			Data: obj.Data,
+		},
 	}
 
 	_, err := c.client.SaveObject(ctx, req)
@@ -44,17 +47,22 @@ func (c *Client) SaveObject(ctx context.Context, name string, data []byte) error
 	return nil
 }
 
-func (c *Client) GetObject(ctx context.Context, name string) ([]byte, error) {
+func (c *Client) GetObject(ctx context.Context, name string) (domain.Object, error) {
 	req := &storagepb.GetRequest{
 		Name: name,
 	}
 
 	resp, err := c.client.GetObject(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("error getting object: %w", err)
+		return domain.Object{}, fmt.Errorf("error getting object: %w", err)
 	}
 
-	return resp.GetData(), nil
+	obj := domain.Object{
+		Name: resp.GetObject().GetName(),
+		Data: resp.GetObject().GetData(),
+	}
+
+	return obj, nil
 }
 
 func (c *Client) DeleteObject(ctx context.Context, name string) error {

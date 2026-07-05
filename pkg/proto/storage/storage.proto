@@ -14,9 +14,13 @@ service Storage {
   rpc DeleteObject(DeleteRequest) returns (google.protobuf.Empty) {}
 }
 
-message SaveRequest {
+message Object {
   string name = 1;
   bytes data = 2;
+}
+
+message SaveRequest {
+  Object object = 1;
 }
 
 message GetRequest {
@@ -24,7 +28,7 @@ message GetRequest {
 }
 
 message GetResponse {
-  bytes data = 1;
+  Object object = 1;
 }
 
 message DeleteRequest {
