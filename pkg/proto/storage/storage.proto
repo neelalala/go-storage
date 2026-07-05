@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package storage;
+
+import "google/protobuf/empty.proto";
+
+option go_package = "github.com/neelalala/go-storage/pkg/proto/storage";
+
+service Storage {
+  rpc SaveObject(SaveRequest) returns (google.protobuf.Empty) {}
+  
+  rpc GetObject(GetRequest) returns (GetResponse) {}
+  
+  rpc DeleteObject(DeleteRequest) returns (google.protobuf.Empty) {}
+}
+
+message SaveRequest {
+  string name = 1;
+  bytes data = 2;
+}
+
+message GetRequest {
+  string name = 1;
+}
+
+message GetResponse {
+  bytes data = 1;
+}
+
+message DeleteRequest {
+  string name = 1;
+}
