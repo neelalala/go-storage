@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"log/slog"
 
 	"github.com/neelalala/go-storage/internal/gateway/domain"
@@ -21,7 +22,7 @@ func NewGateway(storage domain.Storage, hasher domain.Hasher, log *slog.Logger) 
 	}
 }
 
-func (g *Gateway) PutObject(bucket, key string, data []byte) error {
+func (g *Gateway) PutObject(ctx context.Context, bucket, key string, data []byte) error {
 	hash := string(g.hasher.Hash([]byte(bucket + key)))
 
 	g.log.Debug("put object",
@@ -31,10 +32,10 @@ func (g *Gateway) PutObject(bucket, key string, data []byte) error {
 		"data_size", len(data),
 	)
 
-	return g.storage.SaveObject(hash, data)
+	return g.storage.SaveObject(ctx, hash, data)
 }
 
-func (g *Gateway) GetObject(bucket, key string) ([]byte, error) {
+func (g *Gateway) GetObject(ctx context.Context, bucket, key string) ([]byte, error) {
 	hash := string(g.hasher.Hash([]byte(bucket + key)))
 
 	g.log.Debug("get object",
@@ -43,10 +44,10 @@ func (g *Gateway) GetObject(bucket, key string) ([]byte, error) {
 		"hash", hash,
 	)
 
-	return g.storage.GetObject(hash)
+	return g.storage.GetObject(ctx, hash)
 }
 
-func (g *Gateway) DeleteObject(bucket, key string) error {
+func (g *Gateway) DeleteObject(ctx context.Context, bucket, key string) error {
 	hash := string(g.hasher.Hash([]byte(bucket + key)))
 
 	g.log.Debug("delete object",
@@ -55,5 +56,5 @@ func (g *Gateway) DeleteObject(bucket, key string) error {
 		"hash", hash,
 	)
 
-	return g.storage.DeleteObject(hash)
+	return g.storage.DeleteObject(ctx, hash)
 }
