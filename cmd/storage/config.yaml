@@ -1,0 +1,4 @@
+log_level: DEBUG
+upload_root: ./1488_322/
+grpc:
+  address: ":50051"
