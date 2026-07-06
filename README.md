@@ -6,7 +6,7 @@
 # План реализации 
 01-06 - MVP 
 
-## 01 - Simple storage 
+## 01 - Simple storage ✅
 Один узел, сохраняющий данные
 
 ### Архитектура
@@ -17,7 +17,7 @@ Client -> Gateway -> Node
 - `PUT bucket/object` 
 - `GET bucket/object` 
 - `DELETE bucket/object`
-- `GET bucket`
+- `GET bucket` (решено сделать этот эндпоинт на следующем этапе)
 
 ## 02 - Metadata Service
 Сервис, знающий о файлах. Промежуточный этап для хранения данных на нескольких узлах. Освобождает Gateway от будущей логики распределения между узлами
