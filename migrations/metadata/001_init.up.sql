@@ -2,9 +2,10 @@ CREATE TABLE IF NOT EXISTS object_metadata (
   bucket TEXT NOT NULL,
   key TEXT NOT NULL,
   size BIGINT NOT NULL,
-  chechsum BIGINT NOT NULL,
+  checksum BIGINT NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  storage_node_id TEXT NOT NULL, 
 
   PRIMARY KEY (bucket, key),
 
@@ -14,6 +15,10 @@ CREATE TABLE IF NOT EXISTS object_metadata (
 
   CONSTRAINT valid_key CHECK (
     key <> ''
+  )
+
+  CONSTRAINT valid_storage_node_id CHECK (
+    storage_node_id <> ''
   )
 );
 
