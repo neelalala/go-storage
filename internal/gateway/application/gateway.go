@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
 	"github.com/neelalala/go-storage/internal/gateway/domain"
@@ -23,7 +24,7 @@ func NewGateway(storage domain.Storage, hasher domain.Hasher, log *slog.Logger) 
 }
 
 func (g *Gateway) PutObject(ctx context.Context, bucket, key string, data []byte) error {
-	hash := string(g.hasher.Hash([]byte(bucket + key)))
+	hash := fmt.Sprintf("%X", g.hasher.Hash([]byte(bucket+key)))
 
 	g.log.Debug("put object",
 		"bucket", bucket,
@@ -41,7 +42,7 @@ func (g *Gateway) PutObject(ctx context.Context, bucket, key string, data []byte
 }
 
 func (g *Gateway) GetObject(ctx context.Context, bucket, key string) ([]byte, error) {
-	hash := string(g.hasher.Hash([]byte(bucket + key)))
+	hash := fmt.Sprintf("%X", g.hasher.Hash([]byte(bucket+key)))
 
 	g.log.Debug("get object",
 		"bucket", bucket,
@@ -58,7 +59,7 @@ func (g *Gateway) GetObject(ctx context.Context, bucket, key string) ([]byte, er
 }
 
 func (g *Gateway) DeleteObject(ctx context.Context, bucket, key string) error {
-	hash := string(g.hasher.Hash([]byte(bucket + key)))
+	hash := fmt.Sprintf("%X", g.hasher.Hash([]byte(bucket+key)))
 
 	g.log.Debug("delete object",
 		"bucket", bucket,
