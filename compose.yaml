@@ -1,0 +1,59 @@
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: cmd/gateway/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      # metadata: service_started
+      storage:
+        condition: service_started
+    ports:
+      - "8080:80"
+    environment:
+      - NO_PROXY=postgres,localhost,127.0.0.1
+
+  # metadata:
+  #  build:
+  #    context: .
+  #    dockerfile: cmd/metadata/Dockerfile
+  #  restart: unless-stopped
+  #  depends_on:
+  #    postgres:
+  #      condition: service_healthy
+
+  storage:
+    build:
+      context: .
+      dockerfile: cmd/storage/Dockerfile
+    restart: unless-stopped
+    environment:
+      - NO_PROXY=postgres,localhost,127.0.0.1
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres_container
+    env_file:
+      - .env
+    ports:
+      - "5430:5432"
+    volumes:
+      - ./pgdata:${PGDATA}
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+    environment:
+      - NO_PROXY=postgres,localhost,127.0.0.1
+
+networks:
+  go-storage-network:
+    driver: bridge
+
+volumes:
+  pgdata:
+    driver: local
