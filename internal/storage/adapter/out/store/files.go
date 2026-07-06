@@ -28,6 +28,7 @@ func New(root string) FileStore {
 }
 
 func (s FileStore) Save(ctx context.Context, obj domain.Object) error {
+	// TODO: if root dir not exists always an error
 	if err := os.WriteFile(s.root+obj.Name, obj.Data, 0644); err != nil {
 		return fmt.Errorf("error saving object: %w", err)
 	}
