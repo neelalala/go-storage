@@ -3,4 +3,4 @@ http:
   timeout: 5s
 
 log_lecel: DEBUG
-storage_address: "storage:80"
+storage_address: "localhost:50051"
