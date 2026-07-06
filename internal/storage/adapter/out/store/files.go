@@ -15,7 +15,7 @@ type FileStore struct {
 }
 
 func New(root string) FileStore {
-	root = func() string {
+	root += func() string {
 		if strings.HasSuffix(root, "/") {
 			return ""
 		}
