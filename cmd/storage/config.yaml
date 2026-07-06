@@ -1,4 +1,6 @@
-log_level: DEBUG
+logger:
+  log_level: DEBUG
 upload_root: ./
+node_name: node-1
 grpc:
   address: ":50051"

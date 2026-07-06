@@ -9,13 +9,15 @@ import (
 
 type Storage struct {
 	store domain.Store
+	name  string
 
 	log *slog.Logger
 }
 
-func NewStorage(store domain.Store, log *slog.Logger) *Storage {
+func NewStorage(store domain.Store, name string, log *slog.Logger) *Storage {
 	return &Storage{
 		store: store,
+		name:  name,
 		log:   log,
 	}
 }
@@ -43,4 +45,12 @@ func (s *Storage) DeleteObject(ctx context.Context, name string) error {
 	)
 
 	return s.store.Delete(ctx, name)
+}
+
+func (s *Storage) GetNodeInfo(ctx context.Context) (domain.NodeInfo, error) {
+	s.log.Debug("get node info")
+
+	return domain.NodeInfo{
+		Name: s.name,
+	}, nil
 }

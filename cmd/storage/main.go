@@ -22,7 +22,7 @@ func main() {
 
 	cfg := config.MustLoad(configPath)
 
-	log := mustMakeLogger(cfg.LogLevel)
+	log := mustMakeLogger(cfg.Logger.LogLevel)
 
 	if err := run(cfg, log); err != nil {
 		log.Error("server failed", "error", err)
@@ -38,12 +38,12 @@ func run(cfg config.Config, log *slog.Logger) error {
 
 	store := store.New(cfg.UploadRoot)
 
-	storage := application.NewStorage(store, log)
+	storage := application.NewStorage(store, cfg.NodeName, log)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
-	server := grpc.NewServer(cfg.GRPCConfig.Address, storage, log)
+	server := grpc.NewServer(cfg.GRPC.Address, storage, log)
 
 	go func() {
 		<-ctx.Done()
