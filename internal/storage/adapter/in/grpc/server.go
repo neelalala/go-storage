@@ -19,6 +19,7 @@ type Storage interface {
 	SaveObject(ctx context.Context, obj domain.Object) error
 	GetObject(ctx context.Context, name string) (domain.Object, error)
 	DeleteObject(ctx context.Context, name string) error
+	GetNodeInfo(ctx context.Context) (domain.NodeInfo, error)
 }
 
 type Server struct {
@@ -128,4 +129,17 @@ func (s *Server) DeleteObject(ctx context.Context, req *storagepb.DeleteRequest)
 	}
 
 	return nil, nil
+}
+
+func (s *Server) GetNodeInfo(ctx context.Context, _ *emptypb.Empty) (*storagepb.NodeInfo, error) {
+	s.log.Debug("get node info request")
+
+	info, err := s.storage.GetNodeInfo(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting node info: %v", err)
+	}
+
+	return &storagepb.NodeInfo{
+		Id: info.Name,
+	}, nil
 }
