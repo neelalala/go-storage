@@ -2,3 +2,7 @@ protobuf:
 	protoc --go_out=. --go_opt=paths=source_relative \
                --go-grpc_out=. --go-grpc_opt=paths=source_relative \
                pkg/proto/storage/storage.proto
+
+build:
+	go build -o bin/gateway cmd/gateway/main.go 
+	go build -o bin/storage cmd/storage/main.go
