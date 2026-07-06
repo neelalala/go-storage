@@ -33,7 +33,7 @@ func main() {
 
 func run(cfg config.Config, log *slog.Logger) error {
 	log.Info("starting server")
-	log.Debug("debug messages are on")
+	log.Debug("debug messages are enabled")
 
 	log.Debug("config", fmt.Sprintf("%+v", cfg))
 
