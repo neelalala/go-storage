@@ -250,50 +250,6 @@ func (x *DeleteRequest) GetName() string {
 	return ""
 }
 
-type NodeInfo struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *NodeInfo) Reset() {
-	*x = NodeInfo{}
-	mi := &file_pkg_proto_storage_storage_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *NodeInfo) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*NodeInfo) ProtoMessage() {}
-
-func (x *NodeInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_storage_storage_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use NodeInfo.ProtoReflect.Descriptor instead.
-func (*NodeInfo) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_storage_storage_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *NodeInfo) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
 var File_pkg_proto_storage_storage_proto protoreflect.FileDescriptor
 
 const file_pkg_proto_storage_storage_proto_rawDesc = "" +
@@ -310,15 +266,12 @@ const file_pkg_proto_storage_storage_proto_rawDesc = "" +
 	"\vGetResponse\x12'\n" +
 	"\x06object\x18\x01 \x01(\v2\x0f.storage.ObjectR\x06object\"#\n" +
 	"\rDeleteRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"\x1a\n" +
-	"\bNodeInfo\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id2\xff\x01\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name2\xc3\x01\n" +
 	"\aStorage\x12<\n" +
 	"\n" +
 	"SaveObject\x12\x14.storage.SaveRequest\x1a\x16.google.protobuf.Empty\"\x00\x128\n" +
 	"\tGetObject\x12\x13.storage.GetRequest\x1a\x14.storage.GetResponse\"\x00\x12@\n" +
-	"\fDeleteObject\x12\x16.storage.DeleteRequest\x1a\x16.google.protobuf.Empty\"\x00\x12:\n" +
-	"\vGetNodeInfo\x12\x16.google.protobuf.Empty\x1a\x11.storage.NodeInfo\"\x00B3Z1github.com/neelalala/go-storage/pkg/proto/storageb\x06proto3"
+	"\fDeleteObject\x12\x16.storage.DeleteRequest\x1a\x16.google.protobuf.Empty\"\x00B3Z1github.com/neelalala/go-storage/pkg/proto/storageb\x06proto3"
 
 var (
 	file_pkg_proto_storage_storage_proto_rawDescOnce sync.Once
@@ -332,15 +285,14 @@ func file_pkg_proto_storage_storage_proto_rawDescGZIP() []byte {
 	return file_pkg_proto_storage_storage_proto_rawDescData
 }
 
-var file_pkg_proto_storage_storage_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_pkg_proto_storage_storage_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_pkg_proto_storage_storage_proto_goTypes = []any{
 	(*Object)(nil),        // 0: storage.Object
 	(*SaveRequest)(nil),   // 1: storage.SaveRequest
 	(*GetRequest)(nil),    // 2: storage.GetRequest
 	(*GetResponse)(nil),   // 3: storage.GetResponse
 	(*DeleteRequest)(nil), // 4: storage.DeleteRequest
-	(*NodeInfo)(nil),      // 5: storage.NodeInfo
-	(*emptypb.Empty)(nil), // 6: google.protobuf.Empty
+	(*emptypb.Empty)(nil), // 5: google.protobuf.Empty
 }
 var file_pkg_proto_storage_storage_proto_depIdxs = []int32{
 	0, // 0: storage.SaveRequest.object:type_name -> storage.Object
@@ -348,13 +300,11 @@ var file_pkg_proto_storage_storage_proto_depIdxs = []int32{
 	1, // 2: storage.Storage.SaveObject:input_type -> storage.SaveRequest
 	2, // 3: storage.Storage.GetObject:input_type -> storage.GetRequest
 	4, // 4: storage.Storage.DeleteObject:input_type -> storage.DeleteRequest
-	6, // 5: storage.Storage.GetNodeInfo:input_type -> google.protobuf.Empty
-	6, // 6: storage.Storage.SaveObject:output_type -> google.protobuf.Empty
-	3, // 7: storage.Storage.GetObject:output_type -> storage.GetResponse
-	6, // 8: storage.Storage.DeleteObject:output_type -> google.protobuf.Empty
-	5, // 9: storage.Storage.GetNodeInfo:output_type -> storage.NodeInfo
-	6, // [6:10] is the sub-list for method output_type
-	2, // [2:6] is the sub-list for method input_type
+	5, // 5: storage.Storage.SaveObject:output_type -> google.protobuf.Empty
+	3, // 6: storage.Storage.GetObject:output_type -> storage.GetResponse
+	5, // 7: storage.Storage.DeleteObject:output_type -> google.protobuf.Empty
+	5, // [5:8] is the sub-list for method output_type
+	2, // [2:5] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
 	2, // [2:2] is the sub-list for extension extendee
 	0, // [0:2] is the sub-list for field type_name
@@ -371,7 +321,7 @@ func file_pkg_proto_storage_storage_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_proto_storage_storage_proto_rawDesc), len(file_pkg_proto_storage_storage_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

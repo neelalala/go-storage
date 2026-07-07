@@ -12,8 +12,6 @@ service Storage {
   rpc GetObject(GetRequest) returns (GetResponse) {}
   
   rpc DeleteObject(DeleteRequest) returns (google.protobuf.Empty) {}
-
-  rpc GetNodeInfo(google.protobuf.Empty) returns (NodeInfo) {}
 }
 
 message Object {
@@ -37,6 +35,3 @@ message DeleteRequest {
   string name = 1;
 }
 
-message NodeInfo {
-  string id = 1;
-}
