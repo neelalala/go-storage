@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package metadata;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/neelalala/go-storage/pkg/proto/metadata";
+
+service Metadata {
+  // Metadata выбирает Storage Node, куда сохранить файл, сохраняет текущее состояние загрузки
+  rpc InitUpload(InitUploadRequest) returns (InitUploadResponse) {}
+
+  // Metadata обновляет поле updated_at, записывает checksum и помечает объект сохраненным
+  rpc CommitUpload(CommitUploadRequest) returns (google.protobuf.Empty) {}
+
+  // Metadata удаляет запись о текущей загрузке
+  rpc AbortUpload(AbortUploadRequest) returns (google.protobuf.Empty) {}
+
+  // Metadata возвращает метаданные объекта и узел, с которого его нужно загрузить 
+  rpc GetObject(GetObjectRequest) returns (GetObjectResponse) {}
+
+  // Metadata удаляпт запись об объекте и GC со временем отчищает хранилище 
+  rpc DeleteObject(DeleteObjectRequest) returns (DeleteObjectResponse) {}
+}
+
+message InitUploadRequest {
+  string bucket = 1;
+  string key = 2;
+  uint64 size = 3;
+}
+
+message InitUploadResponse {
+  string upload_id = 1;
+  Node storage_node = 2;
+}
+
+message Node {
+  string id = 1;
+  string address = 2;
+}
+
+message CommitUploadRequest {
+  string upload_id = 1;
+  uint32 checksum = 2;
+}
+
+message AbortUploadRequest {
+  string upload_id = 1;
+}
+
+message GetObjectRequest {
+  string bucket = 1;
+  string key = 2;
+}
+
+message GetObjectResponse {
+  ObjectMetadata metadata = 1;
+  Node storage_node = 2;
+}
+
+message DeleteObjectRequest {
+  string bucket = 1;
+  string key = 2;
+}
+
+message DeleteObjectResponse {
+  ObjectMetadata metadata = 1;
+  Node storage_node = 2;
+}
+
+message ObjectMetadata {
+  string bucket = 1;
+  string key = 2;
+  uint64 size = 3;
+  uint32 checksum = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  string storage_node_id = 7;
+}
