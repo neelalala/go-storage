@@ -20,7 +20,8 @@ type GRPCConfig struct {
 }
 
 type StorageConfig struct {
-	Address string `yaml:"address" env:"STORAGE_ADDRESS"`
+	ID      string `yaml:"id"`
+	Address string `yaml:"address"`
 }
 
 type Config struct {
