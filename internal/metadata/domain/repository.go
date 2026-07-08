@@ -1,9 +1,28 @@
 package domain
 
-import "context"
+import (
+	"context"
 
-type MetadataRepository interface {
-	GetObjectMetadata(ctx context.Context, bucket, key string) (ObjectMetadata, error)
-	SaveObjectMetadata(ctx context.Context, meta ObjectMetadata) (ObjectMetadata, error)
-	DeleteObjectMetadata(ctx context.Context, bucket, key string) error
+	"github.com/google/uuid"
+)
+
+type Transactor interface {
+	WithinTransaction(context.Context, func(context.Context) error) error
+}
+
+type UploadRepository interface {
+	CreateUpload(ctx context.Context, upload *Upload) error
+	DeleteUpload(ctx context.Context, uploadID uuid.UUID) error
+	CommitUpload(ctx context.Context, uploadID uuid.UUID, size uint64, checksum uint32) error
+}
+
+type ObjectRepository interface {
+	GetObject(ctx context.Context, bucket, key string) (*Object, error)
+	SoftDeleteObject(ctx context.Context, bucket, key string) (*Object, error)
+}
+
+type GCRepository interface {
+	GetPendingGCTasks(ctx context.Context, limit int) ([]*GCTask, error)
+	CompleteGCTask(ctx context.Context, deletionID int64) error
+	IncremetGCTaskAttempts(ctx context.Context, deletionID int64) error
 }
