@@ -22,6 +22,7 @@ type Upload struct {
 	Bucket        string
 	Key           string
 	ObjectPath    string
+	Size          uint64
 	StorageNodeID uuid.UUID
 	CreatedAt     time.Time
 }

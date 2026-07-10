@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS uploads (
   bucket TEXT NOT NULL,
   key TEXT NOT NULL,
   object_path TEXT NOT NULL,
+  size BIGINT NOT NULL,
   storage_node_id UUID NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
