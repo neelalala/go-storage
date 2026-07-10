@@ -22,8 +22,8 @@ func NewUploadRepository(pool *pgxpool.Pool) *UploadRepository {
 
 func (r *UploadRepository) CreateUpload(ctx context.Context, upload domain.Upload) (*domain.Upload, error) {
 	query := `
-		INSERT INTO uploads ($1, bucket, key, object_path, storage_node_id)
-		VALUES ($2, $3, $4, $5)
+		INSERT INTO uploads ($1, bucket, key, object_path, size, storage_node_id)
+		VALUES ($2, $3, $4, $5, $6)
 		RETURNING upload_id, created_at
 	`
 
@@ -34,7 +34,7 @@ func (r *UploadRepository) CreateUpload(ctx context.Context, upload domain.Uploa
 		return nil, fmt.Errorf("error: create new upload_id: %v", err)
 	}
 
-	if err := db.QueryRow(ctx, query, uploadID, upload.Bucket, upload.Key, upload.ObjectPath, upload.StorageNodeID).Scan(
+	if err := db.QueryRow(ctx, query, uploadID, upload.Bucket, upload.Key, upload.ObjectPath, upload.Size, upload.StorageNodeID).Scan(
 		&upload.UploadID,
 		&upload.CreatedAt,
 	); err != nil {
