@@ -24,5 +24,5 @@ type ObjectRepository interface {
 type GCRepository interface {
 	GetPendingGCTasks(ctx context.Context, limit int) ([]*GCTask, error)
 	CompleteGCTask(ctx context.Context, deletionID int64) error
-	IncremetGCTaskAttempts(ctx context.Context, deletionID int64) error
+	IncrementGCTaskAttempts(ctx context.Context, deletionID int64) error
 }
