@@ -57,7 +57,7 @@ func (r *UploadRepository) DeleteUpload(ctx context.Context, uploadID uuid.UUID)
 		return err
 	}
 	if tag.RowsAffected() == 0 {
-		return fmt.Errorf("error: upload %s not exists", uploadID.String())
+		return fmt.Errorf("%w or already deleted: %s", domain.ErrUploadNotFound, uploadID.String())
 	}
 
 	return nil
@@ -89,7 +89,7 @@ func (r *UploadRepository) CommitUpload(ctx context.Context, uploadID uuid.UUID,
 	}
 
 	if tag.RowsAffected() == 0 {
-		return errors.New("upload not found or was commited or aborted")
+		return fmt.Errorf("%w or already commited: %s", domain.ErrUploadNotFound, uploadID)
 	}
 
 	return nil
