@@ -2,7 +2,6 @@ package sql
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -63,15 +62,15 @@ func (r *UploadRepository) DeleteUpload(ctx context.Context, uploadID uuid.UUID)
 	return nil
 }
 
-func (r *UploadRepository) CommitUpload(ctx context.Context, uploadID uuid.UUID, size uint64, checksum uint32) error {
+func (r *UploadRepository) CommitUpload(ctx context.Context, uploadID uuid.UUID, checksum uint32) error {
 	query := `
 		WITH upload AS (
 			DELETE FROM uploads
 			WHERE upload_id = $1
-			RETURNING bucket, key, object_path, storage_node_id
+			RETURNING bucket, key, object_path, size, storage_node_id
 		)
 		INSERT INTO objects (bucket, key, object_path, size, checksum, storage_node_id)
-		SELECT bucket, key, object_path, $2, $3, storage_node_id
+		SELECT bucket, key, object_path, size, $3, storage_node_id
 		FROM upload
 		ON CONFLICT (bucket, key)
 		DO UPDATE SET 
@@ -83,7 +82,7 @@ func (r *UploadRepository) CommitUpload(ctx context.Context, uploadID uuid.UUID,
 
 	db := GetDB(ctx, r.pool)
 
-	tag, err := db.Exec(ctx, query, uploadID, size, checksum)
+	tag, err := db.Exec(ctx, query, uploadID, checksum)
 	if err != nil {
 		return err
 	}
