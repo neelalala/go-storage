@@ -142,7 +142,24 @@ func (s *MetadataService) GetObject(ctx context.Context, bucket, key string) (do
 		"message", "successful",
 	)
 
-	return *obj, s.storage, nil
+	return obj, s.storage, nil
+}
+
+func (s *MetadataService) GetObjects(ctx context.Context, bucket, path string, limit, offset int) ([]domain.Object, error) {
+	s.log.Debug("metadata service",
+		"method", "get objects",
+		"bucket", bucket,
+		"path", path,
+		"limit", limit,
+		"offset", offset,
+	)
+
+	objs, err := s.objRepo.GetObjects(ctx, bucket, path, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	return objs, nil
 }
 
 func (s *MetadataService) DeleteObject(ctx context.Context, bucket, key string) (domain.Object, domain.Storage, error) {
@@ -172,5 +189,5 @@ func (s *MetadataService) DeleteObject(ctx context.Context, bucket, key string) 
 		"message", "successful",
 	)
 
-	return *obj, s.storage, nil
+	return obj, s.storage, nil
 }
