@@ -8,6 +8,8 @@ import (
 	"github.com/neelalala/go-storage/internal/metadata/domain"
 )
 
+var _ domain.GCRepository = (*GCRepository)(nil)
+
 type GCRepository struct {
 	pool *pgxpool.Pool
 }
@@ -18,7 +20,7 @@ func NewGCRepository(pool *pgxpool.Pool) *GCRepository {
 	}
 }
 
-func (r *GCRepository) GetPendingGCTasks(ctx context.Context, limit int) ([]*domain.GCTask, error) {
+func (r *GCRepository) GetPendingGCTasks(ctx context.Context, limit int) ([]domain.GCTask, error) {
 	query := `
 		SELECT deletion_id, object_path, storage_node_id, attempts, created_at
 		FROM gc_queue
@@ -35,7 +37,7 @@ func (r *GCRepository) GetPendingGCTasks(ctx context.Context, limit int) ([]*dom
 	}
 	defer rows.Close()
 
-	tasks := make([]*domain.GCTask, 0, limit)
+	tasks := make([]domain.GCTask, 0, limit)
 
 	for rows.Next() {
 		var task domain.GCTask
@@ -51,7 +53,7 @@ func (r *GCRepository) GetPendingGCTasks(ctx context.Context, limit int) ([]*dom
 			return nil, err
 		}
 		task.Status = domain.StatusPending
-		tasks = append(tasks, &task)
+		tasks = append(tasks, task)
 	}
 
 	if err = rows.Err(); err != nil {

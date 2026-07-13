@@ -10,6 +10,8 @@ import (
 	"github.com/neelalala/go-storage/internal/metadata/domain"
 )
 
+var _ domain.ObjectRepository = (*ObjectRepository)(nil)
+
 type ObjectRepository struct {
 	pool *pgxpool.Pool
 }
@@ -20,7 +22,7 @@ func NewObjectRepository(pool *pgxpool.Pool) *ObjectRepository {
 	}
 }
 
-func (r *ObjectRepository) GetObject(ctx context.Context, bucket, key string) (*domain.Object, error) {
+func (r *ObjectRepository) GetObject(ctx context.Context, bucket, key string) (domain.Object, error) {
 	query := `
 		SELECT bucket, key, object_path, size, checksum, storage_node_id, created_at, updated_at
 		FROM objects
@@ -30,7 +32,7 @@ func (r *ObjectRepository) GetObject(ctx context.Context, bucket, key string) (*
 	db := GetDB(ctx, r.pool)
 
 	var object domain.Object
-	if err := db.QueryRow(ctx, query, bucket, key).Scan(
+	err := db.QueryRow(ctx, query, bucket, key).Scan(
 		&object.Bucket,
 		&object.Key,
 		&object.ObjectPath,
@@ -39,14 +41,15 @@ func (r *ObjectRepository) GetObject(ctx context.Context, bucket, key string) (*
 		&object.StorageNodeID,
 		&object.CreatedAt,
 		&object.UpdatedAt,
-	); err != nil {
-		return nil, err
+	)
+	if err != nil {
+		return domain.Object{}, err
 	}
 
-	return &object, nil
+	return object, nil
 }
 
-func (r *ObjectRepository) GetObjects(ctx context.Context, bucket, path string, limit, offset int) ([]*domain.Object, error) {
+func (r *ObjectRepository) GetObjects(ctx context.Context, bucket, path string, limit, offset int) ([]domain.Object, error) {
 	query := `
 		SELECT bucket, key, object_path, size, checksum, storage_node_id, created_at, updated_at
 		FROM objects
@@ -63,7 +66,7 @@ func (r *ObjectRepository) GetObjects(ctx context.Context, bucket, path string, 
 	}
 	defer rows.Close()
 
-	var objects []*domain.Object
+	objects := make([]domain.Object, 0, limit)
 
 	for rows.Next() {
 		var object domain.Object
@@ -82,7 +85,7 @@ func (r *ObjectRepository) GetObjects(ctx context.Context, bucket, path string, 
 			return nil, err
 		}
 
-		objects = append(objects, &object)
+		objects = append(objects, object)
 	}
 
 	if err := rows.Err(); err != nil {
@@ -92,7 +95,7 @@ func (r *ObjectRepository) GetObjects(ctx context.Context, bucket, path string, 
 	return objects, nil
 }
 
-func (r *ObjectRepository) SoftDeleteObject(ctx context.Context, bucket, key string) (*domain.Object, error) {
+func (r *ObjectRepository) SoftDeleteObject(ctx context.Context, bucket, key string) (domain.Object, error) {
 	query := `
 		WITH deleted AS (
 			DELETE FROM objects
@@ -121,10 +124,10 @@ func (r *ObjectRepository) SoftDeleteObject(ctx context.Context, bucket, key str
 		&object.UpdatedAt,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, fmt.Errorf("%w: %s/%s", domain.ErrObjectNotFound, bucket, key)
+			return domain.Object{}, fmt.Errorf("%w: %s/%s", domain.ErrObjectNotFound, bucket, key)
 		}
-		return nil, err
+		return domain.Object{}, err
 	}
 
-	return &object, nil
+	return object, nil
 }

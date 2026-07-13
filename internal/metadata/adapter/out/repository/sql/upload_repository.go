@@ -9,6 +9,8 @@ import (
 	"github.com/neelalala/go-storage/internal/metadata/domain"
 )
 
+var _ domain.UploadRepository = (*UploadRepository)(nil)
+
 type UploadRepository struct {
 	pool *pgxpool.Pool
 }
@@ -19,7 +21,7 @@ func NewUploadRepository(pool *pgxpool.Pool) *UploadRepository {
 	}
 }
 
-func (r *UploadRepository) CreateUpload(ctx context.Context, upload domain.Upload) (*domain.Upload, error) {
+func (r *UploadRepository) CreateUpload(ctx context.Context, upload domain.Upload) (domain.Upload, error) {
 	query := `
 		INSERT INTO uploads ($1, bucket, key, object_path, size, storage_node_id)
 		VALUES ($2, $3, $4, $5, $6)
@@ -30,17 +32,17 @@ func (r *UploadRepository) CreateUpload(ctx context.Context, upload domain.Uploa
 
 	uploadID, err := uuid.NewV7()
 	if err != nil {
-		return nil, fmt.Errorf("error: create new upload_id: %v", err)
+		return domain.Upload{}, fmt.Errorf("error: create new upload_id: %v", err)
 	}
 
 	if err := db.QueryRow(ctx, query, uploadID, upload.Bucket, upload.Key, upload.ObjectPath, upload.Size, upload.StorageNodeID).Scan(
 		&upload.UploadID,
 		&upload.CreatedAt,
 	); err != nil {
-		return nil, err
+		return domain.Upload{}, err
 	}
 
-	return &upload, nil
+	return upload, nil
 }
 
 func (r *UploadRepository) DeleteUpload(ctx context.Context, uploadID uuid.UUID) error {
