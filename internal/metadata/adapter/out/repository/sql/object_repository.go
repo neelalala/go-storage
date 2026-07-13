@@ -46,6 +46,52 @@ func (r *ObjectRepository) GetObject(ctx context.Context, bucket, key string) (*
 	return &object, nil
 }
 
+func (r *ObjectRepository) GetObjects(ctx context.Context, bucket, path string, limit, offset int) ([]*domain.Object, error) {
+	query := `
+		SELECT bucket, key, object_path, size, checksum, storage_node_id, created_at, updated_at
+		FROM objects
+		WHERE bucket = $1 AND key LIKE $2 || '/%'
+		ORDER BY key
+		LIMIT $3 OFFSET $4;
+	`
+
+	db := GetDB(ctx, r.pool)
+
+	rows, err := db.Query(ctx, query, bucket, path, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var objects []*domain.Object
+
+	for rows.Next() {
+		var object domain.Object
+
+		err := rows.Scan(
+			&object.Bucket,
+			&object.Key,
+			&object.ObjectPath,
+			&object.Size,
+			&object.Checksum,
+			&object.StorageNodeID,
+			&object.CreatedAt,
+			&object.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		objects = append(objects, &object)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return objects, nil
+}
+
 func (r *ObjectRepository) SoftDeleteObject(ctx context.Context, bucket, key string) (*domain.Object, error) {
 	query := `
 		WITH deleted AS (
