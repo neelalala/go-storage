@@ -18,7 +18,7 @@ type UploadRepository interface {
 
 type ObjectRepository interface {
 	GetObject(ctx context.Context, bucket, key string) (*Object, error)
-	GetObjects(ctx context.Context, bucket, path string, limit, offset string) ([]*Object, error)
+	GetObjects(ctx context.Context, bucket, path string, limit, offset int) ([]*Object, error)
 	SoftDeleteObject(ctx context.Context, bucket, key string) (*Object, error)
 }
 
