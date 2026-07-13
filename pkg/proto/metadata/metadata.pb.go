@@ -387,6 +387,118 @@ func (x *GetObjectResponse) GetStorageNode() *Node {
 	return nil
 }
 
+type GetObjectsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Bucket        string                 `protobuf:"bytes,1,opt,name=bucket,proto3" json:"bucket,omitempty"`
+	Path          string                 `protobuf:"bytes,2,opt,name=path,proto3" json:"path,omitempty"`
+	Limit         *int32                 `protobuf:"varint,3,opt,name=limit,proto3,oneof" json:"limit,omitempty"`
+	Offset        *int32                 `protobuf:"varint,4,opt,name=offset,proto3,oneof" json:"offset,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetObjectsRequest) Reset() {
+	*x = GetObjectsRequest{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetObjectsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetObjectsRequest) ProtoMessage() {}
+
+func (x *GetObjectsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetObjectsRequest.ProtoReflect.Descriptor instead.
+func (*GetObjectsRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *GetObjectsRequest) GetBucket() string {
+	if x != nil {
+		return x.Bucket
+	}
+	return ""
+}
+
+func (x *GetObjectsRequest) GetPath() string {
+	if x != nil {
+		return x.Path
+	}
+	return ""
+}
+
+func (x *GetObjectsRequest) GetLimit() int32 {
+	if x != nil && x.Limit != nil {
+		return *x.Limit
+	}
+	return 0
+}
+
+func (x *GetObjectsRequest) GetOffset() int32 {
+	if x != nil && x.Offset != nil {
+		return *x.Offset
+	}
+	return 0
+}
+
+type GetObjectsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Objects       []*ObjectMetadata      `protobuf:"bytes,1,rep,name=objects,proto3" json:"objects,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetObjectsResponse) Reset() {
+	*x = GetObjectsResponse{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetObjectsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetObjectsResponse) ProtoMessage() {}
+
+func (x *GetObjectsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetObjectsResponse.ProtoReflect.Descriptor instead.
+func (*GetObjectsResponse) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *GetObjectsResponse) GetObjects() []*ObjectMetadata {
+	if x != nil {
+		return x.Objects
+	}
+	return nil
+}
+
 type DeleteObjectRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Bucket        string                 `protobuf:"bytes,1,opt,name=bucket,proto3" json:"bucket,omitempty"`
@@ -397,7 +509,7 @@ type DeleteObjectRequest struct {
 
 func (x *DeleteObjectRequest) Reset() {
 	*x = DeleteObjectRequest{}
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[7]
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -409,7 +521,7 @@ func (x *DeleteObjectRequest) String() string {
 func (*DeleteObjectRequest) ProtoMessage() {}
 
 func (x *DeleteObjectRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[7]
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -422,7 +534,7 @@ func (x *DeleteObjectRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteObjectRequest.ProtoReflect.Descriptor instead.
 func (*DeleteObjectRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{7}
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *DeleteObjectRequest) GetBucket() string {
@@ -449,7 +561,7 @@ type DeleteObjectResponse struct {
 
 func (x *DeleteObjectResponse) Reset() {
 	*x = DeleteObjectResponse{}
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[8]
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -461,7 +573,7 @@ func (x *DeleteObjectResponse) String() string {
 func (*DeleteObjectResponse) ProtoMessage() {}
 
 func (x *DeleteObjectResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[8]
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -474,7 +586,7 @@ func (x *DeleteObjectResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteObjectResponse.ProtoReflect.Descriptor instead.
 func (*DeleteObjectResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{8}
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *DeleteObjectResponse) GetMetadata() *ObjectMetadata {
@@ -506,7 +618,7 @@ type ObjectMetadata struct {
 
 func (x *ObjectMetadata) Reset() {
 	*x = ObjectMetadata{}
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[9]
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -518,7 +630,7 @@ func (x *ObjectMetadata) String() string {
 func (*ObjectMetadata) ProtoMessage() {}
 
 func (x *ObjectMetadata) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[9]
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -531,7 +643,7 @@ func (x *ObjectMetadata) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ObjectMetadata.ProtoReflect.Descriptor instead.
 func (*ObjectMetadata) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{9}
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ObjectMetadata) GetBucket() string {
@@ -608,7 +720,16 @@ const file_pkg_proto_metadata_metadata_proto_rawDesc = "" +
 	"\x03key\x18\x02 \x01(\tR\x03key\"|\n" +
 	"\x11GetObjectResponse\x124\n" +
 	"\bmetadata\x18\x01 \x01(\v2\x18.metadata.ObjectMetadataR\bmetadata\x121\n" +
-	"\fstorage_node\x18\x02 \x01(\v2\x0e.metadata.NodeR\vstorageNode\"?\n" +
+	"\fstorage_node\x18\x02 \x01(\v2\x0e.metadata.NodeR\vstorageNode\"\x8c\x01\n" +
+	"\x11GetObjectsRequest\x12\x16\n" +
+	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x12\n" +
+	"\x04path\x18\x02 \x01(\tR\x04path\x12\x19\n" +
+	"\x05limit\x18\x03 \x01(\x05H\x00R\x05limit\x88\x01\x01\x12\x1b\n" +
+	"\x06offset\x18\x04 \x01(\x05H\x01R\x06offset\x88\x01\x01B\b\n" +
+	"\x06_limitB\t\n" +
+	"\a_offset\"H\n" +
+	"\x12GetObjectsResponse\x122\n" +
+	"\aobjects\x18\x01 \x03(\v2\x18.metadata.ObjectMetadataR\aobjects\"?\n" +
 	"\x13DeleteObjectRequest\x12\x16\n" +
 	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x10\n" +
 	"\x03key\x18\x02 \x01(\tR\x03key\"\x7f\n" +
@@ -624,13 +745,15 @@ const file_pkg_proto_metadata_metadata_proto_rawDesc = "" +
 	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12&\n" +
-	"\x0fstorage_node_id\x18\a \x01(\tR\rstorageNodeId2\xfe\x02\n" +
+	"\x0fstorage_node_id\x18\a \x01(\tR\rstorageNodeId2\xc9\x03\n" +
 	"\bMetadata\x12I\n" +
 	"\n" +
 	"InitUpload\x12\x1b.metadata.InitUploadRequest\x1a\x1c.metadata.InitUploadResponse\"\x00\x12G\n" +
 	"\fCommitUpload\x12\x1d.metadata.CommitUploadRequest\x1a\x16.google.protobuf.Empty\"\x00\x12E\n" +
 	"\vAbortUpload\x12\x1c.metadata.AbortUploadRequest\x1a\x16.google.protobuf.Empty\"\x00\x12F\n" +
-	"\tGetObject\x12\x1a.metadata.GetObjectRequest\x1a\x1b.metadata.GetObjectResponse\"\x00\x12O\n" +
+	"\tGetObject\x12\x1a.metadata.GetObjectRequest\x1a\x1b.metadata.GetObjectResponse\"\x00\x12I\n" +
+	"\n" +
+	"GetObjects\x12\x1b.metadata.GetObjectsRequest\x1a\x1c.metadata.GetObjectsResponse\"\x00\x12O\n" +
 	"\fDeleteObject\x12\x1d.metadata.DeleteObjectRequest\x1a\x1e.metadata.DeleteObjectResponse\"\x00B4Z2github.com/neelalala/go-storage/pkg/proto/metadatab\x06proto3"
 
 var (
@@ -645,7 +768,7 @@ func file_pkg_proto_metadata_metadata_proto_rawDescGZIP() []byte {
 	return file_pkg_proto_metadata_metadata_proto_rawDescData
 }
 
-var file_pkg_proto_metadata_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_pkg_proto_metadata_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_pkg_proto_metadata_metadata_proto_goTypes = []any{
 	(*InitUploadRequest)(nil),     // 0: metadata.InitUploadRequest
 	(*InitUploadResponse)(nil),    // 1: metadata.InitUploadResponse
@@ -654,35 +777,40 @@ var file_pkg_proto_metadata_metadata_proto_goTypes = []any{
 	(*AbortUploadRequest)(nil),    // 4: metadata.AbortUploadRequest
 	(*GetObjectRequest)(nil),      // 5: metadata.GetObjectRequest
 	(*GetObjectResponse)(nil),     // 6: metadata.GetObjectResponse
-	(*DeleteObjectRequest)(nil),   // 7: metadata.DeleteObjectRequest
-	(*DeleteObjectResponse)(nil),  // 8: metadata.DeleteObjectResponse
-	(*ObjectMetadata)(nil),        // 9: metadata.ObjectMetadata
-	(*timestamppb.Timestamp)(nil), // 10: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),         // 11: google.protobuf.Empty
+	(*GetObjectsRequest)(nil),     // 7: metadata.GetObjectsRequest
+	(*GetObjectsResponse)(nil),    // 8: metadata.GetObjectsResponse
+	(*DeleteObjectRequest)(nil),   // 9: metadata.DeleteObjectRequest
+	(*DeleteObjectResponse)(nil),  // 10: metadata.DeleteObjectResponse
+	(*ObjectMetadata)(nil),        // 11: metadata.ObjectMetadata
+	(*timestamppb.Timestamp)(nil), // 12: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),         // 13: google.protobuf.Empty
 }
 var file_pkg_proto_metadata_metadata_proto_depIdxs = []int32{
 	2,  // 0: metadata.InitUploadResponse.storage_node:type_name -> metadata.Node
-	9,  // 1: metadata.GetObjectResponse.metadata:type_name -> metadata.ObjectMetadata
+	11, // 1: metadata.GetObjectResponse.metadata:type_name -> metadata.ObjectMetadata
 	2,  // 2: metadata.GetObjectResponse.storage_node:type_name -> metadata.Node
-	9,  // 3: metadata.DeleteObjectResponse.metadata:type_name -> metadata.ObjectMetadata
-	2,  // 4: metadata.DeleteObjectResponse.storage_node:type_name -> metadata.Node
-	10, // 5: metadata.ObjectMetadata.created_at:type_name -> google.protobuf.Timestamp
-	10, // 6: metadata.ObjectMetadata.updated_at:type_name -> google.protobuf.Timestamp
-	0,  // 7: metadata.Metadata.InitUpload:input_type -> metadata.InitUploadRequest
-	3,  // 8: metadata.Metadata.CommitUpload:input_type -> metadata.CommitUploadRequest
-	4,  // 9: metadata.Metadata.AbortUpload:input_type -> metadata.AbortUploadRequest
-	5,  // 10: metadata.Metadata.GetObject:input_type -> metadata.GetObjectRequest
-	7,  // 11: metadata.Metadata.DeleteObject:input_type -> metadata.DeleteObjectRequest
-	1,  // 12: metadata.Metadata.InitUpload:output_type -> metadata.InitUploadResponse
-	11, // 13: metadata.Metadata.CommitUpload:output_type -> google.protobuf.Empty
-	11, // 14: metadata.Metadata.AbortUpload:output_type -> google.protobuf.Empty
-	6,  // 15: metadata.Metadata.GetObject:output_type -> metadata.GetObjectResponse
-	8,  // 16: metadata.Metadata.DeleteObject:output_type -> metadata.DeleteObjectResponse
-	12, // [12:17] is the sub-list for method output_type
-	7,  // [7:12] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	11, // 3: metadata.GetObjectsResponse.objects:type_name -> metadata.ObjectMetadata
+	11, // 4: metadata.DeleteObjectResponse.metadata:type_name -> metadata.ObjectMetadata
+	2,  // 5: metadata.DeleteObjectResponse.storage_node:type_name -> metadata.Node
+	12, // 6: metadata.ObjectMetadata.created_at:type_name -> google.protobuf.Timestamp
+	12, // 7: metadata.ObjectMetadata.updated_at:type_name -> google.protobuf.Timestamp
+	0,  // 8: metadata.Metadata.InitUpload:input_type -> metadata.InitUploadRequest
+	3,  // 9: metadata.Metadata.CommitUpload:input_type -> metadata.CommitUploadRequest
+	4,  // 10: metadata.Metadata.AbortUpload:input_type -> metadata.AbortUploadRequest
+	5,  // 11: metadata.Metadata.GetObject:input_type -> metadata.GetObjectRequest
+	7,  // 12: metadata.Metadata.GetObjects:input_type -> metadata.GetObjectsRequest
+	9,  // 13: metadata.Metadata.DeleteObject:input_type -> metadata.DeleteObjectRequest
+	1,  // 14: metadata.Metadata.InitUpload:output_type -> metadata.InitUploadResponse
+	13, // 15: metadata.Metadata.CommitUpload:output_type -> google.protobuf.Empty
+	13, // 16: metadata.Metadata.AbortUpload:output_type -> google.protobuf.Empty
+	6,  // 17: metadata.Metadata.GetObject:output_type -> metadata.GetObjectResponse
+	8,  // 18: metadata.Metadata.GetObjects:output_type -> metadata.GetObjectsResponse
+	10, // 19: metadata.Metadata.DeleteObject:output_type -> metadata.DeleteObjectResponse
+	14, // [14:20] is the sub-list for method output_type
+	8,  // [8:14] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_pkg_proto_metadata_metadata_proto_init() }
@@ -690,13 +818,14 @@ func file_pkg_proto_metadata_metadata_proto_init() {
 	if File_pkg_proto_metadata_metadata_proto != nil {
 		return
 	}
+	file_pkg_proto_metadata_metadata_proto_msgTypes[7].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_proto_metadata_metadata_proto_rawDesc), len(file_pkg_proto_metadata_metadata_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

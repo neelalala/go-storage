@@ -24,6 +24,7 @@ const (
 	Metadata_CommitUpload_FullMethodName = "/metadata.Metadata/CommitUpload"
 	Metadata_AbortUpload_FullMethodName  = "/metadata.Metadata/AbortUpload"
 	Metadata_GetObject_FullMethodName    = "/metadata.Metadata/GetObject"
+	Metadata_GetObjects_FullMethodName   = "/metadata.Metadata/GetObjects"
 	Metadata_DeleteObject_FullMethodName = "/metadata.Metadata/DeleteObject"
 )
 
@@ -39,6 +40,8 @@ type MetadataClient interface {
 	AbortUpload(ctx context.Context, in *AbortUploadRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// Metadata возвращает метаданные объекта и узел, с которого его нужно загрузить
 	GetObject(ctx context.Context, in *GetObjectRequest, opts ...grpc.CallOption) (*GetObjectResponse, error)
+	// Metadata возвращает метаданные объектов, у которых бакет и путь соответсвует запросу
+	GetObjects(ctx context.Context, in *GetObjectsRequest, opts ...grpc.CallOption) (*GetObjectsResponse, error)
 	// Metadata удаляпт запись об объекте и GC со временем отчищает хранилище
 	DeleteObject(ctx context.Context, in *DeleteObjectRequest, opts ...grpc.CallOption) (*DeleteObjectResponse, error)
 }
@@ -91,6 +94,16 @@ func (c *metadataClient) GetObject(ctx context.Context, in *GetObjectRequest, op
 	return out, nil
 }
 
+func (c *metadataClient) GetObjects(ctx context.Context, in *GetObjectsRequest, opts ...grpc.CallOption) (*GetObjectsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetObjectsResponse)
+	err := c.cc.Invoke(ctx, Metadata_GetObjects_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *metadataClient) DeleteObject(ctx context.Context, in *DeleteObjectRequest, opts ...grpc.CallOption) (*DeleteObjectResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DeleteObjectResponse)
@@ -113,6 +126,8 @@ type MetadataServer interface {
 	AbortUpload(context.Context, *AbortUploadRequest) (*emptypb.Empty, error)
 	// Metadata возвращает метаданные объекта и узел, с которого его нужно загрузить
 	GetObject(context.Context, *GetObjectRequest) (*GetObjectResponse, error)
+	// Metadata возвращает метаданные объектов, у которых бакет и путь соответсвует запросу
+	GetObjects(context.Context, *GetObjectsRequest) (*GetObjectsResponse, error)
 	// Metadata удаляпт запись об объекте и GC со временем отчищает хранилище
 	DeleteObject(context.Context, *DeleteObjectRequest) (*DeleteObjectResponse, error)
 	mustEmbedUnimplementedMetadataServer()
@@ -136,6 +151,9 @@ func (UnimplementedMetadataServer) AbortUpload(context.Context, *AbortUploadRequ
 }
 func (UnimplementedMetadataServer) GetObject(context.Context, *GetObjectRequest) (*GetObjectResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetObject not implemented")
+}
+func (UnimplementedMetadataServer) GetObjects(context.Context, *GetObjectsRequest) (*GetObjectsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetObjects not implemented")
 }
 func (UnimplementedMetadataServer) DeleteObject(context.Context, *DeleteObjectRequest) (*DeleteObjectResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteObject not implemented")
@@ -233,6 +251,24 @@ func _Metadata_GetObject_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Metadata_GetObjects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetObjectsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetadataServer).GetObjects(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Metadata_GetObjects_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetadataServer).GetObjects(ctx, req.(*GetObjectsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Metadata_DeleteObject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteObjectRequest)
 	if err := dec(in); err != nil {
@@ -273,6 +309,10 @@ var Metadata_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetObject",
 			Handler:    _Metadata_GetObject_Handler,
+		},
+		{
+			MethodName: "GetObjects",
+			Handler:    _Metadata_GetObjects_Handler,
 		},
 		{
 			MethodName: "DeleteObject",

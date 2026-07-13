@@ -20,6 +20,9 @@ service Metadata {
   // Metadata возвращает метаданные объекта и узел, с которого его нужно загрузить 
   rpc GetObject(GetObjectRequest) returns (GetObjectResponse) {}
 
+  // Metadata возвращает метаданные объектов, у которых бакет и путь соответсвует запросу
+  rpc GetObjects(GetObjectsRequest) returns (GetObjectsResponse) {}
+
   // Metadata удаляпт запись об объекте и GC со временем отчищает хранилище 
   rpc DeleteObject(DeleteObjectRequest) returns (DeleteObjectResponse) {}
 }
@@ -57,6 +60,17 @@ message GetObjectRequest {
 message GetObjectResponse {
   ObjectMetadata metadata = 1;
   Node storage_node = 2;
+}
+
+message GetObjectsRequest {
+  string bucket = 1;
+  string path = 2;
+  optional int32 limit = 3;
+  optional int32 offset = 4;
+}
+
+message GetObjectsResponse {
+  repeated ObjectMetadata objects = 1;
 }
 
 message DeleteObjectRequest {
