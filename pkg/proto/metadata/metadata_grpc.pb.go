@@ -43,7 +43,7 @@ type MetadataClient interface {
 	// Metadata возвращает метаданные объектов, у которых бакет и путь соответсвует запросу
 	GetObjects(ctx context.Context, in *GetObjectsRequest, opts ...grpc.CallOption) (*GetObjectsResponse, error)
 	// Metadata удаляпт запись об объекте и GC со временем отчищает хранилище
-	DeleteObject(ctx context.Context, in *DeleteObjectRequest, opts ...grpc.CallOption) (*DeleteObjectResponse, error)
+	DeleteObject(ctx context.Context, in *DeleteObjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type metadataClient struct {
@@ -104,9 +104,9 @@ func (c *metadataClient) GetObjects(ctx context.Context, in *GetObjectsRequest, 
 	return out, nil
 }
 
-func (c *metadataClient) DeleteObject(ctx context.Context, in *DeleteObjectRequest, opts ...grpc.CallOption) (*DeleteObjectResponse, error) {
+func (c *metadataClient) DeleteObject(ctx context.Context, in *DeleteObjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteObjectResponse)
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, Metadata_DeleteObject_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -129,7 +129,7 @@ type MetadataServer interface {
 	// Metadata возвращает метаданные объектов, у которых бакет и путь соответсвует запросу
 	GetObjects(context.Context, *GetObjectsRequest) (*GetObjectsResponse, error)
 	// Metadata удаляпт запись об объекте и GC со временем отчищает хранилище
-	DeleteObject(context.Context, *DeleteObjectRequest) (*DeleteObjectResponse, error)
+	DeleteObject(context.Context, *DeleteObjectRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedMetadataServer()
 }
 
@@ -155,7 +155,7 @@ func (UnimplementedMetadataServer) GetObject(context.Context, *GetObjectRequest)
 func (UnimplementedMetadataServer) GetObjects(context.Context, *GetObjectsRequest) (*GetObjectsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetObjects not implemented")
 }
-func (UnimplementedMetadataServer) DeleteObject(context.Context, *DeleteObjectRequest) (*DeleteObjectResponse, error) {
+func (UnimplementedMetadataServer) DeleteObject(context.Context, *DeleteObjectRequest) (*emptypb.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteObject not implemented")
 }
 func (UnimplementedMetadataServer) mustEmbedUnimplementedMetadataServer() {}

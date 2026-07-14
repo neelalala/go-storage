@@ -24,7 +24,7 @@ service Metadata {
   rpc GetObjects(GetObjectsRequest) returns (GetObjectsResponse) {}
 
   // Metadata удаляпт запись об объекте и GC со временем отчищает хранилище 
-  rpc DeleteObject(DeleteObjectRequest) returns (DeleteObjectResponse) {}
+  rpc DeleteObject(DeleteObjectRequest) returns (google.protobuf.Empty) {}
 }
 
 message InitUploadRequest {
@@ -76,11 +76,6 @@ message GetObjectsResponse {
 message DeleteObjectRequest {
   string bucket = 1;
   string key = 2;
-}
-
-message DeleteObjectResponse {
-  ObjectMetadata metadata = 1;
-  Node storage_node = 2;
 }
 
 message ObjectMetadata {

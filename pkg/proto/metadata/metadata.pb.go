@@ -551,58 +551,6 @@ func (x *DeleteObjectRequest) GetKey() string {
 	return ""
 }
 
-type DeleteObjectResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Metadata      *ObjectMetadata        `protobuf:"bytes,1,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	StorageNode   *Node                  `protobuf:"bytes,2,opt,name=storage_node,json=storageNode,proto3" json:"storage_node,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteObjectResponse) Reset() {
-	*x = DeleteObjectResponse{}
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteObjectResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteObjectResponse) ProtoMessage() {}
-
-func (x *DeleteObjectResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteObjectResponse.ProtoReflect.Descriptor instead.
-func (*DeleteObjectResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *DeleteObjectResponse) GetMetadata() *ObjectMetadata {
-	if x != nil {
-		return x.Metadata
-	}
-	return nil
-}
-
-func (x *DeleteObjectResponse) GetStorageNode() *Node {
-	if x != nil {
-		return x.StorageNode
-	}
-	return nil
-}
-
 type ObjectMetadata struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Bucket        string                 `protobuf:"bytes,1,opt,name=bucket,proto3" json:"bucket,omitempty"`
@@ -618,7 +566,7 @@ type ObjectMetadata struct {
 
 func (x *ObjectMetadata) Reset() {
 	*x = ObjectMetadata{}
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[11]
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -630,7 +578,7 @@ func (x *ObjectMetadata) String() string {
 func (*ObjectMetadata) ProtoMessage() {}
 
 func (x *ObjectMetadata) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[11]
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -643,7 +591,7 @@ func (x *ObjectMetadata) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ObjectMetadata.ProtoReflect.Descriptor instead.
 func (*ObjectMetadata) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{11}
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *ObjectMetadata) GetBucket() string {
@@ -732,10 +680,7 @@ const file_pkg_proto_metadata_metadata_proto_rawDesc = "" +
 	"\aobjects\x18\x01 \x03(\v2\x18.metadata.ObjectMetadataR\aobjects\"?\n" +
 	"\x13DeleteObjectRequest\x12\x16\n" +
 	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x10\n" +
-	"\x03key\x18\x02 \x01(\tR\x03key\"\x7f\n" +
-	"\x14DeleteObjectResponse\x124\n" +
-	"\bmetadata\x18\x01 \x01(\v2\x18.metadata.ObjectMetadataR\bmetadata\x121\n" +
-	"\fstorage_node\x18\x02 \x01(\v2\x0e.metadata.NodeR\vstorageNode\"\x88\x02\n" +
+	"\x03key\x18\x02 \x01(\tR\x03key\"\x88\x02\n" +
 	"\x0eObjectMetadata\x12\x16\n" +
 	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x10\n" +
 	"\x03key\x18\x02 \x01(\tR\x03key\x12\x12\n" +
@@ -745,7 +690,7 @@ const file_pkg_proto_metadata_metadata_proto_rawDesc = "" +
 	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12&\n" +
-	"\x0fstorage_node_id\x18\a \x01(\tR\rstorageNodeId2\xc9\x03\n" +
+	"\x0fstorage_node_id\x18\a \x01(\tR\rstorageNodeId2\xc1\x03\n" +
 	"\bMetadata\x12I\n" +
 	"\n" +
 	"InitUpload\x12\x1b.metadata.InitUploadRequest\x1a\x1c.metadata.InitUploadResponse\"\x00\x12G\n" +
@@ -753,8 +698,8 @@ const file_pkg_proto_metadata_metadata_proto_rawDesc = "" +
 	"\vAbortUpload\x12\x1c.metadata.AbortUploadRequest\x1a\x16.google.protobuf.Empty\"\x00\x12F\n" +
 	"\tGetObject\x12\x1a.metadata.GetObjectRequest\x1a\x1b.metadata.GetObjectResponse\"\x00\x12I\n" +
 	"\n" +
-	"GetObjects\x12\x1b.metadata.GetObjectsRequest\x1a\x1c.metadata.GetObjectsResponse\"\x00\x12O\n" +
-	"\fDeleteObject\x12\x1d.metadata.DeleteObjectRequest\x1a\x1e.metadata.DeleteObjectResponse\"\x00B4Z2github.com/neelalala/go-storage/pkg/proto/metadatab\x06proto3"
+	"GetObjects\x12\x1b.metadata.GetObjectsRequest\x1a\x1c.metadata.GetObjectsResponse\"\x00\x12G\n" +
+	"\fDeleteObject\x12\x1d.metadata.DeleteObjectRequest\x1a\x16.google.protobuf.Empty\"\x00B4Z2github.com/neelalala/go-storage/pkg/proto/metadatab\x06proto3"
 
 var (
 	file_pkg_proto_metadata_metadata_proto_rawDescOnce sync.Once
@@ -768,7 +713,7 @@ func file_pkg_proto_metadata_metadata_proto_rawDescGZIP() []byte {
 	return file_pkg_proto_metadata_metadata_proto_rawDescData
 }
 
-var file_pkg_proto_metadata_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_pkg_proto_metadata_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_pkg_proto_metadata_metadata_proto_goTypes = []any{
 	(*InitUploadRequest)(nil),     // 0: metadata.InitUploadRequest
 	(*InitUploadResponse)(nil),    // 1: metadata.InitUploadResponse
@@ -780,37 +725,34 @@ var file_pkg_proto_metadata_metadata_proto_goTypes = []any{
 	(*GetObjectsRequest)(nil),     // 7: metadata.GetObjectsRequest
 	(*GetObjectsResponse)(nil),    // 8: metadata.GetObjectsResponse
 	(*DeleteObjectRequest)(nil),   // 9: metadata.DeleteObjectRequest
-	(*DeleteObjectResponse)(nil),  // 10: metadata.DeleteObjectResponse
-	(*ObjectMetadata)(nil),        // 11: metadata.ObjectMetadata
-	(*timestamppb.Timestamp)(nil), // 12: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),         // 13: google.protobuf.Empty
+	(*ObjectMetadata)(nil),        // 10: metadata.ObjectMetadata
+	(*timestamppb.Timestamp)(nil), // 11: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),         // 12: google.protobuf.Empty
 }
 var file_pkg_proto_metadata_metadata_proto_depIdxs = []int32{
 	2,  // 0: metadata.InitUploadResponse.storage_node:type_name -> metadata.Node
-	11, // 1: metadata.GetObjectResponse.metadata:type_name -> metadata.ObjectMetadata
+	10, // 1: metadata.GetObjectResponse.metadata:type_name -> metadata.ObjectMetadata
 	2,  // 2: metadata.GetObjectResponse.storage_node:type_name -> metadata.Node
-	11, // 3: metadata.GetObjectsResponse.objects:type_name -> metadata.ObjectMetadata
-	11, // 4: metadata.DeleteObjectResponse.metadata:type_name -> metadata.ObjectMetadata
-	2,  // 5: metadata.DeleteObjectResponse.storage_node:type_name -> metadata.Node
-	12, // 6: metadata.ObjectMetadata.created_at:type_name -> google.protobuf.Timestamp
-	12, // 7: metadata.ObjectMetadata.updated_at:type_name -> google.protobuf.Timestamp
-	0,  // 8: metadata.Metadata.InitUpload:input_type -> metadata.InitUploadRequest
-	3,  // 9: metadata.Metadata.CommitUpload:input_type -> metadata.CommitUploadRequest
-	4,  // 10: metadata.Metadata.AbortUpload:input_type -> metadata.AbortUploadRequest
-	5,  // 11: metadata.Metadata.GetObject:input_type -> metadata.GetObjectRequest
-	7,  // 12: metadata.Metadata.GetObjects:input_type -> metadata.GetObjectsRequest
-	9,  // 13: metadata.Metadata.DeleteObject:input_type -> metadata.DeleteObjectRequest
-	1,  // 14: metadata.Metadata.InitUpload:output_type -> metadata.InitUploadResponse
-	13, // 15: metadata.Metadata.CommitUpload:output_type -> google.protobuf.Empty
-	13, // 16: metadata.Metadata.AbortUpload:output_type -> google.protobuf.Empty
-	6,  // 17: metadata.Metadata.GetObject:output_type -> metadata.GetObjectResponse
-	8,  // 18: metadata.Metadata.GetObjects:output_type -> metadata.GetObjectsResponse
-	10, // 19: metadata.Metadata.DeleteObject:output_type -> metadata.DeleteObjectResponse
-	14, // [14:20] is the sub-list for method output_type
-	8,  // [8:14] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	10, // 3: metadata.GetObjectsResponse.objects:type_name -> metadata.ObjectMetadata
+	11, // 4: metadata.ObjectMetadata.created_at:type_name -> google.protobuf.Timestamp
+	11, // 5: metadata.ObjectMetadata.updated_at:type_name -> google.protobuf.Timestamp
+	0,  // 6: metadata.Metadata.InitUpload:input_type -> metadata.InitUploadRequest
+	3,  // 7: metadata.Metadata.CommitUpload:input_type -> metadata.CommitUploadRequest
+	4,  // 8: metadata.Metadata.AbortUpload:input_type -> metadata.AbortUploadRequest
+	5,  // 9: metadata.Metadata.GetObject:input_type -> metadata.GetObjectRequest
+	7,  // 10: metadata.Metadata.GetObjects:input_type -> metadata.GetObjectsRequest
+	9,  // 11: metadata.Metadata.DeleteObject:input_type -> metadata.DeleteObjectRequest
+	1,  // 12: metadata.Metadata.InitUpload:output_type -> metadata.InitUploadResponse
+	12, // 13: metadata.Metadata.CommitUpload:output_type -> google.protobuf.Empty
+	12, // 14: metadata.Metadata.AbortUpload:output_type -> google.protobuf.Empty
+	6,  // 15: metadata.Metadata.GetObject:output_type -> metadata.GetObjectResponse
+	8,  // 16: metadata.Metadata.GetObjects:output_type -> metadata.GetObjectsResponse
+	12, // 17: metadata.Metadata.DeleteObject:output_type -> google.protobuf.Empty
+	12, // [12:18] is the sub-list for method output_type
+	6,  // [6:12] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_pkg_proto_metadata_metadata_proto_init() }
@@ -825,7 +767,7 @@ func file_pkg_proto_metadata_metadata_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_proto_metadata_metadata_proto_rawDesc), len(file_pkg_proto_metadata_metadata_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
