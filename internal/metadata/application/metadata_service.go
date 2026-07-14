@@ -162,14 +162,14 @@ func (s *MetadataService) GetObjects(ctx context.Context, bucket, path string, l
 	return objs, nil
 }
 
-func (s *MetadataService) DeleteObject(ctx context.Context, bucket, key string) (domain.Object, domain.Storage, error) {
+func (s *MetadataService) DeleteObject(ctx context.Context, bucket, key string) error {
 	s.log.Debug("metadata service",
 		"method", "delete object",
 		"bucket", bucket,
 		"key", key,
 	)
 
-	obj, err := s.objRepo.SoftDeleteObject(ctx, bucket, key)
+	err := s.objRepo.SoftDeleteObject(ctx, bucket, key)
 	if err != nil {
 		if !errors.Is(err, domain.ErrObjectNotFound) {
 			s.log.Error("metadata service",
@@ -179,7 +179,7 @@ func (s *MetadataService) DeleteObject(ctx context.Context, bucket, key string) 
 			)
 		}
 
-		return domain.Object{}, domain.Storage{}, err
+		return err
 	}
 
 	s.log.Debug("metadata service",
@@ -189,5 +189,5 @@ func (s *MetadataService) DeleteObject(ctx context.Context, bucket, key string) 
 		"message", "successful",
 	)
 
-	return obj, s.storage, nil
+	return nil
 }
