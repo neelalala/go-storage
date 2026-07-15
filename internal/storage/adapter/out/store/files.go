@@ -11,10 +11,11 @@ import (
 )
 
 type FileStore struct {
-	root string
+	hasher domain.Hasher
+	root   string
 }
 
-func New(root string) FileStore {
+func New(root string, hasher domain.Hasher) FileStore {
 	root += func() string {
 		if strings.HasSuffix(root, "/") {
 			return ""
@@ -23,17 +24,20 @@ func New(root string) FileStore {
 	}()
 
 	return FileStore{
-		root: root,
+		hasher: hasher,
+		root:   root,
 	}
 }
 
-func (s FileStore) Save(ctx context.Context, obj domain.Object) error {
+func (s FileStore) Save(ctx context.Context, obj domain.Object) (uint32, error) {
 	// TODO: if root dir not exists always an error
 	if err := os.WriteFile(s.root+obj.Name, obj.Data, 0644); err != nil {
-		return fmt.Errorf("error saving object: %w", err)
+		return 0, fmt.Errorf("error saving object: %w", err)
 	}
 
-	return nil
+	checksum := s.hasher.Checksum(obj.Data)
+
+	return checksum, nil
 }
 
 func (s FileStore) Get(ctx context.Context, name string) (domain.Object, error) {
