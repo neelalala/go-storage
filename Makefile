@@ -8,3 +8,4 @@ protobuf:
 build:
 	go build -o bin/gateway cmd/gateway/main.go 
 	go build -o bin/storage cmd/storage/main.go
+	go build -o bin/metadata cmd/metadata/main.go
