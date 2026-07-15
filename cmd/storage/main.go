@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/neelalala/go-storage/internal/storage/adapter/in/grpc"
+	"github.com/neelalala/go-storage/internal/storage/adapter/out/hash"
 	"github.com/neelalala/go-storage/internal/storage/adapter/out/store"
 	"github.com/neelalala/go-storage/internal/storage/application"
 	"github.com/neelalala/go-storage/internal/storage/config"
@@ -36,7 +37,9 @@ func run(cfg config.Config, log *slog.Logger) error {
 
 	log.Debug("config", fmt.Sprintf("%+v", cfg))
 
-	store := store.New(cfg.UploadRoot)
+	hasher := hash.NewCRC32()
+
+	store := store.New(cfg.UploadRoot, hasher)
 
 	storage := application.NewStorage(store, cfg.NodeName, log)
 
