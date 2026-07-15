@@ -1,0 +1,17 @@
+logger:
+  log_level: DEBUG
+
+database:
+  migrations_dir: file://migrations/metadata
+
+grpc:
+  address: ":50051"
+
+storage:
+  id: "78463b59-79ee-44c6-b610-18b4549d60f6"
+  address: "storage:50051"
+
+garbage_collector:
+  interval: 1m
+  task_limit: 100
+  task_timeout: 5s
