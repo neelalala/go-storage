@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
@@ -11,7 +12,7 @@ type LoggerConfig struct {
 }
 
 type DatabaseConfig struct {
-	Address       string `yaml:"address" env:"DATABASE_ADDRESS"`
+	URL           string `yaml:"url" env:"DATABASE_URL"`
 	MigrationsDir string `yaml:"migrations_dir" env:"DATABASE_MIGRATIONS_DIRECTORY"`
 }
 
@@ -24,11 +25,18 @@ type StorageConfig struct {
 	Address string `yaml:"address"`
 }
 
+type GarbageCollectorConfig struct {
+	Interval    time.Duration `yaml:"interval" env:"GC_INTERVAL" env-default:"1m"`
+	TaskLimit   int           `yaml:"task_limit" env:"GC_TASK_LIMIT" env-default:"50"`
+	TaskTimeout time.Duration `yaml:"task_timeout" env:"GC_TASK_TIMEOUT" env-default:"10s"`
+}
+
 type Config struct {
-	Logger   LoggerConfig   `yaml:"logger"`
-	Database DatabaseConfig `yaml:"database"`
-	GRPC     GRPCConfig     `yaml:"grpc"`
-	Storage  StorageConfig  `yaml:"storage"`
+	Logger           LoggerConfig           `yaml:"logger"`
+	Database         DatabaseConfig         `yaml:"database"`
+	GRPC             GRPCConfig             `yaml:"grpc"`
+	Storage          StorageConfig          `yaml:"storage"`
+	GarbageCollector GarbageCollectorConfig `yaml:"garbage_collector"`
 }
 
 func MustLoad(configPath string) Config {
