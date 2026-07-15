@@ -22,7 +22,7 @@ func NewStorage(store domain.Store, name string, log *slog.Logger) *Storage {
 	}
 }
 
-func (s *Storage) SaveObject(ctx context.Context, obj domain.Object) error {
+func (s *Storage) SaveObject(ctx context.Context, obj domain.Object) (uint32, error) {
 	s.log.Debug("save object",
 		"name", obj.Name,
 		"data_size", len(obj.Data),
@@ -45,12 +45,4 @@ func (s *Storage) DeleteObject(ctx context.Context, name string) error {
 	)
 
 	return s.store.Delete(ctx, name)
-}
-
-func (s *Storage) GetNodeInfo(ctx context.Context) (domain.NodeInfo, error) {
-	s.log.Debug("get node info")
-
-	return domain.NodeInfo{
-		Name: s.name,
-	}, nil
 }
