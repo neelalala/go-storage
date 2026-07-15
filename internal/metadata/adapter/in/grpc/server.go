@@ -23,7 +23,7 @@ const (
 )
 
 type MetadataService interface {
-	InitUpload(ctx context.Context, bucket, key string, size uint64) (uuid.UUID, domain.Storage, error)
+	InitUpload(ctx context.Context, bucket, key string, size uint64) (domain.Upload, domain.Storage, error)
 	CommitUpload(ctx context.Context, uploadID uuid.UUID, checksum uint32) error
 	AbortUpload(ctx context.Context, uploadID uuid.UUID) error
 	GetObject(ctx context.Context, bucket, key string) (domain.Object, domain.Storage, error)
@@ -92,17 +92,18 @@ func (s *Server) InitUpload(ctx context.Context, req *metadatapb.InitUploadReque
 
 	bucket, key, size := req.GetBucket(), req.GetKey(), req.GetSize()
 
-	id, node, err := s.service.InitUpload(ctx, bucket, key, size)
+	upload, node, err := s.service.InitUpload(ctx, bucket, key, size)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error initing upload: %v", err)
 	}
 
 	return &metadatapb.InitUploadResponse{
-		UploadId: id.String(),
+		UploadId: upload.UploadID.String(),
 		StorageNode: &metadatapb.Node{
 			Id:      node.ID.String(),
 			Address: node.Address,
 		},
+		ObjectPath: upload.ObjectPath,
 	}, nil
 }
 
@@ -168,6 +169,7 @@ func (s *Server) GetObject(ctx context.Context, req *metadatapb.GetObjectRequest
 			CreatedAt:     timestamppb.New(obj.CreatedAt),
 			UpdatedAt:     timestamppb.New(obj.UpdatedAt),
 			StorageNodeId: obj.StorageNodeID.String(),
+			ObjectPath:    obj.ObjectPath,
 		},
 		StorageNode: &metadatapb.Node{
 			Id:      node.ID.String(),
