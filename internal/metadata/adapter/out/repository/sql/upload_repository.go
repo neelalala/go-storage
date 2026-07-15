@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+
 	"github.com/neelalala/go-storage/internal/metadata/domain"
 )
 
@@ -23,9 +24,9 @@ func NewUploadRepository(pool *pgxpool.Pool) *UploadRepository {
 
 func (r *UploadRepository) CreateUpload(ctx context.Context, upload domain.Upload) (domain.Upload, error) {
 	query := `
-		INSERT INTO uploads ($1, bucket, key, object_path, size, storage_node_id)
-		VALUES ($2, $3, $4, $5, $6)
-		RETURNING upload_id, created_at
+		INSERT INTO uploads (upload_id, bucket, key, object_path, size, storage_node_id)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING created_at
 	`
 
 	db := GetDB(ctx, r.pool)
@@ -36,11 +37,12 @@ func (r *UploadRepository) CreateUpload(ctx context.Context, upload domain.Uploa
 	}
 
 	if err := db.QueryRow(ctx, query, uploadID, upload.Bucket, upload.Key, upload.ObjectPath, upload.Size, upload.StorageNodeID).Scan(
-		&upload.UploadID,
 		&upload.CreatedAt,
 	); err != nil {
 		return domain.Upload{}, err
 	}
+
+	upload.UploadID = uploadID
 
 	return upload, nil
 }
