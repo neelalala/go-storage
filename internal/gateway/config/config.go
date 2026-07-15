@@ -7,15 +7,23 @@ import (
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
+type LoggerConfig struct {
+	LogLevel string `yaml:"log_level" env:"LOG_LEVEL" env-default:"DEBUG"`
+}
+
 type HTTPConfig struct {
 	Address string        `yaml:"address" env:"GATEWAY_ADDRESS_HTTP" env-default:"localhost:80"`
 	Timeout time.Duration `yaml:"timeout" env:"GATEWAY_TIMEOUT" env-default:"5s"`
 }
 
+type MetadataServiceConfig struct {
+	Address string `yaml:"address" env:"METADATA_SERVICE_ADDRESS" env-default:"metadata:50051"`
+}
+
 type Config struct {
-	HTTPConfig     HTTPConfig `yaml:"http"`
-	LogLevel       string     `yaml:"log_level" env:"LOG_LEVEL" env-default:"DEBUG"`
-	StorageAddress string     `yaml:"storage_address" env:"STORAGE_ADDRESS" env-default:"storage:80"`
+	HTTP            HTTPConfig            `yaml:"http"`
+	Logger          LoggerConfig          `yaml:"logger"`
+	MetadataService MetadataServiceConfig `yaml:"metadata"`
 }
 
 func MustLoad(configPath string) Config {
