@@ -32,7 +32,7 @@ END;
 $$ language 'plpgsql';
 
 CREATE TRIGGER update_object_metadata_modtime
-  BEFORE UPDATE ON object_metadata
+  BEFORE UPDATE ON objects
   FOR EACH ROW
   EXECUTE PROCEDURE update_modified_column();
 
