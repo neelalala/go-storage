@@ -5,7 +5,8 @@ services:
       dockerfile: cmd/gateway/Dockerfile
     restart: unless-stopped
     depends_on:
-      # metadata: service_started
+      metadata:
+        condition: service_started
       storage:
         condition: service_started
     ports:
@@ -13,14 +14,16 @@ services:
     environment:
       - NO_PROXY=postgres,localhost,127.0.0.1
 
-  # metadata:
-  #  build:
-  #    context: .
-  #    dockerfile: cmd/metadata/Dockerfile
-  #  restart: unless-stopped
-  #  depends_on:
-  #    postgres:
-  #      condition: service_healthy
+  metadata:
+    build:
+      context: .
+      dockerfile: cmd/metadata/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
 
   storage:
     build:
