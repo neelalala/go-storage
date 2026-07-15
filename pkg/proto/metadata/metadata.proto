@@ -23,7 +23,7 @@ service Metadata {
   // Metadata возвращает метаданные объектов, у которых бакет и путь соответсвует запросу
   rpc GetObjects(GetObjectsRequest) returns (GetObjectsResponse) {}
 
-  // Metadata удаляпт запись об объекте и GC со временем отчищает хранилище 
+  // Metadata удаляет запись об объекте и GC со временем отчищает хранилище 
   rpc DeleteObject(DeleteObjectRequest) returns (google.protobuf.Empty) {}
 }
 
@@ -36,6 +36,7 @@ message InitUploadRequest {
 message InitUploadResponse {
   string upload_id = 1;
   Node storage_node = 2;
+  string object_path = 3;
 }
 
 message Node {
@@ -86,4 +87,5 @@ message ObjectMetadata {
   google.protobuf.Timestamp created_at = 5;
   google.protobuf.Timestamp updated_at = 6;
   string storage_node_id = 7;
+  string object_path = 8;
 }

@@ -87,6 +87,7 @@ type InitUploadResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UploadId      string                 `protobuf:"bytes,1,opt,name=upload_id,json=uploadId,proto3" json:"upload_id,omitempty"`
 	StorageNode   *Node                  `protobuf:"bytes,2,opt,name=storage_node,json=storageNode,proto3" json:"storage_node,omitempty"`
+	ObjectPath    string                 `protobuf:"bytes,3,opt,name=object_path,json=objectPath,proto3" json:"object_path,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -133,6 +134,13 @@ func (x *InitUploadResponse) GetStorageNode() *Node {
 		return x.StorageNode
 	}
 	return nil
+}
+
+func (x *InitUploadResponse) GetObjectPath() string {
+	if x != nil {
+		return x.ObjectPath
+	}
+	return ""
 }
 
 type Node struct {
@@ -560,6 +568,7 @@ type ObjectMetadata struct {
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	StorageNodeId string                 `protobuf:"bytes,7,opt,name=storage_node_id,json=storageNodeId,proto3" json:"storage_node_id,omitempty"`
+	ObjectPath    string                 `protobuf:"bytes,8,opt,name=object_path,json=objectPath,proto3" json:"object_path,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -643,6 +652,13 @@ func (x *ObjectMetadata) GetStorageNodeId() string {
 	return ""
 }
 
+func (x *ObjectMetadata) GetObjectPath() string {
+	if x != nil {
+		return x.ObjectPath
+	}
+	return ""
+}
+
 var File_pkg_proto_metadata_metadata_proto protoreflect.FileDescriptor
 
 const file_pkg_proto_metadata_metadata_proto_rawDesc = "" +
@@ -651,10 +667,12 @@ const file_pkg_proto_metadata_metadata_proto_rawDesc = "" +
 	"\x11InitUploadRequest\x12\x16\n" +
 	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x10\n" +
 	"\x03key\x18\x02 \x01(\tR\x03key\x12\x12\n" +
-	"\x04size\x18\x03 \x01(\x04R\x04size\"d\n" +
+	"\x04size\x18\x03 \x01(\x04R\x04size\"\x85\x01\n" +
 	"\x12InitUploadResponse\x12\x1b\n" +
 	"\tupload_id\x18\x01 \x01(\tR\buploadId\x121\n" +
-	"\fstorage_node\x18\x02 \x01(\v2\x0e.metadata.NodeR\vstorageNode\"0\n" +
+	"\fstorage_node\x18\x02 \x01(\v2\x0e.metadata.NodeR\vstorageNode\x12\x1f\n" +
+	"\vobject_path\x18\x03 \x01(\tR\n" +
+	"objectPath\"0\n" +
 	"\x04Node\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
 	"\aaddress\x18\x02 \x01(\tR\aaddress\"N\n" +
@@ -680,7 +698,7 @@ const file_pkg_proto_metadata_metadata_proto_rawDesc = "" +
 	"\aobjects\x18\x01 \x03(\v2\x18.metadata.ObjectMetadataR\aobjects\"?\n" +
 	"\x13DeleteObjectRequest\x12\x16\n" +
 	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x10\n" +
-	"\x03key\x18\x02 \x01(\tR\x03key\"\x88\x02\n" +
+	"\x03key\x18\x02 \x01(\tR\x03key\"\xa9\x02\n" +
 	"\x0eObjectMetadata\x12\x16\n" +
 	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x10\n" +
 	"\x03key\x18\x02 \x01(\tR\x03key\x12\x12\n" +
@@ -690,7 +708,9 @@ const file_pkg_proto_metadata_metadata_proto_rawDesc = "" +
 	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12&\n" +
-	"\x0fstorage_node_id\x18\a \x01(\tR\rstorageNodeId2\xc1\x03\n" +
+	"\x0fstorage_node_id\x18\a \x01(\tR\rstorageNodeId\x12\x1f\n" +
+	"\vobject_path\x18\b \x01(\tR\n" +
+	"objectPath2\xc1\x03\n" +
 	"\bMetadata\x12I\n" +
 	"\n" +
 	"InitUpload\x12\x1b.metadata.InitUploadRequest\x1a\x1c.metadata.InitUploadResponse\"\x00\x12G\n" +

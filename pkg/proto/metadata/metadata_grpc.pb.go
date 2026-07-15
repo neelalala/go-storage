@@ -42,7 +42,7 @@ type MetadataClient interface {
 	GetObject(ctx context.Context, in *GetObjectRequest, opts ...grpc.CallOption) (*GetObjectResponse, error)
 	// Metadata возвращает метаданные объектов, у которых бакет и путь соответсвует запросу
 	GetObjects(ctx context.Context, in *GetObjectsRequest, opts ...grpc.CallOption) (*GetObjectsResponse, error)
-	// Metadata удаляпт запись об объекте и GC со временем отчищает хранилище
+	// Metadata удаляет запись об объекте и GC со временем отчищает хранилище
 	DeleteObject(ctx context.Context, in *DeleteObjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -128,7 +128,7 @@ type MetadataServer interface {
 	GetObject(context.Context, *GetObjectRequest) (*GetObjectResponse, error)
 	// Metadata возвращает метаданные объектов, у которых бакет и путь соответсвует запросу
 	GetObjects(context.Context, *GetObjectsRequest) (*GetObjectsResponse, error)
-	// Metadata удаляпт запись об объекте и GC со временем отчищает хранилище
+	// Metadata удаляет запись об объекте и GC со временем отчищает хранилище
 	DeleteObject(context.Context, *DeleteObjectRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedMetadataServer()
 }
