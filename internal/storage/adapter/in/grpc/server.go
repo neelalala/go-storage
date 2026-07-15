@@ -16,10 +16,9 @@ import (
 )
 
 type Storage interface {
-	SaveObject(ctx context.Context, obj domain.Object) error
+	SaveObject(ctx context.Context, obj domain.Object) (uint32, error)
 	GetObject(ctx context.Context, name string) (domain.Object, error)
 	DeleteObject(ctx context.Context, name string) error
-	GetNodeInfo(ctx context.Context) (domain.NodeInfo, error)
 }
 
 type Server struct {
@@ -78,7 +77,7 @@ func (s *Server) Stop(ctx context.Context) error {
 	}
 }
 
-func (s *Server) SaveObject(ctx context.Context, req *storagepb.SaveRequest) (*emptypb.Empty, error) {
+func (s *Server) SaveObject(ctx context.Context, req *storagepb.SaveRequest) (*storagepb.SaveResponse, error) {
 	s.log.Debug("save object request")
 
 	obj := domain.Object{
@@ -86,12 +85,14 @@ func (s *Server) SaveObject(ctx context.Context, req *storagepb.SaveRequest) (*e
 		Data: req.GetObject().GetData(),
 	}
 
-	err := s.storage.SaveObject(ctx, obj)
+	checksum, err := s.storage.SaveObject(ctx, obj)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error saving object: %v", err)
 	}
 
-	return nil, nil
+	return &storagepb.SaveResponse{
+		Checksum: checksum,
+	}, nil
 }
 
 func (s *Server) GetObject(ctx context.Context, req *storagepb.GetRequest) (*storagepb.GetResponse, error) {
