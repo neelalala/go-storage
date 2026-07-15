@@ -14,20 +14,28 @@ type MetadataService struct {
 	uploadRepo domain.UploadRepository
 	objRepo    domain.ObjectRepository
 	storage    domain.Storage
+	hasher     domain.Hasher
 
 	log *slog.Logger
 }
 
-func NewMetadataService(uploadRepo domain.UploadRepository, objRepo domain.ObjectRepository, storage domain.Storage, log *slog.Logger) *MetadataService {
+func NewMetadataService(
+	uploadRepo domain.UploadRepository,
+	objRepo domain.ObjectRepository,
+	storage domain.Storage,
+	hasher domain.Hasher,
+	log *slog.Logger,
+) *MetadataService {
 	return &MetadataService{
 		uploadRepo: uploadRepo,
 		objRepo:    objRepo,
 		storage:    storage,
+		hasher:     hasher,
 		log:        log,
 	}
 }
 
-func (s *MetadataService) InitUpload(ctx context.Context, bucket, key string, size uint64) (uuid.UUID, domain.Storage, error) {
+func (s *MetadataService) InitUpload(ctx context.Context, bucket, key string, size uint64) (domain.Upload, domain.Storage, error) {
 	s.log.Debug("metadata service",
 		"method", "init upload",
 		"bucket", bucket,
@@ -35,7 +43,17 @@ func (s *MetadataService) InitUpload(ctx context.Context, bucket, key string, si
 		"size", size,
 	)
 
-	upload := domain.Upload{Bucket: bucket, Key: key, Size: size, StorageNodeID: s.storage.ID}
+	// TODO: what if bucket = "bucket/"? it has to be the same as "bucket"
+	objPath := fmt.Sprintf("%X", s.hasher.Hash([]byte(bucket+key)))
+
+	upload := domain.Upload{
+		Bucket:        bucket,
+		Key:           key,
+		ObjectPath:    objPath,
+		Size:          size,
+		StorageNodeID: s.storage.ID,
+	}
+
 	saved, err := s.uploadRepo.CreateUpload(ctx, upload)
 	if err != nil {
 		s.log.Error("metadata service",
@@ -45,17 +63,18 @@ func (s *MetadataService) InitUpload(ctx context.Context, bucket, key string, si
 			"error", err,
 		)
 
-		return uuid.UUID{}, domain.Storage{}, fmt.Errorf("error starting upload transaction")
+		return domain.Upload{}, domain.Storage{}, fmt.Errorf("error starting upload transaction")
 	}
 
 	s.log.Debug("metadata service",
 		"method", "init upload",
 		"bucket", bucket,
 		"key", key,
+		"object_path", saved.ObjectPath,
 		"message", "successful",
 	)
 
-	return saved.UploadID, s.storage, nil
+	return saved, s.storage, nil
 }
 
 func (s *MetadataService) CommitUpload(ctx context.Context, uploadID uuid.UUID, checksum uint32) error {
