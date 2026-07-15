@@ -2,55 +2,77 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
 	"github.com/neelalala/go-storage/internal/gateway/domain"
 )
 
 type Gateway struct {
-	storage domain.Storage
-	hasher  domain.Hasher
+	metadata domain.MetadataService
+	nodes    domain.StorageNodeManager
 
 	log *slog.Logger
 }
 
-func NewGateway(storage domain.Storage, hasher domain.Hasher, log *slog.Logger) *Gateway {
+func NewGateway(metadata domain.MetadataService, nodes domain.StorageNodeManager, log *slog.Logger) *Gateway {
 	return &Gateway{
-		storage: storage,
-		hasher:  hasher,
-		log:     log,
+		metadata: metadata,
+		nodes:    nodes,
+		log:      log,
 	}
 }
 
 func (g *Gateway) PutObject(ctx context.Context, bucket, key string, data []byte) error {
-	hash := fmt.Sprintf("%X", g.hasher.Hash([]byte(bucket+key)))
-
 	g.log.Debug("put object",
 		"bucket", bucket,
 		"key", key,
-		"hash", hash,
 		"data_size", len(data),
 	)
 
+	upload, node, err := g.metadata.InitUpload(ctx, bucket, key, uint64(len(data)))
+	if err != nil {
+		return err
+	}
+
+	g.log.Debug("put object", "object_path", upload.ObjectPath)
+
 	obj := domain.Object{
-		Name: hash,
+		Name: upload.ObjectPath,
 		Data: data,
 	}
 
-	return g.storage.SaveObject(ctx, obj)
+	storage, err := g.nodes.GetStorage(node.Address)
+	if err != nil {
+		g.metadata.AbortUpload(ctx, upload.UploadID)
+		return err
+	}
+
+	checksum, err := storage.SaveObject(ctx, obj)
+	if err != nil {
+		g.metadata.AbortUpload(ctx, upload.UploadID)
+		return err
+	}
+
+	return g.metadata.CommitUpload(ctx, upload.UploadID, checksum)
 }
 
 func (g *Gateway) GetObject(ctx context.Context, bucket, key string) ([]byte, error) {
-	hash := fmt.Sprintf("%X", g.hasher.Hash([]byte(bucket+key)))
-
 	g.log.Debug("get object",
 		"bucket", bucket,
 		"key", key,
-		"hash", hash,
 	)
 
-	obj, err := g.storage.GetObject(ctx, hash)
+	meta, node, err := g.metadata.GetObject(ctx, bucket, key)
+	if err != nil {
+		return nil, err
+	}
+
+	storage, err := g.nodes.GetStorage(node.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	obj, err := storage.GetObject(ctx, meta.ObjectPath)
 	if err != nil {
 		return nil, err
 	}
@@ -59,13 +81,10 @@ func (g *Gateway) GetObject(ctx context.Context, bucket, key string) ([]byte, er
 }
 
 func (g *Gateway) DeleteObject(ctx context.Context, bucket, key string) error {
-	hash := fmt.Sprintf("%X", g.hasher.Hash([]byte(bucket+key)))
-
 	g.log.Debug("delete object",
 		"bucket", bucket,
 		"key", key,
-		"hash", hash,
 	)
 
-	return g.storage.DeleteObject(ctx, hash)
+	return g.metadata.DeleteObject(ctx, bucket, key)
 }
