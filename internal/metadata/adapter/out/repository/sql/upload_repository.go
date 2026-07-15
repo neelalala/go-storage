@@ -72,7 +72,7 @@ func (r *UploadRepository) CommitUpload(ctx context.Context, uploadID uuid.UUID,
 			RETURNING bucket, key, object_path, size, storage_node_id
 		)
 		INSERT INTO objects (bucket, key, object_path, size, checksum, storage_node_id)
-		SELECT bucket, key, object_path, size, $3, storage_node_id
+		SELECT bucket, key, object_path, size, $2, storage_node_id
 		FROM upload
 		ON CONFLICT (bucket, key)
 		DO UPDATE SET 
