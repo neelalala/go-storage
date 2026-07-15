@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/neelalala/go-storage/internal/gateway/adapter/in/http"
+	"github.com/neelalala/go-storage/internal/gateway/adapter/out/grpc/metadata"
 	"github.com/neelalala/go-storage/internal/gateway/adapter/out/grpc/storage"
-	"github.com/neelalala/go-storage/internal/gateway/adapter/out/hasher"
 	"github.com/neelalala/go-storage/internal/gateway/application"
 	"github.com/neelalala/go-storage/internal/gateway/config"
 )
@@ -23,7 +23,7 @@ func main() {
 
 	cfg := config.MustLoad(configPath)
 
-	log := mustMakeLogger(cfg.LogLevel)
+	log := mustMakeLogger(cfg.Logger.LogLevel)
 
 	if err := run(cfg, log); err != nil {
 		log.Error("server failed", "error", err)
@@ -37,19 +37,19 @@ func run(cfg config.Config, log *slog.Logger) error {
 
 	log.Debug("config", fmt.Sprintf("%+v", cfg))
 
-	storage, err := storage.New(cfg.StorageAddress)
+	metadata, err := metadata.New(cfg.MetadataService.Address)
 	if err != nil {
 		return err
 	}
 
-	hasher := hasher.NewSHA256()
+	nodes := storage.NewNodeManager()
 
-	gateway := application.NewGateway(storage, hasher, log)
+	gateway := application.NewGateway(metadata, nodes, log)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
-	server := http.NewServer(gateway, cfg.HTTPConfig.Address, cfg.HTTPConfig.Timeout, log)
+	server := http.NewServer(gateway, cfg.HTTP.Address, cfg.HTTP.Timeout, log)
 
 	go func() {
 		<-ctx.Done()
