@@ -7,7 +7,7 @@ import "google/protobuf/empty.proto";
 option go_package = "github.com/neelalala/go-storage/pkg/proto/storage";
 
 service Storage {
-  rpc SaveObject(SaveRequest) returns (google.protobuf.Empty) {}
+  rpc SaveObject(SaveRequest) returns (SaveResponse) {}
   
   rpc GetObject(GetRequest) returns (GetResponse) {}
   
@@ -21,6 +21,10 @@ message Object {
 
 message SaveRequest {
   Object object = 1;
+}
+
+message SaveResponse {
+  uint32 checksum = 1;
 }
 
 message GetRequest {

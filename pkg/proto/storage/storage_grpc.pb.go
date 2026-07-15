@@ -29,7 +29,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type StorageClient interface {
-	SaveObject(ctx context.Context, in *SaveRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	SaveObject(ctx context.Context, in *SaveRequest, opts ...grpc.CallOption) (*SaveResponse, error)
 	GetObject(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
 	DeleteObject(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
@@ -42,9 +42,9 @@ func NewStorageClient(cc grpc.ClientConnInterface) StorageClient {
 	return &storageClient{cc}
 }
 
-func (c *storageClient) SaveObject(ctx context.Context, in *SaveRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *storageClient) SaveObject(ctx context.Context, in *SaveRequest, opts ...grpc.CallOption) (*SaveResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(emptypb.Empty)
+	out := new(SaveResponse)
 	err := c.cc.Invoke(ctx, Storage_SaveObject_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -76,7 +76,7 @@ func (c *storageClient) DeleteObject(ctx context.Context, in *DeleteRequest, opt
 // All implementations must embed UnimplementedStorageServer
 // for forward compatibility.
 type StorageServer interface {
-	SaveObject(context.Context, *SaveRequest) (*emptypb.Empty, error)
+	SaveObject(context.Context, *SaveRequest) (*SaveResponse, error)
 	GetObject(context.Context, *GetRequest) (*GetResponse, error)
 	DeleteObject(context.Context, *DeleteRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedStorageServer()
@@ -89,7 +89,7 @@ type StorageServer interface {
 // pointer dereference when methods are called.
 type UnimplementedStorageServer struct{}
 
-func (UnimplementedStorageServer) SaveObject(context.Context, *SaveRequest) (*emptypb.Empty, error) {
+func (UnimplementedStorageServer) SaveObject(context.Context, *SaveRequest) (*SaveResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SaveObject not implemented")
 }
 func (UnimplementedStorageServer) GetObject(context.Context, *GetRequest) (*GetResponse, error) {

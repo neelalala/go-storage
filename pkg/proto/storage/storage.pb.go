@@ -118,6 +118,50 @@ func (x *SaveRequest) GetObject() *Object {
 	return nil
 }
 
+type SaveResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Checksum      uint32                 `protobuf:"varint,1,opt,name=checksum,proto3" json:"checksum,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SaveResponse) Reset() {
+	*x = SaveResponse{}
+	mi := &file_pkg_proto_storage_storage_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SaveResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SaveResponse) ProtoMessage() {}
+
+func (x *SaveResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_storage_storage_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SaveResponse.ProtoReflect.Descriptor instead.
+func (*SaveResponse) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_storage_storage_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *SaveResponse) GetChecksum() uint32 {
+	if x != nil {
+		return x.Checksum
+	}
+	return 0
+}
+
 type GetRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
@@ -127,7 +171,7 @@ type GetRequest struct {
 
 func (x *GetRequest) Reset() {
 	*x = GetRequest{}
-	mi := &file_pkg_proto_storage_storage_proto_msgTypes[2]
+	mi := &file_pkg_proto_storage_storage_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -139,7 +183,7 @@ func (x *GetRequest) String() string {
 func (*GetRequest) ProtoMessage() {}
 
 func (x *GetRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_storage_storage_proto_msgTypes[2]
+	mi := &file_pkg_proto_storage_storage_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -152,7 +196,7 @@ func (x *GetRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRequest.ProtoReflect.Descriptor instead.
 func (*GetRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_storage_storage_proto_rawDescGZIP(), []int{2}
+	return file_pkg_proto_storage_storage_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GetRequest) GetName() string {
@@ -171,7 +215,7 @@ type GetResponse struct {
 
 func (x *GetResponse) Reset() {
 	*x = GetResponse{}
-	mi := &file_pkg_proto_storage_storage_proto_msgTypes[3]
+	mi := &file_pkg_proto_storage_storage_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -183,7 +227,7 @@ func (x *GetResponse) String() string {
 func (*GetResponse) ProtoMessage() {}
 
 func (x *GetResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_storage_storage_proto_msgTypes[3]
+	mi := &file_pkg_proto_storage_storage_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -196,7 +240,7 @@ func (x *GetResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetResponse.ProtoReflect.Descriptor instead.
 func (*GetResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_storage_storage_proto_rawDescGZIP(), []int{3}
+	return file_pkg_proto_storage_storage_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GetResponse) GetObject() *Object {
@@ -215,7 +259,7 @@ type DeleteRequest struct {
 
 func (x *DeleteRequest) Reset() {
 	*x = DeleteRequest{}
-	mi := &file_pkg_proto_storage_storage_proto_msgTypes[4]
+	mi := &file_pkg_proto_storage_storage_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -227,7 +271,7 @@ func (x *DeleteRequest) String() string {
 func (*DeleteRequest) ProtoMessage() {}
 
 func (x *DeleteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_storage_storage_proto_msgTypes[4]
+	mi := &file_pkg_proto_storage_storage_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -240,7 +284,7 @@ func (x *DeleteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteRequest.ProtoReflect.Descriptor instead.
 func (*DeleteRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_storage_storage_proto_rawDescGZIP(), []int{4}
+	return file_pkg_proto_storage_storage_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *DeleteRequest) GetName() string {
@@ -259,17 +303,19 @@ const file_pkg_proto_storage_storage_proto_rawDesc = "" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
 	"\x04data\x18\x02 \x01(\fR\x04data\"6\n" +
 	"\vSaveRequest\x12'\n" +
-	"\x06object\x18\x01 \x01(\v2\x0f.storage.ObjectR\x06object\" \n" +
+	"\x06object\x18\x01 \x01(\v2\x0f.storage.ObjectR\x06object\"*\n" +
+	"\fSaveResponse\x12\x1a\n" +
+	"\bchecksum\x18\x01 \x01(\rR\bchecksum\" \n" +
 	"\n" +
 	"GetRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\"6\n" +
 	"\vGetResponse\x12'\n" +
 	"\x06object\x18\x01 \x01(\v2\x0f.storage.ObjectR\x06object\"#\n" +
 	"\rDeleteRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name2\xc3\x01\n" +
-	"\aStorage\x12<\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name2\xc2\x01\n" +
+	"\aStorage\x12;\n" +
 	"\n" +
-	"SaveObject\x12\x14.storage.SaveRequest\x1a\x16.google.protobuf.Empty\"\x00\x128\n" +
+	"SaveObject\x12\x14.storage.SaveRequest\x1a\x15.storage.SaveResponse\"\x00\x128\n" +
 	"\tGetObject\x12\x13.storage.GetRequest\x1a\x14.storage.GetResponse\"\x00\x12@\n" +
 	"\fDeleteObject\x12\x16.storage.DeleteRequest\x1a\x16.google.protobuf.Empty\"\x00B3Z1github.com/neelalala/go-storage/pkg/proto/storageb\x06proto3"
 
@@ -285,24 +331,25 @@ func file_pkg_proto_storage_storage_proto_rawDescGZIP() []byte {
 	return file_pkg_proto_storage_storage_proto_rawDescData
 }
 
-var file_pkg_proto_storage_storage_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_pkg_proto_storage_storage_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_pkg_proto_storage_storage_proto_goTypes = []any{
 	(*Object)(nil),        // 0: storage.Object
 	(*SaveRequest)(nil),   // 1: storage.SaveRequest
-	(*GetRequest)(nil),    // 2: storage.GetRequest
-	(*GetResponse)(nil),   // 3: storage.GetResponse
-	(*DeleteRequest)(nil), // 4: storage.DeleteRequest
-	(*emptypb.Empty)(nil), // 5: google.protobuf.Empty
+	(*SaveResponse)(nil),  // 2: storage.SaveResponse
+	(*GetRequest)(nil),    // 3: storage.GetRequest
+	(*GetResponse)(nil),   // 4: storage.GetResponse
+	(*DeleteRequest)(nil), // 5: storage.DeleteRequest
+	(*emptypb.Empty)(nil), // 6: google.protobuf.Empty
 }
 var file_pkg_proto_storage_storage_proto_depIdxs = []int32{
 	0, // 0: storage.SaveRequest.object:type_name -> storage.Object
 	0, // 1: storage.GetResponse.object:type_name -> storage.Object
 	1, // 2: storage.Storage.SaveObject:input_type -> storage.SaveRequest
-	2, // 3: storage.Storage.GetObject:input_type -> storage.GetRequest
-	4, // 4: storage.Storage.DeleteObject:input_type -> storage.DeleteRequest
-	5, // 5: storage.Storage.SaveObject:output_type -> google.protobuf.Empty
-	3, // 6: storage.Storage.GetObject:output_type -> storage.GetResponse
-	5, // 7: storage.Storage.DeleteObject:output_type -> google.protobuf.Empty
+	3, // 3: storage.Storage.GetObject:input_type -> storage.GetRequest
+	5, // 4: storage.Storage.DeleteObject:input_type -> storage.DeleteRequest
+	2, // 5: storage.Storage.SaveObject:output_type -> storage.SaveResponse
+	4, // 6: storage.Storage.GetObject:output_type -> storage.GetResponse
+	6, // 7: storage.Storage.DeleteObject:output_type -> google.protobuf.Empty
 	5, // [5:8] is the sub-list for method output_type
 	2, // [2:5] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -321,7 +368,7 @@ func file_pkg_proto_storage_storage_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_proto_storage_storage_proto_rawDesc), len(file_pkg_proto_storage_storage_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
