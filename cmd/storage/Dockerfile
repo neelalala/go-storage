@@ -15,7 +15,9 @@ COPY internal/storage ./internal/storage
 COPY pkg/proto/storage/storage.proto ./pkg/proto/storage/
 COPY Makefile ./Makefile
 
-RUN make protobuf 
+RUN protoc --go_out=. --go_opt=paths=source_relative \
+  --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+  pkg/proto/storage/storage.proto
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/storage ./cmd/storage/main.go
 
