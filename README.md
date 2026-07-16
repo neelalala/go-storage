@@ -4,7 +4,7 @@
 [Архитектурные ограничения](docs/architecture.md)
 
 # План реализации 
-01-06 - MVP 
+01-07 - MVP 
 
 ## [01 - Simple storage](/docs/01-stage.md) ✅
 Один узел, сохраняющий данные
@@ -57,25 +57,28 @@ Round-Robin стратегия выбора узла
 Каждый Storage Node раз в заданное время делает `POST /heartbeat`, так что Metadata Service всегда знает, кто жив
 Metadata Service дополнительно хранит:
 - last seen 
-- status (возможно)
+- free_space 
 
-## 05 - Replication
+## 05 - Node Discovery
+Storage Node может сделать `POST /register` на Metadata Service, чтобы начать получать данные
+
+## 06 - Replication
 Данные сохраняются на несколько узлов (replication factor). Промежуточный этап для логики восстановления
 Metadata Service дополнительно хранит идентификатор узла с главной репликой
 
 ### Требования
 Выделяется узел с Primary Replica, на который будут приходить все запросы на работу с данными 
 
-## 06 - Recovery
+## 07 - Recovery
 При падении узла данные, хранящиеся на нем, копируются на другие живые узлы
 
 ### Архитектура
 Metadata Service обнаруживает что Node умер и инициирует восстановление
 
-## 07 - Streaming
+## 08 - Streaming
 Upload / download потоком, а не целым файлом 
 
-## 08 - Chunking
+## 09 - Chunking
 Данные хранятся не целиком, а по частям - чанкам 
 
 ### Архитектура
@@ -85,22 +88,17 @@ Gateway делит полученный объект на части (чанки
 Разные чанки лежат на разных узлах 
 Metadata Service хранит расположение всех чанков
 
-## 09 - Consistent Hashing
+## 10 - Consistent Hashing
 При добавлении в кластер нового узла не нужно переносить все данные
 
-## 10 - Background Rebalancing
+## 11 - Background Rebalancing
 Перенос данных делается в фоне по частям
 
 ## xx - Несколько Metadata Service
-Система поддерживает несколько экземпляров Metadata Service, что позволяет продолжать работу при падании одного из них 
-
-## xx - Node Discovery
-Storage Node может сделать `POST /register` на Metadata Service, чтобы начать получать данные 
+Система поддерживает несколько экземпляров Metadata Service, что позволяет продолжать работу при падании одного из них  
 
 ## xx - Versioning
 Система поддерживает версионирование объектов. Можно получать разные весии одного объекта `GET bucket/object?version=3`
-
-## xx - Garbage Collector
 
 ## xx - Compression
 
