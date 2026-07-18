@@ -204,21 +204,17 @@ func (s *MetadataService) GetObject(ctx context.Context, bucket, key string) (do
 	return obj, s.storage, nil
 }
 
-func (s *MetadataService) GetObjects(ctx context.Context, bucket, path string, limit, offset int) ([]domain.Object, error) {
+func (s *MetadataService) GetObjects(ctx context.Context, bucket, prefix, delimiter string, limit, offset int) ([]domain.Object, error) {
 	s.log.Debug("metadata service",
 		"method", "get objects",
 		"bucket", bucket,
-		"path", path,
+		"prefix", prefix,
+		"delimiter", delimiter,
 		"limit", limit,
 		"offset", offset,
 	)
 
-	objs, err := s.objRepo.GetObjects(ctx, bucket, path, limit, offset)
-	if err != nil {
-		return nil, err
-	}
-
-	return objs, nil
+	return s.objRepo.GetObjects(ctx, bucket, prefix, delimiter, limit, offset)
 }
 
 func (s *MetadataService) DeleteObject(ctx context.Context, bucket, key string) error {
@@ -249,4 +245,14 @@ func (s *MetadataService) DeleteObject(ctx context.Context, bucket, key string) 
 	)
 
 	return nil
+}
+
+func (s *MetadataService) HeadObject(ctx context.Context, bucket, key string) (domain.Object, error) {
+	s.log.Debug("metadata service",
+		"method", "head object",
+		"bucket", bucket,
+		"key", key,
+	)
+
+	return s.objRepo.GetObject(ctx, bucket, key)
 }
