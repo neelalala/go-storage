@@ -11,6 +11,7 @@ import (
 )
 
 type MetadataService struct {
+	bucketRepo domain.BucketRepository
 	uploadRepo domain.UploadRepository
 	objRepo    domain.ObjectRepository
 	storage    domain.Storage
@@ -20,6 +21,7 @@ type MetadataService struct {
 }
 
 func NewMetadataService(
+	bucketRepo domain.BucketRepository,
 	uploadRepo domain.UploadRepository,
 	objRepo domain.ObjectRepository,
 	storage domain.Storage,
@@ -27,12 +29,50 @@ func NewMetadataService(
 	log *slog.Logger,
 ) *MetadataService {
 	return &MetadataService{
+		bucketRepo: bucketRepo,
 		uploadRepo: uploadRepo,
 		objRepo:    objRepo,
 		storage:    storage,
 		hasher:     hasher,
 		log:        log,
 	}
+}
+
+func (s *MetadataService) ListBuckets(ctx context.Context, limit, offset int) ([]domain.Bucket, error) {
+	s.log.Debug("metadata service",
+		"method", "list buckets",
+		"limit", limit,
+		"offset", offset,
+	)
+
+	return s.bucketRepo.GetBuckets(ctx, limit, offset)
+}
+
+func (s *MetadataService) CreateBucket(ctx context.Context, name string) (domain.Bucket, error) {
+	s.log.Debug("metadata service",
+		"method", "create bucket",
+		"name", name,
+	)
+
+	return s.bucketRepo.CreateBucket(ctx, name)
+}
+
+func (s *MetadataService) GetBucket(ctx context.Context, name string) (domain.Bucket, error) {
+	s.log.Debug("metadata service",
+		"method", "get bucket",
+		"name", name,
+	)
+
+	return s.bucketRepo.GetBucket(ctx, name)
+}
+
+func (s *MetadataService) DeleteBucket(ctx context.Context, name string) error {
+	s.log.Debug("metadata service",
+		"method", "delete bucket",
+		"name", name,
+	)
+
+	return s.bucketRepo.DeleteBucket(ctx, name)
 }
 
 func (s *MetadataService) InitUpload(ctx context.Context, bucket, key string, size uint64) (domain.Upload, domain.Storage, error) {
