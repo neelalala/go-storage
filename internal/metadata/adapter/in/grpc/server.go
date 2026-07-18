@@ -8,6 +8,7 @@ import (
 	"net"
 
 	"github.com/google/uuid"
+	"github.com/neelalala/go-storage/internal/metadata/application"
 	"github.com/neelalala/go-storage/internal/metadata/domain"
 	metadatapb "github.com/neelalala/go-storage/pkg/proto/metadata"
 	"google.golang.org/grpc"
@@ -18,29 +19,22 @@ import (
 )
 
 const (
+	DefaultBucketsLimit  = 100
+	DefaultBucketsOffset = 0
 	DefaultObjectsLimit  = 100
 	DefaultObjectsOffset = 0
 )
-
-type MetadataService interface {
-	InitUpload(ctx context.Context, bucket, key string, size uint64) (domain.Upload, domain.Storage, error)
-	CommitUpload(ctx context.Context, uploadID uuid.UUID, checksum uint32) error
-	AbortUpload(ctx context.Context, uploadID uuid.UUID) error
-	GetObject(ctx context.Context, bucket, key string) (domain.Object, domain.Storage, error)
-	GetObjects(ctx context.Context, bucket, path string, limit, offset int) ([]domain.Object, error)
-	DeleteObject(ctx context.Context, bucket, key string) error
-}
 
 type Server struct {
 	metadatapb.UnimplementedMetadataServer
 	addr       string
 	grpcServer *grpc.Server
-	service    MetadataService
+	service    application.MetadataService
 
 	log *slog.Logger
 }
 
-func NewServer(addr string, service MetadataService, log *slog.Logger) *Server {
+func NewServer(addr string, service application.MetadataService, log *slog.Logger) *Server {
 	grpcServer := grpc.NewServer()
 
 	server := &Server{
@@ -85,6 +79,153 @@ func (s *Server) Stop(ctx context.Context) error {
 	case <-stopped:
 		return nil
 	}
+}
+
+func (s *Server) ListBuckets(ctx context.Context, req *metadatapb.ListBucketsRequest) (*metadatapb.ListBucketsResponse, error) {
+	s.log.Debug("list buckets request")
+
+	var (
+		limit  int
+		offset int
+	)
+
+	if req.Limit != nil {
+		limit = int(req.GetLimit())
+	} else {
+		limit = DefaultBucketsLimit
+	}
+
+	if req.Offset != nil {
+		offset = int(req.GetOffset())
+	} else {
+		offset = DefaultBucketsOffset
+	}
+
+	buckets, err := s.service.ListBuckets(ctx, limit, offset)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting buckets: %v", err)
+	}
+
+	pbbuckets := make([]*metadatapb.BucketMetadata, 0, len(buckets))
+	for _, bucket := range buckets {
+		pbbucket := &metadatapb.BucketMetadata{
+			Name:      bucket.Name,
+			CreatedAt: timestamppb.New(bucket.CreatedAt),
+		}
+		pbbuckets = append(pbbuckets, pbbucket)
+	}
+
+	return &metadatapb.ListBucketsResponse{
+		Buckets: pbbuckets,
+	}, nil
+}
+
+func (s *Server) CreateBucket(ctx context.Context, req *metadatapb.CreateBucketRequest) (*metadatapb.CreateBucketResponse, error) {
+	s.log.Debug("create bucket request")
+
+	name := req.GetName()
+
+	bucket, err := s.service.CreateBucket(ctx, name)
+	if err != nil {
+		if errors.Is(err, domain.ErrBucketExists) {
+			return nil, status.Errorf(codes.InvalidArgument, "error creating bucket: %v", err)
+		}
+		return nil, status.Errorf(codes.Internal, "error creating bucket: %v", err)
+	}
+
+	return &metadatapb.CreateBucketResponse{
+		Bucket: &metadatapb.BucketMetadata{
+			Name:      bucket.Name,
+			CreatedAt: timestamppb.New(bucket.CreatedAt),
+		},
+	}, nil
+}
+
+func (s *Server) ListObjects(ctx context.Context, req *metadatapb.ListObjectsRequest) (*metadatapb.ListObjectsResponse, error) {
+	s.log.Debug("get objects request")
+
+	bucket, prefix, delimiter := req.GetBucket(), req.GetPrefix(), req.GetDelimiter()
+
+	var (
+		limit  int
+		offset int
+	)
+
+	if req.Limit != nil {
+		limit = int(req.GetLimit())
+	} else {
+		limit = DefaultObjectsLimit
+	}
+
+	if req.Offset != nil {
+		offset = int(req.GetOffset())
+	} else {
+		offset = DefaultObjectsOffset
+	}
+
+	objs, err := s.service.GetObjects(ctx, bucket, prefix, delimiter, limit, offset)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting objects: %v", err)
+	}
+
+	pbobjects := make([]*metadatapb.ObjectMetadata, 0, len(objs))
+	for _, obj := range objs {
+		pbobject := &metadatapb.ObjectMetadata{
+			Bucket:        obj.Bucket,
+			Key:           obj.Key,
+			Size:          obj.Size,
+			Checksum:      obj.Checksum,
+			CreatedAt:     timestamppb.New(obj.CreatedAt),
+			UpdatedAt:     timestamppb.New(obj.UpdatedAt),
+			StorageNodeId: obj.StorageNodeID.String(),
+		}
+		pbobjects = append(pbobjects, pbobject)
+	}
+
+	return &metadatapb.ListObjectsResponse{
+		Objects: pbobjects,
+	}, nil
+
+}
+
+func (s *Server) DeleteBucket(ctx context.Context, req *metadatapb.DeleteBucketRequest) (*emptypb.Empty, error) {
+	s.log.Debug("delete bucket request")
+
+	name := req.GetName()
+
+	err := s.service.DeleteBucket(ctx, name)
+	if err != nil {
+		if errors.Is(err, domain.ErrBucketNotExists) {
+			return nil, status.Errorf(codes.NotFound, "error deleting bucket: %v", err)
+		}
+		if errors.Is(err, domain.ErrBucketNotEmpty) {
+			return nil, status.Errorf(codes.InvalidArgument, "error deleting bucket: %v", err)
+		}
+		return nil, status.Errorf(codes.Internal, "error deleting bucket: %v", err)
+	}
+
+	return &emptypb.Empty{}, nil
+}
+
+func (s *Server) HeadBucket(ctx context.Context, req *metadatapb.HeadBucketRequest) (*metadatapb.HeadBucketResponse, error) {
+	s.log.Debug("head bucket request")
+
+	name := req.GetName()
+
+	bucket, err := s.service.GetBucket(ctx, name)
+	if err != nil {
+		if errors.Is(err, domain.ErrBucketNotExists) {
+			return nil, status.Errorf(codes.NotFound, "error getting bucket head: %v", err)
+		}
+		return nil, status.Errorf(codes.Internal, "error getting bucket head: %v", err)
+	}
+
+	return &metadatapb.HeadBucketResponse{
+		BucketMeta: &metadatapb.BucketMetadata{
+			Name:      bucket.Name,
+			CreatedAt: timestamppb.New(bucket.CreatedAt),
+		},
+	}, nil
 }
 
 func (s *Server) InitUpload(ctx context.Context, req *metadatapb.InitUploadRequest) (*metadatapb.InitUploadResponse, error) {
@@ -178,52 +319,6 @@ func (s *Server) GetObject(ctx context.Context, req *metadatapb.GetObjectRequest
 	}, nil
 }
 
-func (s *Server) GetObjects(ctx context.Context, req *metadatapb.GetObjectsRequest) (*metadatapb.GetObjectsResponse, error) {
-	s.log.Debug("get objects request")
-
-	bucket, path := req.GetBucket(), req.GetPath()
-
-	var (
-		limit  int
-		offset int
-	)
-
-	if req.Limit != nil {
-		limit = int(req.GetLimit())
-	} else {
-		limit = DefaultObjectsLimit
-	}
-
-	if req.Offset != nil {
-		offset = int(req.GetOffset())
-	} else {
-		offset = DefaultObjectsOffset
-	}
-
-	objs, err := s.service.GetObjects(ctx, bucket, path, limit, offset)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error getting objects: %v", err)
-	}
-
-	pbobjects := make([]*metadatapb.ObjectMetadata, 0, len(objs))
-	for _, obj := range objs {
-		pbobject := &metadatapb.ObjectMetadata{
-			Bucket:        obj.Bucket,
-			Key:           obj.Key,
-			Size:          obj.Size,
-			Checksum:      obj.Checksum,
-			CreatedAt:     timestamppb.New(obj.CreatedAt),
-			UpdatedAt:     timestamppb.New(obj.UpdatedAt),
-			StorageNodeId: obj.StorageNodeID.String(),
-		}
-		pbobjects = append(pbobjects, pbobject)
-	}
-
-	return &metadatapb.GetObjectsResponse{
-		Objects: pbobjects,
-	}, nil
-}
-
 func (s *Server) DeleteObject(ctx context.Context, req *metadatapb.DeleteObjectRequest) (*emptypb.Empty, error) {
 	s.log.Debug("delete object request")
 
@@ -237,4 +332,31 @@ func (s *Server) DeleteObject(ctx context.Context, req *metadatapb.DeleteObjectR
 	}
 
 	return &emptypb.Empty{}, nil
+}
+
+func (s *Server) HeadObject(ctx context.Context, req *metadatapb.HeadObjectRequest) (*metadatapb.HeadObjectResponse, error) {
+	s.log.Debug("head object request")
+
+	bucket, key := req.GetBucket(), req.GetKey()
+
+	obj, err := s.service.HeadObject(ctx, bucket, key)
+	if err != nil {
+		if errors.Is(err, domain.ErrObjectNotFound) {
+			return nil, status.Errorf(codes.NotFound, "error getting object head: %v", err)
+		}
+		return nil, status.Errorf(codes.Internal, "error getting object head: %v", err)
+	}
+
+	return &metadatapb.HeadObjectResponse{
+		ObjectMeta: &metadatapb.ObjectMetadata{
+			Bucket:        obj.Bucket,
+			Key:           obj.Key,
+			Size:          obj.Size,
+			Checksum:      obj.Checksum,
+			CreatedAt:     timestamppb.New(obj.CreatedAt),
+			UpdatedAt:     timestamppb.New(obj.UpdatedAt),
+			StorageNodeId: obj.StorageNodeID.String(),
+			ObjectPath:    obj.ObjectPath,
+		},
+	}, nil
 }
