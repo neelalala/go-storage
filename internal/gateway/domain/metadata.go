@@ -8,12 +8,22 @@ import (
 )
 
 type MetadataService interface {
+	ListBuckets(ctx context.Context, limit, offset int) ([]BucketMetadata, error)
+	CreateBucket(ctx context.Context, name string) (BucketMetadata, error)
+	GetBucket(ctx context.Context, name string) (BucketMetadata, error)
+	DeleteBucket(ctx context.Context, name string) error
 	InitUpload(ctx context.Context, bucket, key string, size uint64) (Upload, StorageNode, error)
 	CommitUpload(ctx context.Context, uploadID uuid.UUID, checksum uint32) error
 	AbortUpload(ctx context.Context, uploadID uuid.UUID) error
 	GetObject(ctx context.Context, bucket, key string) (ObjectMetadata, StorageNode, error)
-	GetObjects(ctx context.Context, bucket, path string, limit, offset int) ([]ObjectMetadata, error)
+	ListObjects(ctx context.Context, bucket, prefix, delimiter string, limit, offset int) ([]ObjectMetadata, error)
 	DeleteObject(ctx context.Context, bucket, key string) error
+	HeadObject(ctx context.Context, bucket, key string) (ObjectMetadata, error)
+}
+
+type BucketMetadata struct {
+	Name      string
+	CreatedAt time.Time
 }
 
 type ObjectMetadata struct {
