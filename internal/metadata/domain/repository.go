@@ -10,6 +10,13 @@ type Transactor interface {
 	WithinTransaction(context.Context, func(context.Context) error) error
 }
 
+type BucketRepository interface {
+	GetBuckets(ctx context.Context, limit, offset int) ([]Bucket, error)
+	CreateBucket(ctx context.Context, name string) (Bucket, error)
+	DeleteBucket(ctx context.Context, name string) error
+	GetBucket(ctx context.Context, name string) (Bucket, error)
+}
+
 type UploadRepository interface {
 	CreateUpload(ctx context.Context, upload Upload) (Upload, error)
 	DeleteUpload(ctx context.Context, uploadID uuid.UUID) error
