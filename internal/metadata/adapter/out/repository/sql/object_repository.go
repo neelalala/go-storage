@@ -2,8 +2,10 @@ package sql
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/neelalala/go-storage/internal/metadata/domain"
 )
@@ -41,13 +43,17 @@ func (r *ObjectRepository) GetObject(ctx context.Context, bucket, key string) (d
 		&object.UpdatedAt,
 	)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.Object{}, fmt.Errorf("%w: %s/%s", domain.ErrObjectNotFound, bucket, key)
+		}
 		return domain.Object{}, err
 	}
 
 	return object, nil
 }
 
-func (r *ObjectRepository) GetObjects(ctx context.Context, bucket, path string, limit, offset int) ([]domain.Object, error) {
+func (r *ObjectRepository) GetObjects(ctx context.Context, bucket, path, delimiter string, limit, offset int) ([]domain.Object, error) {
+	// TODO: use delimiter
 	query := `
 		SELECT bucket, key, object_path, size, checksum, storage_node_id, created_at, updated_at
 		FROM objects
