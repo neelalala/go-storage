@@ -8,6 +8,21 @@ import "google/protobuf/timestamp.proto";
 option go_package = "github.com/neelalala/go-storage/pkg/proto/metadata";
 
 service Metadata {
+  // Metadata возвращает все доаступные бакеты
+  rpc ListBuckets(ListBucketsRequest) returns (ListBucketsResponse) {}
+
+  // Metadata создает бакет
+  rpc CreateBucket(CreateBucketRequest) returns (CreateBucketResponse) {}
+
+  // Metadata возвращает все объекты с указанным префиксом и группирует объекты по переданному разделителю
+  rpc ListObjects(ListObjectsRequest) returns (ListObjectsResponse) {}
+
+  // Metadata удаляет бакет. Бакет обязан быть пустым
+  rpc DeleteBucket(DeleteBucketRequest) returns (google.protobuf.Empty) {}
+
+  // Metadata возвращает метаданные бакета
+  rpc HeadBucket(HeadBucketRequest) returns (HeadBucketResponse) {}
+
   // Metadata выбирает Storage Node, куда сохранить файл, сохраняет текущее состояние загрузки
   rpc InitUpload(InitUploadRequest) returns (InitUploadResponse) {}
 
@@ -20,11 +35,77 @@ service Metadata {
   // Metadata возвращает метаданные объекта и узел, с которого его нужно загрузить 
   rpc GetObject(GetObjectRequest) returns (GetObjectResponse) {}
 
-  // Metadata возвращает метаданные объектов, у которых бакет и путь соответсвует запросу
-  rpc GetObjects(GetObjectsRequest) returns (GetObjectsResponse) {}
-
   // Metadata удаляет запись об объекте и GC со временем отчищает хранилище 
   rpc DeleteObject(DeleteObjectRequest) returns (google.protobuf.Empty) {}
+
+  // Metadata возвращает метаданные объекта
+  rpc HeadObject(HeadObjectRequest) returns (HeadObjectResponse) {}
+}
+
+// DTOs
+
+message BucketMetadata {
+  string name = 1;
+  google.protobuf.Timestamp created_at = 2;
+}
+
+message ObjectMetadata {
+  string bucket = 1;
+  string key = 2;
+  uint64 size = 3;
+  uint32 checksum = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  string storage_node_id = 7;
+  string object_path = 8;
+}
+
+message Node {
+  string id = 1;
+  string address = 2;
+}
+
+// Requests & responses
+
+message ListBucketsRequest {
+  optional int32 limit = 1;
+  optional int32 offset = 2;
+}
+
+message ListBucketsResponse {
+  repeated BucketMetadata buckets = 1;
+}
+
+message CreateBucketRequest {
+  string name = 1;
+}
+
+message CreateBucketResponse {
+  BucketMetadata bucket = 1;
+}
+
+message ListObjectsRequest {
+  string bucket = 1;
+  string prefix = 2;
+  string delimiter = 3;
+  optional int32 limit = 4;
+  optional int32 offset = 5;
+}
+
+message ListObjectsResponse {
+  repeated ObjectMetadata objects = 1;
+}
+
+message DeleteBucketRequest {
+  string name = 1;
+}
+
+message HeadBucketRequest {
+  string name = 1;
+}
+
+message HeadBucketResponse {
+  BucketMetadata bucket_meta = 1;
 }
 
 message InitUploadRequest {
@@ -37,11 +118,6 @@ message InitUploadResponse {
   string upload_id = 1;
   Node storage_node = 2;
   string object_path = 3;
-}
-
-message Node {
-  string id = 1;
-  string address = 2;
 }
 
 message CommitUploadRequest {
@@ -63,29 +139,16 @@ message GetObjectResponse {
   Node storage_node = 2;
 }
 
-message GetObjectsRequest {
-  string bucket = 1;
-  string path = 2;
-  optional int32 limit = 3;
-  optional int32 offset = 4;
-}
-
-message GetObjectsResponse {
-  repeated ObjectMetadata objects = 1;
-}
-
 message DeleteObjectRequest {
   string bucket = 1;
   string key = 2;
 }
 
-message ObjectMetadata {
+message HeadObjectRequest {
   string bucket = 1;
   string key = 2;
-  uint64 size = 3;
-  uint32 checksum = 4;
-  google.protobuf.Timestamp created_at = 5;
-  google.protobuf.Timestamp updated_at = 6;
-  string storage_node_id = 7;
-  string object_path = 8;
+}
+
+message HeadObjectResponse {
+  ObjectMetadata object_meta = 1;
 }

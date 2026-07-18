@@ -23,29 +23,28 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type InitUploadRequest struct {
+type BucketMetadata struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Bucket        string                 `protobuf:"bytes,1,opt,name=bucket,proto3" json:"bucket,omitempty"`
-	Key           string                 `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
-	Size          uint64                 `protobuf:"varint,3,opt,name=size,proto3" json:"size,omitempty"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *InitUploadRequest) Reset() {
-	*x = InitUploadRequest{}
+func (x *BucketMetadata) Reset() {
+	*x = BucketMetadata{}
 	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *InitUploadRequest) String() string {
+func (x *BucketMetadata) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*InitUploadRequest) ProtoMessage() {}
+func (*BucketMetadata) ProtoMessage() {}
 
-func (x *InitUploadRequest) ProtoReflect() protoreflect.Message {
+func (x *BucketMetadata) ProtoReflect() protoreflect.Message {
 	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -57,506 +56,23 @@ func (x *InitUploadRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use InitUploadRequest.ProtoReflect.Descriptor instead.
-func (*InitUploadRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use BucketMetadata.ProtoReflect.Descriptor instead.
+func (*BucketMetadata) Descriptor() ([]byte, []int) {
 	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *InitUploadRequest) GetBucket() string {
+func (x *BucketMetadata) GetName() string {
 	if x != nil {
-		return x.Bucket
+		return x.Name
 	}
 	return ""
 }
 
-func (x *InitUploadRequest) GetKey() string {
+func (x *BucketMetadata) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
-		return x.Key
-	}
-	return ""
-}
-
-func (x *InitUploadRequest) GetSize() uint64 {
-	if x != nil {
-		return x.Size
-	}
-	return 0
-}
-
-type InitUploadResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UploadId      string                 `protobuf:"bytes,1,opt,name=upload_id,json=uploadId,proto3" json:"upload_id,omitempty"`
-	StorageNode   *Node                  `protobuf:"bytes,2,opt,name=storage_node,json=storageNode,proto3" json:"storage_node,omitempty"`
-	ObjectPath    string                 `protobuf:"bytes,3,opt,name=object_path,json=objectPath,proto3" json:"object_path,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *InitUploadResponse) Reset() {
-	*x = InitUploadResponse{}
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *InitUploadResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*InitUploadResponse) ProtoMessage() {}
-
-func (x *InitUploadResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use InitUploadResponse.ProtoReflect.Descriptor instead.
-func (*InitUploadResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *InitUploadResponse) GetUploadId() string {
-	if x != nil {
-		return x.UploadId
-	}
-	return ""
-}
-
-func (x *InitUploadResponse) GetStorageNode() *Node {
-	if x != nil {
-		return x.StorageNode
+		return x.CreatedAt
 	}
 	return nil
-}
-
-func (x *InitUploadResponse) GetObjectPath() string {
-	if x != nil {
-		return x.ObjectPath
-	}
-	return ""
-}
-
-type Node struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Address       string                 `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Node) Reset() {
-	*x = Node{}
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Node) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Node) ProtoMessage() {}
-
-func (x *Node) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Node.ProtoReflect.Descriptor instead.
-func (*Node) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *Node) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-func (x *Node) GetAddress() string {
-	if x != nil {
-		return x.Address
-	}
-	return ""
-}
-
-type CommitUploadRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UploadId      string                 `protobuf:"bytes,1,opt,name=upload_id,json=uploadId,proto3" json:"upload_id,omitempty"`
-	Checksum      uint32                 `protobuf:"varint,2,opt,name=checksum,proto3" json:"checksum,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CommitUploadRequest) Reset() {
-	*x = CommitUploadRequest{}
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CommitUploadRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CommitUploadRequest) ProtoMessage() {}
-
-func (x *CommitUploadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CommitUploadRequest.ProtoReflect.Descriptor instead.
-func (*CommitUploadRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *CommitUploadRequest) GetUploadId() string {
-	if x != nil {
-		return x.UploadId
-	}
-	return ""
-}
-
-func (x *CommitUploadRequest) GetChecksum() uint32 {
-	if x != nil {
-		return x.Checksum
-	}
-	return 0
-}
-
-type AbortUploadRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UploadId      string                 `protobuf:"bytes,1,opt,name=upload_id,json=uploadId,proto3" json:"upload_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AbortUploadRequest) Reset() {
-	*x = AbortUploadRequest{}
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AbortUploadRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AbortUploadRequest) ProtoMessage() {}
-
-func (x *AbortUploadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AbortUploadRequest.ProtoReflect.Descriptor instead.
-func (*AbortUploadRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *AbortUploadRequest) GetUploadId() string {
-	if x != nil {
-		return x.UploadId
-	}
-	return ""
-}
-
-type GetObjectRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Bucket        string                 `protobuf:"bytes,1,opt,name=bucket,proto3" json:"bucket,omitempty"`
-	Key           string                 `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetObjectRequest) Reset() {
-	*x = GetObjectRequest{}
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetObjectRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetObjectRequest) ProtoMessage() {}
-
-func (x *GetObjectRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetObjectRequest.ProtoReflect.Descriptor instead.
-func (*GetObjectRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *GetObjectRequest) GetBucket() string {
-	if x != nil {
-		return x.Bucket
-	}
-	return ""
-}
-
-func (x *GetObjectRequest) GetKey() string {
-	if x != nil {
-		return x.Key
-	}
-	return ""
-}
-
-type GetObjectResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Metadata      *ObjectMetadata        `protobuf:"bytes,1,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	StorageNode   *Node                  `protobuf:"bytes,2,opt,name=storage_node,json=storageNode,proto3" json:"storage_node,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetObjectResponse) Reset() {
-	*x = GetObjectResponse{}
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetObjectResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetObjectResponse) ProtoMessage() {}
-
-func (x *GetObjectResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetObjectResponse.ProtoReflect.Descriptor instead.
-func (*GetObjectResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *GetObjectResponse) GetMetadata() *ObjectMetadata {
-	if x != nil {
-		return x.Metadata
-	}
-	return nil
-}
-
-func (x *GetObjectResponse) GetStorageNode() *Node {
-	if x != nil {
-		return x.StorageNode
-	}
-	return nil
-}
-
-type GetObjectsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Bucket        string                 `protobuf:"bytes,1,opt,name=bucket,proto3" json:"bucket,omitempty"`
-	Path          string                 `protobuf:"bytes,2,opt,name=path,proto3" json:"path,omitempty"`
-	Limit         *int32                 `protobuf:"varint,3,opt,name=limit,proto3,oneof" json:"limit,omitempty"`
-	Offset        *int32                 `protobuf:"varint,4,opt,name=offset,proto3,oneof" json:"offset,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetObjectsRequest) Reset() {
-	*x = GetObjectsRequest{}
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetObjectsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetObjectsRequest) ProtoMessage() {}
-
-func (x *GetObjectsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetObjectsRequest.ProtoReflect.Descriptor instead.
-func (*GetObjectsRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *GetObjectsRequest) GetBucket() string {
-	if x != nil {
-		return x.Bucket
-	}
-	return ""
-}
-
-func (x *GetObjectsRequest) GetPath() string {
-	if x != nil {
-		return x.Path
-	}
-	return ""
-}
-
-func (x *GetObjectsRequest) GetLimit() int32 {
-	if x != nil && x.Limit != nil {
-		return *x.Limit
-	}
-	return 0
-}
-
-func (x *GetObjectsRequest) GetOffset() int32 {
-	if x != nil && x.Offset != nil {
-		return *x.Offset
-	}
-	return 0
-}
-
-type GetObjectsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Objects       []*ObjectMetadata      `protobuf:"bytes,1,rep,name=objects,proto3" json:"objects,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetObjectsResponse) Reset() {
-	*x = GetObjectsResponse{}
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetObjectsResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetObjectsResponse) ProtoMessage() {}
-
-func (x *GetObjectsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetObjectsResponse.ProtoReflect.Descriptor instead.
-func (*GetObjectsResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *GetObjectsResponse) GetObjects() []*ObjectMetadata {
-	if x != nil {
-		return x.Objects
-	}
-	return nil
-}
-
-type DeleteObjectRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Bucket        string                 `protobuf:"bytes,1,opt,name=bucket,proto3" json:"bucket,omitempty"`
-	Key           string                 `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteObjectRequest) Reset() {
-	*x = DeleteObjectRequest{}
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteObjectRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteObjectRequest) ProtoMessage() {}
-
-func (x *DeleteObjectRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteObjectRequest.ProtoReflect.Descriptor instead.
-func (*DeleteObjectRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *DeleteObjectRequest) GetBucket() string {
-	if x != nil {
-		return x.Bucket
-	}
-	return ""
-}
-
-func (x *DeleteObjectRequest) GetKey() string {
-	if x != nil {
-		return x.Key
-	}
-	return ""
 }
 
 type ObjectMetadata struct {
@@ -575,7 +91,7 @@ type ObjectMetadata struct {
 
 func (x *ObjectMetadata) Reset() {
 	*x = ObjectMetadata{}
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[10]
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -587,7 +103,7 @@ func (x *ObjectMetadata) String() string {
 func (*ObjectMetadata) ProtoMessage() {}
 
 func (x *ObjectMetadata) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[10]
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -600,7 +116,7 @@ func (x *ObjectMetadata) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ObjectMetadata.ProtoReflect.Descriptor instead.
 func (*ObjectMetadata) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{10}
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *ObjectMetadata) GetBucket() string {
@@ -659,46 +175,971 @@ func (x *ObjectMetadata) GetObjectPath() string {
 	return ""
 }
 
+type Node struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Address       string                 `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Node) Reset() {
+	*x = Node{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Node) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Node) ProtoMessage() {}
+
+func (x *Node) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Node.ProtoReflect.Descriptor instead.
+func (*Node) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *Node) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Node) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+type ListBucketsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Limit         *int32                 `protobuf:"varint,1,opt,name=limit,proto3,oneof" json:"limit,omitempty"`
+	Offset        *int32                 `protobuf:"varint,2,opt,name=offset,proto3,oneof" json:"offset,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListBucketsRequest) Reset() {
+	*x = ListBucketsRequest{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListBucketsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListBucketsRequest) ProtoMessage() {}
+
+func (x *ListBucketsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListBucketsRequest.ProtoReflect.Descriptor instead.
+func (*ListBucketsRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ListBucketsRequest) GetLimit() int32 {
+	if x != nil && x.Limit != nil {
+		return *x.Limit
+	}
+	return 0
+}
+
+func (x *ListBucketsRequest) GetOffset() int32 {
+	if x != nil && x.Offset != nil {
+		return *x.Offset
+	}
+	return 0
+}
+
+type ListBucketsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Buckets       []*BucketMetadata      `protobuf:"bytes,1,rep,name=buckets,proto3" json:"buckets,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListBucketsResponse) Reset() {
+	*x = ListBucketsResponse{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListBucketsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListBucketsResponse) ProtoMessage() {}
+
+func (x *ListBucketsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListBucketsResponse.ProtoReflect.Descriptor instead.
+func (*ListBucketsResponse) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ListBucketsResponse) GetBuckets() []*BucketMetadata {
+	if x != nil {
+		return x.Buckets
+	}
+	return nil
+}
+
+type CreateBucketRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateBucketRequest) Reset() {
+	*x = CreateBucketRequest{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateBucketRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateBucketRequest) ProtoMessage() {}
+
+func (x *CreateBucketRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateBucketRequest.ProtoReflect.Descriptor instead.
+func (*CreateBucketRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *CreateBucketRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+type CreateBucketResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Bucket        *BucketMetadata        `protobuf:"bytes,1,opt,name=bucket,proto3" json:"bucket,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateBucketResponse) Reset() {
+	*x = CreateBucketResponse{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateBucketResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateBucketResponse) ProtoMessage() {}
+
+func (x *CreateBucketResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateBucketResponse.ProtoReflect.Descriptor instead.
+func (*CreateBucketResponse) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *CreateBucketResponse) GetBucket() *BucketMetadata {
+	if x != nil {
+		return x.Bucket
+	}
+	return nil
+}
+
+type ListObjectsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Bucket        string                 `protobuf:"bytes,1,opt,name=bucket,proto3" json:"bucket,omitempty"`
+	Prefix        string                 `protobuf:"bytes,2,opt,name=prefix,proto3" json:"prefix,omitempty"`
+	Delimiter     string                 `protobuf:"bytes,3,opt,name=delimiter,proto3" json:"delimiter,omitempty"`
+	Limit         *int32                 `protobuf:"varint,4,opt,name=limit,proto3,oneof" json:"limit,omitempty"`
+	Offset        *int32                 `protobuf:"varint,5,opt,name=offset,proto3,oneof" json:"offset,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListObjectsRequest) Reset() {
+	*x = ListObjectsRequest{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListObjectsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListObjectsRequest) ProtoMessage() {}
+
+func (x *ListObjectsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListObjectsRequest.ProtoReflect.Descriptor instead.
+func (*ListObjectsRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ListObjectsRequest) GetBucket() string {
+	if x != nil {
+		return x.Bucket
+	}
+	return ""
+}
+
+func (x *ListObjectsRequest) GetPrefix() string {
+	if x != nil {
+		return x.Prefix
+	}
+	return ""
+}
+
+func (x *ListObjectsRequest) GetDelimiter() string {
+	if x != nil {
+		return x.Delimiter
+	}
+	return ""
+}
+
+func (x *ListObjectsRequest) GetLimit() int32 {
+	if x != nil && x.Limit != nil {
+		return *x.Limit
+	}
+	return 0
+}
+
+func (x *ListObjectsRequest) GetOffset() int32 {
+	if x != nil && x.Offset != nil {
+		return *x.Offset
+	}
+	return 0
+}
+
+type ListObjectsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Objects       []*ObjectMetadata      `protobuf:"bytes,1,rep,name=objects,proto3" json:"objects,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListObjectsResponse) Reset() {
+	*x = ListObjectsResponse{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListObjectsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListObjectsResponse) ProtoMessage() {}
+
+func (x *ListObjectsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListObjectsResponse.ProtoReflect.Descriptor instead.
+func (*ListObjectsResponse) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ListObjectsResponse) GetObjects() []*ObjectMetadata {
+	if x != nil {
+		return x.Objects
+	}
+	return nil
+}
+
+type DeleteBucketRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteBucketRequest) Reset() {
+	*x = DeleteBucketRequest{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteBucketRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteBucketRequest) ProtoMessage() {}
+
+func (x *DeleteBucketRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteBucketRequest.ProtoReflect.Descriptor instead.
+func (*DeleteBucketRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *DeleteBucketRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+type HeadBucketRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HeadBucketRequest) Reset() {
+	*x = HeadBucketRequest{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HeadBucketRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HeadBucketRequest) ProtoMessage() {}
+
+func (x *HeadBucketRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HeadBucketRequest.ProtoReflect.Descriptor instead.
+func (*HeadBucketRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *HeadBucketRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+type HeadBucketResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	BucketMeta    *BucketMetadata        `protobuf:"bytes,1,opt,name=bucket_meta,json=bucketMeta,proto3" json:"bucket_meta,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HeadBucketResponse) Reset() {
+	*x = HeadBucketResponse{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HeadBucketResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HeadBucketResponse) ProtoMessage() {}
+
+func (x *HeadBucketResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HeadBucketResponse.ProtoReflect.Descriptor instead.
+func (*HeadBucketResponse) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *HeadBucketResponse) GetBucketMeta() *BucketMetadata {
+	if x != nil {
+		return x.BucketMeta
+	}
+	return nil
+}
+
+type InitUploadRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Bucket        string                 `protobuf:"bytes,1,opt,name=bucket,proto3" json:"bucket,omitempty"`
+	Key           string                 `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
+	Size          uint64                 `protobuf:"varint,3,opt,name=size,proto3" json:"size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *InitUploadRequest) Reset() {
+	*x = InitUploadRequest{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *InitUploadRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*InitUploadRequest) ProtoMessage() {}
+
+func (x *InitUploadRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use InitUploadRequest.ProtoReflect.Descriptor instead.
+func (*InitUploadRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *InitUploadRequest) GetBucket() string {
+	if x != nil {
+		return x.Bucket
+	}
+	return ""
+}
+
+func (x *InitUploadRequest) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *InitUploadRequest) GetSize() uint64 {
+	if x != nil {
+		return x.Size
+	}
+	return 0
+}
+
+type InitUploadResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UploadId      string                 `protobuf:"bytes,1,opt,name=upload_id,json=uploadId,proto3" json:"upload_id,omitempty"`
+	StorageNode   *Node                  `protobuf:"bytes,2,opt,name=storage_node,json=storageNode,proto3" json:"storage_node,omitempty"`
+	ObjectPath    string                 `protobuf:"bytes,3,opt,name=object_path,json=objectPath,proto3" json:"object_path,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *InitUploadResponse) Reset() {
+	*x = InitUploadResponse{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *InitUploadResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*InitUploadResponse) ProtoMessage() {}
+
+func (x *InitUploadResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use InitUploadResponse.ProtoReflect.Descriptor instead.
+func (*InitUploadResponse) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *InitUploadResponse) GetUploadId() string {
+	if x != nil {
+		return x.UploadId
+	}
+	return ""
+}
+
+func (x *InitUploadResponse) GetStorageNode() *Node {
+	if x != nil {
+		return x.StorageNode
+	}
+	return nil
+}
+
+func (x *InitUploadResponse) GetObjectPath() string {
+	if x != nil {
+		return x.ObjectPath
+	}
+	return ""
+}
+
+type CommitUploadRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UploadId      string                 `protobuf:"bytes,1,opt,name=upload_id,json=uploadId,proto3" json:"upload_id,omitempty"`
+	Checksum      uint32                 `protobuf:"varint,2,opt,name=checksum,proto3" json:"checksum,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CommitUploadRequest) Reset() {
+	*x = CommitUploadRequest{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CommitUploadRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CommitUploadRequest) ProtoMessage() {}
+
+func (x *CommitUploadRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CommitUploadRequest.ProtoReflect.Descriptor instead.
+func (*CommitUploadRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *CommitUploadRequest) GetUploadId() string {
+	if x != nil {
+		return x.UploadId
+	}
+	return ""
+}
+
+func (x *CommitUploadRequest) GetChecksum() uint32 {
+	if x != nil {
+		return x.Checksum
+	}
+	return 0
+}
+
+type AbortUploadRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UploadId      string                 `protobuf:"bytes,1,opt,name=upload_id,json=uploadId,proto3" json:"upload_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AbortUploadRequest) Reset() {
+	*x = AbortUploadRequest{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AbortUploadRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AbortUploadRequest) ProtoMessage() {}
+
+func (x *AbortUploadRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AbortUploadRequest.ProtoReflect.Descriptor instead.
+func (*AbortUploadRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *AbortUploadRequest) GetUploadId() string {
+	if x != nil {
+		return x.UploadId
+	}
+	return ""
+}
+
+type GetObjectRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Bucket        string                 `protobuf:"bytes,1,opt,name=bucket,proto3" json:"bucket,omitempty"`
+	Key           string                 `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetObjectRequest) Reset() {
+	*x = GetObjectRequest{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetObjectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetObjectRequest) ProtoMessage() {}
+
+func (x *GetObjectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetObjectRequest.ProtoReflect.Descriptor instead.
+func (*GetObjectRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *GetObjectRequest) GetBucket() string {
+	if x != nil {
+		return x.Bucket
+	}
+	return ""
+}
+
+func (x *GetObjectRequest) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+type GetObjectResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Metadata      *ObjectMetadata        `protobuf:"bytes,1,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	StorageNode   *Node                  `protobuf:"bytes,2,opt,name=storage_node,json=storageNode,proto3" json:"storage_node,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetObjectResponse) Reset() {
+	*x = GetObjectResponse{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetObjectResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetObjectResponse) ProtoMessage() {}
+
+func (x *GetObjectResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetObjectResponse.ProtoReflect.Descriptor instead.
+func (*GetObjectResponse) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *GetObjectResponse) GetMetadata() *ObjectMetadata {
+	if x != nil {
+		return x.Metadata
+	}
+	return nil
+}
+
+func (x *GetObjectResponse) GetStorageNode() *Node {
+	if x != nil {
+		return x.StorageNode
+	}
+	return nil
+}
+
+type DeleteObjectRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Bucket        string                 `protobuf:"bytes,1,opt,name=bucket,proto3" json:"bucket,omitempty"`
+	Key           string                 `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteObjectRequest) Reset() {
+	*x = DeleteObjectRequest{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteObjectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteObjectRequest) ProtoMessage() {}
+
+func (x *DeleteObjectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteObjectRequest.ProtoReflect.Descriptor instead.
+func (*DeleteObjectRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *DeleteObjectRequest) GetBucket() string {
+	if x != nil {
+		return x.Bucket
+	}
+	return ""
+}
+
+func (x *DeleteObjectRequest) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+type HeadObjectRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Bucket        string                 `protobuf:"bytes,1,opt,name=bucket,proto3" json:"bucket,omitempty"`
+	Key           string                 `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HeadObjectRequest) Reset() {
+	*x = HeadObjectRequest{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HeadObjectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HeadObjectRequest) ProtoMessage() {}
+
+func (x *HeadObjectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HeadObjectRequest.ProtoReflect.Descriptor instead.
+func (*HeadObjectRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *HeadObjectRequest) GetBucket() string {
+	if x != nil {
+		return x.Bucket
+	}
+	return ""
+}
+
+func (x *HeadObjectRequest) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+type HeadObjectResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ObjectMeta    *ObjectMetadata        `protobuf:"bytes,1,opt,name=object_meta,json=objectMeta,proto3" json:"object_meta,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HeadObjectResponse) Reset() {
+	*x = HeadObjectResponse{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HeadObjectResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HeadObjectResponse) ProtoMessage() {}
+
+func (x *HeadObjectResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HeadObjectResponse.ProtoReflect.Descriptor instead.
+func (*HeadObjectResponse) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *HeadObjectResponse) GetObjectMeta() *ObjectMetadata {
+	if x != nil {
+		return x.ObjectMeta
+	}
+	return nil
+}
+
 var File_pkg_proto_metadata_metadata_proto protoreflect.FileDescriptor
 
 const file_pkg_proto_metadata_metadata_proto_rawDesc = "" +
 	"\n" +
-	"!pkg/proto/metadata/metadata.proto\x12\bmetadata\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"Q\n" +
-	"\x11InitUploadRequest\x12\x16\n" +
-	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x10\n" +
-	"\x03key\x18\x02 \x01(\tR\x03key\x12\x12\n" +
-	"\x04size\x18\x03 \x01(\x04R\x04size\"\x85\x01\n" +
-	"\x12InitUploadResponse\x12\x1b\n" +
-	"\tupload_id\x18\x01 \x01(\tR\buploadId\x121\n" +
-	"\fstorage_node\x18\x02 \x01(\v2\x0e.metadata.NodeR\vstorageNode\x12\x1f\n" +
-	"\vobject_path\x18\x03 \x01(\tR\n" +
-	"objectPath\"0\n" +
-	"\x04Node\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
-	"\aaddress\x18\x02 \x01(\tR\aaddress\"N\n" +
-	"\x13CommitUploadRequest\x12\x1b\n" +
-	"\tupload_id\x18\x01 \x01(\tR\buploadId\x12\x1a\n" +
-	"\bchecksum\x18\x02 \x01(\rR\bchecksum\"1\n" +
-	"\x12AbortUploadRequest\x12\x1b\n" +
-	"\tupload_id\x18\x01 \x01(\tR\buploadId\"<\n" +
-	"\x10GetObjectRequest\x12\x16\n" +
-	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x10\n" +
-	"\x03key\x18\x02 \x01(\tR\x03key\"|\n" +
-	"\x11GetObjectResponse\x124\n" +
-	"\bmetadata\x18\x01 \x01(\v2\x18.metadata.ObjectMetadataR\bmetadata\x121\n" +
-	"\fstorage_node\x18\x02 \x01(\v2\x0e.metadata.NodeR\vstorageNode\"\x8c\x01\n" +
-	"\x11GetObjectsRequest\x12\x16\n" +
-	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x12\n" +
-	"\x04path\x18\x02 \x01(\tR\x04path\x12\x19\n" +
-	"\x05limit\x18\x03 \x01(\x05H\x00R\x05limit\x88\x01\x01\x12\x1b\n" +
-	"\x06offset\x18\x04 \x01(\x05H\x01R\x06offset\x88\x01\x01B\b\n" +
-	"\x06_limitB\t\n" +
-	"\a_offset\"H\n" +
-	"\x12GetObjectsResponse\x122\n" +
-	"\aobjects\x18\x01 \x03(\v2\x18.metadata.ObjectMetadataR\aobjects\"?\n" +
-	"\x13DeleteObjectRequest\x12\x16\n" +
-	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x10\n" +
-	"\x03key\x18\x02 \x01(\tR\x03key\"\xa9\x02\n" +
+	"!pkg/proto/metadata/metadata.proto\x12\bmetadata\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"_\n" +
+	"\x0eBucketMetadata\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x129\n" +
+	"\n" +
+	"created_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\xa9\x02\n" +
 	"\x0eObjectMetadata\x12\x16\n" +
 	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x10\n" +
 	"\x03key\x18\x02 \x01(\tR\x03key\x12\x12\n" +
@@ -710,16 +1151,82 @@ const file_pkg_proto_metadata_metadata_proto_rawDesc = "" +
 	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12&\n" +
 	"\x0fstorage_node_id\x18\a \x01(\tR\rstorageNodeId\x12\x1f\n" +
 	"\vobject_path\x18\b \x01(\tR\n" +
-	"objectPath2\xc1\x03\n" +
-	"\bMetadata\x12I\n" +
+	"objectPath\"0\n" +
+	"\x04Node\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
+	"\aaddress\x18\x02 \x01(\tR\aaddress\"a\n" +
+	"\x12ListBucketsRequest\x12\x19\n" +
+	"\x05limit\x18\x01 \x01(\x05H\x00R\x05limit\x88\x01\x01\x12\x1b\n" +
+	"\x06offset\x18\x02 \x01(\x05H\x01R\x06offset\x88\x01\x01B\b\n" +
+	"\x06_limitB\t\n" +
+	"\a_offset\"I\n" +
+	"\x13ListBucketsResponse\x122\n" +
+	"\abuckets\x18\x01 \x03(\v2\x18.metadata.BucketMetadataR\abuckets\")\n" +
+	"\x13CreateBucketRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"H\n" +
+	"\x14CreateBucketResponse\x120\n" +
+	"\x06bucket\x18\x01 \x01(\v2\x18.metadata.BucketMetadataR\x06bucket\"\xaf\x01\n" +
+	"\x12ListObjectsRequest\x12\x16\n" +
+	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x16\n" +
+	"\x06prefix\x18\x02 \x01(\tR\x06prefix\x12\x1c\n" +
+	"\tdelimiter\x18\x03 \x01(\tR\tdelimiter\x12\x19\n" +
+	"\x05limit\x18\x04 \x01(\x05H\x00R\x05limit\x88\x01\x01\x12\x1b\n" +
+	"\x06offset\x18\x05 \x01(\x05H\x01R\x06offset\x88\x01\x01B\b\n" +
+	"\x06_limitB\t\n" +
+	"\a_offset\"I\n" +
+	"\x13ListObjectsResponse\x122\n" +
+	"\aobjects\x18\x01 \x03(\v2\x18.metadata.ObjectMetadataR\aobjects\")\n" +
+	"\x13DeleteBucketRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"'\n" +
+	"\x11HeadBucketRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"O\n" +
+	"\x12HeadBucketResponse\x129\n" +
+	"\vbucket_meta\x18\x01 \x01(\v2\x18.metadata.BucketMetadataR\n" +
+	"bucketMeta\"Q\n" +
+	"\x11InitUploadRequest\x12\x16\n" +
+	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x10\n" +
+	"\x03key\x18\x02 \x01(\tR\x03key\x12\x12\n" +
+	"\x04size\x18\x03 \x01(\x04R\x04size\"\x85\x01\n" +
+	"\x12InitUploadResponse\x12\x1b\n" +
+	"\tupload_id\x18\x01 \x01(\tR\buploadId\x121\n" +
+	"\fstorage_node\x18\x02 \x01(\v2\x0e.metadata.NodeR\vstorageNode\x12\x1f\n" +
+	"\vobject_path\x18\x03 \x01(\tR\n" +
+	"objectPath\"N\n" +
+	"\x13CommitUploadRequest\x12\x1b\n" +
+	"\tupload_id\x18\x01 \x01(\tR\buploadId\x12\x1a\n" +
+	"\bchecksum\x18\x02 \x01(\rR\bchecksum\"1\n" +
+	"\x12AbortUploadRequest\x12\x1b\n" +
+	"\tupload_id\x18\x01 \x01(\tR\buploadId\"<\n" +
+	"\x10GetObjectRequest\x12\x16\n" +
+	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x10\n" +
+	"\x03key\x18\x02 \x01(\tR\x03key\"|\n" +
+	"\x11GetObjectResponse\x124\n" +
+	"\bmetadata\x18\x01 \x01(\v2\x18.metadata.ObjectMetadataR\bmetadata\x121\n" +
+	"\fstorage_node\x18\x02 \x01(\v2\x0e.metadata.NodeR\vstorageNode\"?\n" +
+	"\x13DeleteObjectRequest\x12\x16\n" +
+	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x10\n" +
+	"\x03key\x18\x02 \x01(\tR\x03key\"=\n" +
+	"\x11HeadObjectRequest\x12\x16\n" +
+	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x10\n" +
+	"\x03key\x18\x02 \x01(\tR\x03key\"O\n" +
+	"\x12HeadObjectResponse\x129\n" +
+	"\vobject_meta\x18\x01 \x01(\v2\x18.metadata.ObjectMetadataR\n" +
+	"objectMeta2\xc2\x06\n" +
+	"\bMetadata\x12L\n" +
+	"\vListBuckets\x12\x1c.metadata.ListBucketsRequest\x1a\x1d.metadata.ListBucketsResponse\"\x00\x12O\n" +
+	"\fCreateBucket\x12\x1d.metadata.CreateBucketRequest\x1a\x1e.metadata.CreateBucketResponse\"\x00\x12L\n" +
+	"\vListObjects\x12\x1c.metadata.ListObjectsRequest\x1a\x1d.metadata.ListObjectsResponse\"\x00\x12G\n" +
+	"\fDeleteBucket\x12\x1d.metadata.DeleteBucketRequest\x1a\x16.google.protobuf.Empty\"\x00\x12I\n" +
+	"\n" +
+	"HeadBucket\x12\x1b.metadata.HeadBucketRequest\x1a\x1c.metadata.HeadBucketResponse\"\x00\x12I\n" +
 	"\n" +
 	"InitUpload\x12\x1b.metadata.InitUploadRequest\x1a\x1c.metadata.InitUploadResponse\"\x00\x12G\n" +
 	"\fCommitUpload\x12\x1d.metadata.CommitUploadRequest\x1a\x16.google.protobuf.Empty\"\x00\x12E\n" +
 	"\vAbortUpload\x12\x1c.metadata.AbortUploadRequest\x1a\x16.google.protobuf.Empty\"\x00\x12F\n" +
-	"\tGetObject\x12\x1a.metadata.GetObjectRequest\x1a\x1b.metadata.GetObjectResponse\"\x00\x12I\n" +
+	"\tGetObject\x12\x1a.metadata.GetObjectRequest\x1a\x1b.metadata.GetObjectResponse\"\x00\x12G\n" +
+	"\fDeleteObject\x12\x1d.metadata.DeleteObjectRequest\x1a\x16.google.protobuf.Empty\"\x00\x12I\n" +
 	"\n" +
-	"GetObjects\x12\x1b.metadata.GetObjectsRequest\x1a\x1c.metadata.GetObjectsResponse\"\x00\x12G\n" +
-	"\fDeleteObject\x12\x1d.metadata.DeleteObjectRequest\x1a\x16.google.protobuf.Empty\"\x00B4Z2github.com/neelalala/go-storage/pkg/proto/metadatab\x06proto3"
+	"HeadObject\x12\x1b.metadata.HeadObjectRequest\x1a\x1c.metadata.HeadObjectResponse\"\x00B4Z2github.com/neelalala/go-storage/pkg/proto/metadatab\x06proto3"
 
 var (
 	file_pkg_proto_metadata_metadata_proto_rawDescOnce sync.Once
@@ -733,46 +1240,71 @@ func file_pkg_proto_metadata_metadata_proto_rawDescGZIP() []byte {
 	return file_pkg_proto_metadata_metadata_proto_rawDescData
 }
 
-var file_pkg_proto_metadata_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_pkg_proto_metadata_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
 var file_pkg_proto_metadata_metadata_proto_goTypes = []any{
-	(*InitUploadRequest)(nil),     // 0: metadata.InitUploadRequest
-	(*InitUploadResponse)(nil),    // 1: metadata.InitUploadResponse
+	(*BucketMetadata)(nil),        // 0: metadata.BucketMetadata
+	(*ObjectMetadata)(nil),        // 1: metadata.ObjectMetadata
 	(*Node)(nil),                  // 2: metadata.Node
-	(*CommitUploadRequest)(nil),   // 3: metadata.CommitUploadRequest
-	(*AbortUploadRequest)(nil),    // 4: metadata.AbortUploadRequest
-	(*GetObjectRequest)(nil),      // 5: metadata.GetObjectRequest
-	(*GetObjectResponse)(nil),     // 6: metadata.GetObjectResponse
-	(*GetObjectsRequest)(nil),     // 7: metadata.GetObjectsRequest
-	(*GetObjectsResponse)(nil),    // 8: metadata.GetObjectsResponse
-	(*DeleteObjectRequest)(nil),   // 9: metadata.DeleteObjectRequest
-	(*ObjectMetadata)(nil),        // 10: metadata.ObjectMetadata
-	(*timestamppb.Timestamp)(nil), // 11: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),         // 12: google.protobuf.Empty
+	(*ListBucketsRequest)(nil),    // 3: metadata.ListBucketsRequest
+	(*ListBucketsResponse)(nil),   // 4: metadata.ListBucketsResponse
+	(*CreateBucketRequest)(nil),   // 5: metadata.CreateBucketRequest
+	(*CreateBucketResponse)(nil),  // 6: metadata.CreateBucketResponse
+	(*ListObjectsRequest)(nil),    // 7: metadata.ListObjectsRequest
+	(*ListObjectsResponse)(nil),   // 8: metadata.ListObjectsResponse
+	(*DeleteBucketRequest)(nil),   // 9: metadata.DeleteBucketRequest
+	(*HeadBucketRequest)(nil),     // 10: metadata.HeadBucketRequest
+	(*HeadBucketResponse)(nil),    // 11: metadata.HeadBucketResponse
+	(*InitUploadRequest)(nil),     // 12: metadata.InitUploadRequest
+	(*InitUploadResponse)(nil),    // 13: metadata.InitUploadResponse
+	(*CommitUploadRequest)(nil),   // 14: metadata.CommitUploadRequest
+	(*AbortUploadRequest)(nil),    // 15: metadata.AbortUploadRequest
+	(*GetObjectRequest)(nil),      // 16: metadata.GetObjectRequest
+	(*GetObjectResponse)(nil),     // 17: metadata.GetObjectResponse
+	(*DeleteObjectRequest)(nil),   // 18: metadata.DeleteObjectRequest
+	(*HeadObjectRequest)(nil),     // 19: metadata.HeadObjectRequest
+	(*HeadObjectResponse)(nil),    // 20: metadata.HeadObjectResponse
+	(*timestamppb.Timestamp)(nil), // 21: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),         // 22: google.protobuf.Empty
 }
 var file_pkg_proto_metadata_metadata_proto_depIdxs = []int32{
-	2,  // 0: metadata.InitUploadResponse.storage_node:type_name -> metadata.Node
-	10, // 1: metadata.GetObjectResponse.metadata:type_name -> metadata.ObjectMetadata
-	2,  // 2: metadata.GetObjectResponse.storage_node:type_name -> metadata.Node
-	10, // 3: metadata.GetObjectsResponse.objects:type_name -> metadata.ObjectMetadata
-	11, // 4: metadata.ObjectMetadata.created_at:type_name -> google.protobuf.Timestamp
-	11, // 5: metadata.ObjectMetadata.updated_at:type_name -> google.protobuf.Timestamp
-	0,  // 6: metadata.Metadata.InitUpload:input_type -> metadata.InitUploadRequest
-	3,  // 7: metadata.Metadata.CommitUpload:input_type -> metadata.CommitUploadRequest
-	4,  // 8: metadata.Metadata.AbortUpload:input_type -> metadata.AbortUploadRequest
-	5,  // 9: metadata.Metadata.GetObject:input_type -> metadata.GetObjectRequest
-	7,  // 10: metadata.Metadata.GetObjects:input_type -> metadata.GetObjectsRequest
-	9,  // 11: metadata.Metadata.DeleteObject:input_type -> metadata.DeleteObjectRequest
-	1,  // 12: metadata.Metadata.InitUpload:output_type -> metadata.InitUploadResponse
-	12, // 13: metadata.Metadata.CommitUpload:output_type -> google.protobuf.Empty
-	12, // 14: metadata.Metadata.AbortUpload:output_type -> google.protobuf.Empty
-	6,  // 15: metadata.Metadata.GetObject:output_type -> metadata.GetObjectResponse
-	8,  // 16: metadata.Metadata.GetObjects:output_type -> metadata.GetObjectsResponse
-	12, // 17: metadata.Metadata.DeleteObject:output_type -> google.protobuf.Empty
-	12, // [12:18] is the sub-list for method output_type
-	6,  // [6:12] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	21, // 0: metadata.BucketMetadata.created_at:type_name -> google.protobuf.Timestamp
+	21, // 1: metadata.ObjectMetadata.created_at:type_name -> google.protobuf.Timestamp
+	21, // 2: metadata.ObjectMetadata.updated_at:type_name -> google.protobuf.Timestamp
+	0,  // 3: metadata.ListBucketsResponse.buckets:type_name -> metadata.BucketMetadata
+	0,  // 4: metadata.CreateBucketResponse.bucket:type_name -> metadata.BucketMetadata
+	1,  // 5: metadata.ListObjectsResponse.objects:type_name -> metadata.ObjectMetadata
+	0,  // 6: metadata.HeadBucketResponse.bucket_meta:type_name -> metadata.BucketMetadata
+	2,  // 7: metadata.InitUploadResponse.storage_node:type_name -> metadata.Node
+	1,  // 8: metadata.GetObjectResponse.metadata:type_name -> metadata.ObjectMetadata
+	2,  // 9: metadata.GetObjectResponse.storage_node:type_name -> metadata.Node
+	1,  // 10: metadata.HeadObjectResponse.object_meta:type_name -> metadata.ObjectMetadata
+	3,  // 11: metadata.Metadata.ListBuckets:input_type -> metadata.ListBucketsRequest
+	5,  // 12: metadata.Metadata.CreateBucket:input_type -> metadata.CreateBucketRequest
+	7,  // 13: metadata.Metadata.ListObjects:input_type -> metadata.ListObjectsRequest
+	9,  // 14: metadata.Metadata.DeleteBucket:input_type -> metadata.DeleteBucketRequest
+	10, // 15: metadata.Metadata.HeadBucket:input_type -> metadata.HeadBucketRequest
+	12, // 16: metadata.Metadata.InitUpload:input_type -> metadata.InitUploadRequest
+	14, // 17: metadata.Metadata.CommitUpload:input_type -> metadata.CommitUploadRequest
+	15, // 18: metadata.Metadata.AbortUpload:input_type -> metadata.AbortUploadRequest
+	16, // 19: metadata.Metadata.GetObject:input_type -> metadata.GetObjectRequest
+	18, // 20: metadata.Metadata.DeleteObject:input_type -> metadata.DeleteObjectRequest
+	19, // 21: metadata.Metadata.HeadObject:input_type -> metadata.HeadObjectRequest
+	4,  // 22: metadata.Metadata.ListBuckets:output_type -> metadata.ListBucketsResponse
+	6,  // 23: metadata.Metadata.CreateBucket:output_type -> metadata.CreateBucketResponse
+	8,  // 24: metadata.Metadata.ListObjects:output_type -> metadata.ListObjectsResponse
+	22, // 25: metadata.Metadata.DeleteBucket:output_type -> google.protobuf.Empty
+	11, // 26: metadata.Metadata.HeadBucket:output_type -> metadata.HeadBucketResponse
+	13, // 27: metadata.Metadata.InitUpload:output_type -> metadata.InitUploadResponse
+	22, // 28: metadata.Metadata.CommitUpload:output_type -> google.protobuf.Empty
+	22, // 29: metadata.Metadata.AbortUpload:output_type -> google.protobuf.Empty
+	17, // 30: metadata.Metadata.GetObject:output_type -> metadata.GetObjectResponse
+	22, // 31: metadata.Metadata.DeleteObject:output_type -> google.protobuf.Empty
+	20, // 32: metadata.Metadata.HeadObject:output_type -> metadata.HeadObjectResponse
+	22, // [22:33] is the sub-list for method output_type
+	11, // [11:22] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_pkg_proto_metadata_metadata_proto_init() }
@@ -780,6 +1312,7 @@ func file_pkg_proto_metadata_metadata_proto_init() {
 	if File_pkg_proto_metadata_metadata_proto != nil {
 		return
 	}
+	file_pkg_proto_metadata_metadata_proto_msgTypes[3].OneofWrappers = []any{}
 	file_pkg_proto_metadata_metadata_proto_msgTypes[7].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -787,7 +1320,7 @@ func file_pkg_proto_metadata_metadata_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_proto_metadata_metadata_proto_rawDesc), len(file_pkg_proto_metadata_metadata_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   21,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

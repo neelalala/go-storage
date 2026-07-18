@@ -20,18 +20,33 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
+	Metadata_ListBuckets_FullMethodName  = "/metadata.Metadata/ListBuckets"
+	Metadata_CreateBucket_FullMethodName = "/metadata.Metadata/CreateBucket"
+	Metadata_ListObjects_FullMethodName  = "/metadata.Metadata/ListObjects"
+	Metadata_DeleteBucket_FullMethodName = "/metadata.Metadata/DeleteBucket"
+	Metadata_HeadBucket_FullMethodName   = "/metadata.Metadata/HeadBucket"
 	Metadata_InitUpload_FullMethodName   = "/metadata.Metadata/InitUpload"
 	Metadata_CommitUpload_FullMethodName = "/metadata.Metadata/CommitUpload"
 	Metadata_AbortUpload_FullMethodName  = "/metadata.Metadata/AbortUpload"
 	Metadata_GetObject_FullMethodName    = "/metadata.Metadata/GetObject"
-	Metadata_GetObjects_FullMethodName   = "/metadata.Metadata/GetObjects"
 	Metadata_DeleteObject_FullMethodName = "/metadata.Metadata/DeleteObject"
+	Metadata_HeadObject_FullMethodName   = "/metadata.Metadata/HeadObject"
 )
 
 // MetadataClient is the client API for Metadata service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MetadataClient interface {
+	// Metadata возвращает все доаступные бакеты
+	ListBuckets(ctx context.Context, in *ListBucketsRequest, opts ...grpc.CallOption) (*ListBucketsResponse, error)
+	// Metadata создает бакет
+	CreateBucket(ctx context.Context, in *CreateBucketRequest, opts ...grpc.CallOption) (*CreateBucketResponse, error)
+	// Metadata возвращает все объекты с указанным префиксом и группирует объекты по переданному разделителю
+	ListObjects(ctx context.Context, in *ListObjectsRequest, opts ...grpc.CallOption) (*ListObjectsResponse, error)
+	// Metadata удаляет бакет. Бакет обязан быть пустым
+	DeleteBucket(ctx context.Context, in *DeleteBucketRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Metadata возвращает метаданные бакета
+	HeadBucket(ctx context.Context, in *HeadBucketRequest, opts ...grpc.CallOption) (*HeadBucketResponse, error)
 	// Metadata выбирает Storage Node, куда сохранить файл, сохраняет текущее состояние загрузки
 	InitUpload(ctx context.Context, in *InitUploadRequest, opts ...grpc.CallOption) (*InitUploadResponse, error)
 	// Metadata обновляет поле updated_at, записывает checksum и помечает объект сохраненным
@@ -40,10 +55,10 @@ type MetadataClient interface {
 	AbortUpload(ctx context.Context, in *AbortUploadRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// Metadata возвращает метаданные объекта и узел, с которого его нужно загрузить
 	GetObject(ctx context.Context, in *GetObjectRequest, opts ...grpc.CallOption) (*GetObjectResponse, error)
-	// Metadata возвращает метаданные объектов, у которых бакет и путь соответсвует запросу
-	GetObjects(ctx context.Context, in *GetObjectsRequest, opts ...grpc.CallOption) (*GetObjectsResponse, error)
 	// Metadata удаляет запись об объекте и GC со временем отчищает хранилище
 	DeleteObject(ctx context.Context, in *DeleteObjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Metadata возвращает метаданные объекта
+	HeadObject(ctx context.Context, in *HeadObjectRequest, opts ...grpc.CallOption) (*HeadObjectResponse, error)
 }
 
 type metadataClient struct {
@@ -52,6 +67,56 @@ type metadataClient struct {
 
 func NewMetadataClient(cc grpc.ClientConnInterface) MetadataClient {
 	return &metadataClient{cc}
+}
+
+func (c *metadataClient) ListBuckets(ctx context.Context, in *ListBucketsRequest, opts ...grpc.CallOption) (*ListBucketsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListBucketsResponse)
+	err := c.cc.Invoke(ctx, Metadata_ListBuckets_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *metadataClient) CreateBucket(ctx context.Context, in *CreateBucketRequest, opts ...grpc.CallOption) (*CreateBucketResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateBucketResponse)
+	err := c.cc.Invoke(ctx, Metadata_CreateBucket_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *metadataClient) ListObjects(ctx context.Context, in *ListObjectsRequest, opts ...grpc.CallOption) (*ListObjectsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListObjectsResponse)
+	err := c.cc.Invoke(ctx, Metadata_ListObjects_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *metadataClient) DeleteBucket(ctx context.Context, in *DeleteBucketRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, Metadata_DeleteBucket_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *metadataClient) HeadBucket(ctx context.Context, in *HeadBucketRequest, opts ...grpc.CallOption) (*HeadBucketResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(HeadBucketResponse)
+	err := c.cc.Invoke(ctx, Metadata_HeadBucket_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *metadataClient) InitUpload(ctx context.Context, in *InitUploadRequest, opts ...grpc.CallOption) (*InitUploadResponse, error) {
@@ -94,16 +159,6 @@ func (c *metadataClient) GetObject(ctx context.Context, in *GetObjectRequest, op
 	return out, nil
 }
 
-func (c *metadataClient) GetObjects(ctx context.Context, in *GetObjectsRequest, opts ...grpc.CallOption) (*GetObjectsResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetObjectsResponse)
-	err := c.cc.Invoke(ctx, Metadata_GetObjects_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *metadataClient) DeleteObject(ctx context.Context, in *DeleteObjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
@@ -114,10 +169,30 @@ func (c *metadataClient) DeleteObject(ctx context.Context, in *DeleteObjectReque
 	return out, nil
 }
 
+func (c *metadataClient) HeadObject(ctx context.Context, in *HeadObjectRequest, opts ...grpc.CallOption) (*HeadObjectResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(HeadObjectResponse)
+	err := c.cc.Invoke(ctx, Metadata_HeadObject_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MetadataServer is the server API for Metadata service.
 // All implementations must embed UnimplementedMetadataServer
 // for forward compatibility.
 type MetadataServer interface {
+	// Metadata возвращает все доаступные бакеты
+	ListBuckets(context.Context, *ListBucketsRequest) (*ListBucketsResponse, error)
+	// Metadata создает бакет
+	CreateBucket(context.Context, *CreateBucketRequest) (*CreateBucketResponse, error)
+	// Metadata возвращает все объекты с указанным префиксом и группирует объекты по переданному разделителю
+	ListObjects(context.Context, *ListObjectsRequest) (*ListObjectsResponse, error)
+	// Metadata удаляет бакет. Бакет обязан быть пустым
+	DeleteBucket(context.Context, *DeleteBucketRequest) (*emptypb.Empty, error)
+	// Metadata возвращает метаданные бакета
+	HeadBucket(context.Context, *HeadBucketRequest) (*HeadBucketResponse, error)
 	// Metadata выбирает Storage Node, куда сохранить файл, сохраняет текущее состояние загрузки
 	InitUpload(context.Context, *InitUploadRequest) (*InitUploadResponse, error)
 	// Metadata обновляет поле updated_at, записывает checksum и помечает объект сохраненным
@@ -126,10 +201,10 @@ type MetadataServer interface {
 	AbortUpload(context.Context, *AbortUploadRequest) (*emptypb.Empty, error)
 	// Metadata возвращает метаданные объекта и узел, с которого его нужно загрузить
 	GetObject(context.Context, *GetObjectRequest) (*GetObjectResponse, error)
-	// Metadata возвращает метаданные объектов, у которых бакет и путь соответсвует запросу
-	GetObjects(context.Context, *GetObjectsRequest) (*GetObjectsResponse, error)
 	// Metadata удаляет запись об объекте и GC со временем отчищает хранилище
 	DeleteObject(context.Context, *DeleteObjectRequest) (*emptypb.Empty, error)
+	// Metadata возвращает метаданные объекта
+	HeadObject(context.Context, *HeadObjectRequest) (*HeadObjectResponse, error)
 	mustEmbedUnimplementedMetadataServer()
 }
 
@@ -140,6 +215,21 @@ type MetadataServer interface {
 // pointer dereference when methods are called.
 type UnimplementedMetadataServer struct{}
 
+func (UnimplementedMetadataServer) ListBuckets(context.Context, *ListBucketsRequest) (*ListBucketsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListBuckets not implemented")
+}
+func (UnimplementedMetadataServer) CreateBucket(context.Context, *CreateBucketRequest) (*CreateBucketResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateBucket not implemented")
+}
+func (UnimplementedMetadataServer) ListObjects(context.Context, *ListObjectsRequest) (*ListObjectsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListObjects not implemented")
+}
+func (UnimplementedMetadataServer) DeleteBucket(context.Context, *DeleteBucketRequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteBucket not implemented")
+}
+func (UnimplementedMetadataServer) HeadBucket(context.Context, *HeadBucketRequest) (*HeadBucketResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method HeadBucket not implemented")
+}
 func (UnimplementedMetadataServer) InitUpload(context.Context, *InitUploadRequest) (*InitUploadResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method InitUpload not implemented")
 }
@@ -152,11 +242,11 @@ func (UnimplementedMetadataServer) AbortUpload(context.Context, *AbortUploadRequ
 func (UnimplementedMetadataServer) GetObject(context.Context, *GetObjectRequest) (*GetObjectResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetObject not implemented")
 }
-func (UnimplementedMetadataServer) GetObjects(context.Context, *GetObjectsRequest) (*GetObjectsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetObjects not implemented")
-}
 func (UnimplementedMetadataServer) DeleteObject(context.Context, *DeleteObjectRequest) (*emptypb.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteObject not implemented")
+}
+func (UnimplementedMetadataServer) HeadObject(context.Context, *HeadObjectRequest) (*HeadObjectResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method HeadObject not implemented")
 }
 func (UnimplementedMetadataServer) mustEmbedUnimplementedMetadataServer() {}
 func (UnimplementedMetadataServer) testEmbeddedByValue()                  {}
@@ -177,6 +267,96 @@ func RegisterMetadataServer(s grpc.ServiceRegistrar, srv MetadataServer) {
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&Metadata_ServiceDesc, srv)
+}
+
+func _Metadata_ListBuckets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListBucketsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetadataServer).ListBuckets(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Metadata_ListBuckets_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetadataServer).ListBuckets(ctx, req.(*ListBucketsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Metadata_CreateBucket_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateBucketRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetadataServer).CreateBucket(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Metadata_CreateBucket_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetadataServer).CreateBucket(ctx, req.(*CreateBucketRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Metadata_ListObjects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListObjectsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetadataServer).ListObjects(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Metadata_ListObjects_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetadataServer).ListObjects(ctx, req.(*ListObjectsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Metadata_DeleteBucket_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteBucketRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetadataServer).DeleteBucket(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Metadata_DeleteBucket_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetadataServer).DeleteBucket(ctx, req.(*DeleteBucketRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Metadata_HeadBucket_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HeadBucketRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetadataServer).HeadBucket(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Metadata_HeadBucket_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetadataServer).HeadBucket(ctx, req.(*HeadBucketRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Metadata_InitUpload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -251,24 +431,6 @@ func _Metadata_GetObject_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Metadata_GetObjects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetObjectsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MetadataServer).GetObjects(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Metadata_GetObjects_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MetadataServer).GetObjects(ctx, req.(*GetObjectsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Metadata_DeleteObject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteObjectRequest)
 	if err := dec(in); err != nil {
@@ -287,6 +449,24 @@ func _Metadata_DeleteObject_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Metadata_HeadObject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HeadObjectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetadataServer).HeadObject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Metadata_HeadObject_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetadataServer).HeadObject(ctx, req.(*HeadObjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Metadata_ServiceDesc is the grpc.ServiceDesc for Metadata service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -294,6 +474,26 @@ var Metadata_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "metadata.Metadata",
 	HandlerType: (*MetadataServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "ListBuckets",
+			Handler:    _Metadata_ListBuckets_Handler,
+		},
+		{
+			MethodName: "CreateBucket",
+			Handler:    _Metadata_CreateBucket_Handler,
+		},
+		{
+			MethodName: "ListObjects",
+			Handler:    _Metadata_ListObjects_Handler,
+		},
+		{
+			MethodName: "DeleteBucket",
+			Handler:    _Metadata_DeleteBucket_Handler,
+		},
+		{
+			MethodName: "HeadBucket",
+			Handler:    _Metadata_HeadBucket_Handler,
+		},
 		{
 			MethodName: "InitUpload",
 			Handler:    _Metadata_InitUpload_Handler,
@@ -311,12 +511,12 @@ var Metadata_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Metadata_GetObject_Handler,
 		},
 		{
-			MethodName: "GetObjects",
-			Handler:    _Metadata_GetObjects_Handler,
-		},
-		{
 			MethodName: "DeleteObject",
 			Handler:    _Metadata_DeleteObject_Handler,
+		},
+		{
+			MethodName: "HeadObject",
+			Handler:    _Metadata_HeadObject_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
