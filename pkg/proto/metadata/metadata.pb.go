@@ -229,8 +229,8 @@ func (x *Node) GetAddress() string {
 
 type ListBucketsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Limit         *int32                 `protobuf:"varint,1,opt,name=limit,proto3,oneof" json:"limit,omitempty"`
-	Offset        *int32                 `protobuf:"varint,2,opt,name=offset,proto3,oneof" json:"offset,omitempty"`
+	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset        int32                  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -266,15 +266,15 @@ func (*ListBucketsRequest) Descriptor() ([]byte, []int) {
 }
 
 func (x *ListBucketsRequest) GetLimit() int32 {
-	if x != nil && x.Limit != nil {
-		return *x.Limit
+	if x != nil {
+		return x.Limit
 	}
 	return 0
 }
 
 func (x *ListBucketsRequest) GetOffset() int32 {
-	if x != nil && x.Offset != nil {
-		return *x.Offset
+	if x != nil {
+		return x.Offset
 	}
 	return 0
 }
@@ -416,8 +416,8 @@ type ListObjectsRequest struct {
 	Bucket        string                 `protobuf:"bytes,1,opt,name=bucket,proto3" json:"bucket,omitempty"`
 	Prefix        string                 `protobuf:"bytes,2,opt,name=prefix,proto3" json:"prefix,omitempty"`
 	Delimiter     string                 `protobuf:"bytes,3,opt,name=delimiter,proto3" json:"delimiter,omitempty"`
-	Limit         *int32                 `protobuf:"varint,4,opt,name=limit,proto3,oneof" json:"limit,omitempty"`
-	Offset        *int32                 `protobuf:"varint,5,opt,name=offset,proto3,oneof" json:"offset,omitempty"`
+	Limit         int32                  `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset        int32                  `protobuf:"varint,5,opt,name=offset,proto3" json:"offset,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -474,15 +474,15 @@ func (x *ListObjectsRequest) GetDelimiter() string {
 }
 
 func (x *ListObjectsRequest) GetLimit() int32 {
-	if x != nil && x.Limit != nil {
-		return *x.Limit
+	if x != nil {
+		return x.Limit
 	}
 	return 0
 }
 
 func (x *ListObjectsRequest) GetOffset() int32 {
-	if x != nil && x.Offset != nil {
-		return *x.Offset
+	if x != nil {
+		return x.Offset
 	}
 	return 0
 }
@@ -1154,26 +1154,22 @@ const file_pkg_proto_metadata_metadata_proto_rawDesc = "" +
 	"objectPath\"0\n" +
 	"\x04Node\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
-	"\aaddress\x18\x02 \x01(\tR\aaddress\"a\n" +
-	"\x12ListBucketsRequest\x12\x19\n" +
-	"\x05limit\x18\x01 \x01(\x05H\x00R\x05limit\x88\x01\x01\x12\x1b\n" +
-	"\x06offset\x18\x02 \x01(\x05H\x01R\x06offset\x88\x01\x01B\b\n" +
-	"\x06_limitB\t\n" +
-	"\a_offset\"I\n" +
+	"\aaddress\x18\x02 \x01(\tR\aaddress\"B\n" +
+	"\x12ListBucketsRequest\x12\x14\n" +
+	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x16\n" +
+	"\x06offset\x18\x02 \x01(\x05R\x06offset\"I\n" +
 	"\x13ListBucketsResponse\x122\n" +
 	"\abuckets\x18\x01 \x03(\v2\x18.metadata.BucketMetadataR\abuckets\")\n" +
 	"\x13CreateBucketRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\"H\n" +
 	"\x14CreateBucketResponse\x120\n" +
-	"\x06bucket\x18\x01 \x01(\v2\x18.metadata.BucketMetadataR\x06bucket\"\xaf\x01\n" +
+	"\x06bucket\x18\x01 \x01(\v2\x18.metadata.BucketMetadataR\x06bucket\"\x90\x01\n" +
 	"\x12ListObjectsRequest\x12\x16\n" +
 	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x16\n" +
 	"\x06prefix\x18\x02 \x01(\tR\x06prefix\x12\x1c\n" +
-	"\tdelimiter\x18\x03 \x01(\tR\tdelimiter\x12\x19\n" +
-	"\x05limit\x18\x04 \x01(\x05H\x00R\x05limit\x88\x01\x01\x12\x1b\n" +
-	"\x06offset\x18\x05 \x01(\x05H\x01R\x06offset\x88\x01\x01B\b\n" +
-	"\x06_limitB\t\n" +
-	"\a_offset\"I\n" +
+	"\tdelimiter\x18\x03 \x01(\tR\tdelimiter\x12\x14\n" +
+	"\x05limit\x18\x04 \x01(\x05R\x05limit\x12\x16\n" +
+	"\x06offset\x18\x05 \x01(\x05R\x06offset\"I\n" +
 	"\x13ListObjectsResponse\x122\n" +
 	"\aobjects\x18\x01 \x03(\v2\x18.metadata.ObjectMetadataR\aobjects\")\n" +
 	"\x13DeleteBucketRequest\x12\x12\n" +
@@ -1312,8 +1308,6 @@ func file_pkg_proto_metadata_metadata_proto_init() {
 	if File_pkg_proto_metadata_metadata_proto != nil {
 		return
 	}
-	file_pkg_proto_metadata_metadata_proto_msgTypes[3].OneofWrappers = []any{}
-	file_pkg_proto_metadata_metadata_proto_msgTypes[7].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

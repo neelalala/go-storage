@@ -126,18 +126,16 @@ func (c *Client) GetObject(ctx context.Context, bucket, key string) (domain.Obje
 	return meta, node, nil
 }
 
-func (c *Client) GetObjects(ctx context.Context, bucket, path string, limit, offset int) ([]domain.ObjectMetadata, error) {
-	limit32 := int32(limit)
-	offset32 := int32(offset)
-
-	req := &metadatapb.GetObjectsRequest{
-		Bucket: bucket,
-		Path:   path,
-		Limit:  &limit32,
-		Offset: &offset32,
+func (c *Client) ListObjects(ctx context.Context, bucket, prefix, delimiter string, limit, offset int) ([]domain.ObjectMetadata, error) {
+	req := &metadatapb.ListObjectsRequest{
+		Bucket:    bucket,
+		Prefix:    prefix,
+		Delimiter: delimiter,
+		Limit:     int32(limit),
+		Offset:    int32(offset),
 	}
 
-	resp, err := c.client.GetObjects(ctx, req)
+	resp, err := c.client.ListObjects(ctx, req)
 	if err != nil {
 		return nil, err
 	}
