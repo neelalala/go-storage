@@ -57,6 +57,7 @@ func run(cfg config.Config, log *slog.Logger) error {
 		return err
 	}
 
+	bucketRepo := sql.NewBucketRepository(pool)
 	uploadRepo := sql.NewUploadRepository(pool)
 	objRepo := sql.NewObjectRepository(pool)
 
@@ -68,6 +69,7 @@ func run(cfg config.Config, log *slog.Logger) error {
 	hasher := hasher.NewSHA256()
 
 	metadata := application.NewMetadataService(
+		bucketRepo,
 		uploadRepo,
 		objRepo,
 		domain.Storage{
