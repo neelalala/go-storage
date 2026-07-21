@@ -39,7 +39,10 @@ func run(cfg config.Config, log *slog.Logger) error {
 
 	hasher := hash.NewCRC32()
 
-	store := store.New(cfg.UploadRoot, hasher)
+	store, err := store.New(cfg.UploadRoot, hasher)
+	if err != nil {
+		return fmt.Errorf("could not create store: %w", err)
+	}
 
 	storage := application.NewStorage(store, cfg.NodeName, log)
 
