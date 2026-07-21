@@ -12,6 +12,7 @@ import (
 
 var _ domain.MetadataService = (*Client)(nil)
 
+// TODO: client return domain errors
 type Client struct {
 	client metadatapb.MetadataClient
 	conn   *grpc.ClientConn
@@ -31,6 +32,59 @@ func New(addr string) (*Client, error) {
 
 func (c *Client) Close() error {
 	return c.conn.Close()
+}
+
+func (c *Client) ListBuckets(ctx context.Context, limit, offset int) ([]domain.BucketMetadata, error) {
+	req := &metadatapb.ListBucketsRequest{
+		Limit:  int32(limit),
+		Offset: int32(offset),
+	}
+
+	resp, err := c.client.ListBuckets(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	pbbuckets := resp.GetBuckets()
+
+	buckets := make([]domain.BucketMetadata, 0, len(pbbuckets))
+	for _, pbbucket := range pbbuckets {
+		bucket := domain.BucketMetadata{
+			Name:      pbbucket.GetName(),
+			CreatedAt: pbbucket.CreatedAt.AsTime(),
+		}
+
+		buckets = append(buckets, bucket)
+	}
+
+	return buckets, nil
+}
+
+func (c *Client) CreateBucket(ctx context.Context, name string) (domain.BucketMetadata, error) {
+	req := &metadatapb.CreateBucketRequest{
+		Name: name,
+	}
+
+	resp, err := c.client.CreateBucket(ctx, req)
+	if err != nil {
+		return domain.BucketMetadata{}, err
+	}
+
+	bucket := domain.BucketMetadata{
+		Name:      resp.GetBucket().GetName(),
+		CreatedAt: resp.GetBucket().GetCreatedAt().AsTime(),
+	}
+
+	return bucket, nil
+}
+
+func (c *Client) DeleteBucket(ctx context.Context, name string) error {
+	req := &metadatapb.DeleteBucketRequest{
+		Name: name,
+	}
+
+	_, err := c.client.DeleteBucket(ctx, req)
+	return err
 }
 
 func (c *Client) InitUpload(ctx context.Context, bucket, key string, size uint64) (domain.Upload, domain.StorageNode, error) {
