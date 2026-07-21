@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/neelalala/go-storage/internal/gateway/adapter/in/http"
+	"github.com/neelalala/go-storage/internal/gateway/adapter/in/http/marshal"
 	"github.com/neelalala/go-storage/internal/gateway/adapter/out/grpc/metadata"
 	"github.com/neelalala/go-storage/internal/gateway/adapter/out/grpc/storage"
 	"github.com/neelalala/go-storage/internal/gateway/application"
@@ -49,7 +50,9 @@ func run(cfg config.Config, log *slog.Logger) error {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
-	server := http.NewServer(gateway, cfg.HTTP.Address, cfg.HTTP.Timeout, log)
+	marshaller := marshal.JSONMarshaller{}
+
+	server := http.NewServer(metadata, gateway, marshaller, cfg.HTTP.Address, cfg.HTTP.Timeout, log)
 
 	go func() {
 		<-ctx.Done()
