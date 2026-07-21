@@ -18,23 +18,16 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-const (
-	DefaultBucketsLimit  = 100
-	DefaultBucketsOffset = 0
-	DefaultObjectsLimit  = 100
-	DefaultObjectsOffset = 0
-)
-
 type Server struct {
 	metadatapb.UnimplementedMetadataServer
 	addr       string
 	grpcServer *grpc.Server
-	service    application.MetadataService
+	service    *application.MetadataService
 
 	log *slog.Logger
 }
 
-func NewServer(addr string, service application.MetadataService, log *slog.Logger) *Server {
+func NewServer(addr string, service *application.MetadataService, log *slog.Logger) *Server {
 	grpcServer := grpc.NewServer()
 
 	server := &Server{
@@ -84,22 +77,7 @@ func (s *Server) Stop(ctx context.Context) error {
 func (s *Server) ListBuckets(ctx context.Context, req *metadatapb.ListBucketsRequest) (*metadatapb.ListBucketsResponse, error) {
 	s.log.Debug("list buckets request")
 
-	var (
-		limit  int
-		offset int
-	)
-
-	if req.Limit != nil {
-		limit = int(req.GetLimit())
-	} else {
-		limit = DefaultBucketsLimit
-	}
-
-	if req.Offset != nil {
-		offset = int(req.GetOffset())
-	} else {
-		offset = DefaultBucketsOffset
-	}
+	limit, offset := int(req.GetLimit()), int(req.GetOffset())
 
 	buckets, err := s.service.ListBuckets(ctx, limit, offset)
 	if err != nil {
@@ -145,23 +123,7 @@ func (s *Server) ListObjects(ctx context.Context, req *metadatapb.ListObjectsReq
 	s.log.Debug("get objects request")
 
 	bucket, prefix, delimiter := req.GetBucket(), req.GetPrefix(), req.GetDelimiter()
-
-	var (
-		limit  int
-		offset int
-	)
-
-	if req.Limit != nil {
-		limit = int(req.GetLimit())
-	} else {
-		limit = DefaultObjectsLimit
-	}
-
-	if req.Offset != nil {
-		offset = int(req.GetOffset())
-	} else {
-		offset = DefaultObjectsOffset
-	}
+	limit, offset := int(req.GetLimit()), int(req.GetOffset())
 
 	objs, err := s.service.GetObjects(ctx, bucket, prefix, delimiter, limit, offset)
 	if err != nil {
@@ -185,7 +147,6 @@ func (s *Server) ListObjects(ctx context.Context, req *metadatapb.ListObjectsReq
 	return &metadatapb.ListObjectsResponse{
 		Objects: pbobjects,
 	}, nil
-
 }
 
 func (s *Server) DeleteBucket(ctx context.Context, req *metadatapb.DeleteBucketRequest) (*emptypb.Empty, error) {
