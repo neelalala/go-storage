@@ -168,27 +168,6 @@ func (s *Server) DeleteBucket(ctx context.Context, req *metadatapb.DeleteBucketR
 	return &emptypb.Empty{}, nil
 }
 
-func (s *Server) HeadBucket(ctx context.Context, req *metadatapb.HeadBucketRequest) (*metadatapb.HeadBucketResponse, error) {
-	s.log.Debug("head bucket request")
-
-	name := req.GetName()
-
-	bucket, err := s.service.GetBucket(ctx, name)
-	if err != nil {
-		if errors.Is(err, domain.ErrBucketNotExists) {
-			return nil, status.Errorf(codes.NotFound, "error getting bucket head: %v", err)
-		}
-		return nil, status.Errorf(codes.Internal, "error getting bucket head: %v", err)
-	}
-
-	return &metadatapb.HeadBucketResponse{
-		BucketMeta: &metadatapb.BucketMetadata{
-			Name:      bucket.Name,
-			CreatedAt: timestamppb.New(bucket.CreatedAt),
-		},
-	}, nil
-}
-
 func (s *Server) InitUpload(ctx context.Context, req *metadatapb.InitUploadRequest) (*metadatapb.InitUploadResponse, error) {
 	s.log.Debug("init upload request")
 
@@ -293,31 +272,4 @@ func (s *Server) DeleteObject(ctx context.Context, req *metadatapb.DeleteObjectR
 	}
 
 	return &emptypb.Empty{}, nil
-}
-
-func (s *Server) HeadObject(ctx context.Context, req *metadatapb.HeadObjectRequest) (*metadatapb.HeadObjectResponse, error) {
-	s.log.Debug("head object request")
-
-	bucket, key := req.GetBucket(), req.GetKey()
-
-	obj, err := s.service.HeadObject(ctx, bucket, key)
-	if err != nil {
-		if errors.Is(err, domain.ErrObjectNotFound) {
-			return nil, status.Errorf(codes.NotFound, "error getting object head: %v", err)
-		}
-		return nil, status.Errorf(codes.Internal, "error getting object head: %v", err)
-	}
-
-	return &metadatapb.HeadObjectResponse{
-		ObjectMeta: &metadatapb.ObjectMetadata{
-			Bucket:        obj.Bucket,
-			Key:           obj.Key,
-			Size:          obj.Size,
-			Checksum:      obj.Checksum,
-			CreatedAt:     timestamppb.New(obj.CreatedAt),
-			UpdatedAt:     timestamppb.New(obj.UpdatedAt),
-			StorageNodeId: obj.StorageNodeID.String(),
-			ObjectPath:    obj.ObjectPath,
-		},
-	}, nil
 }

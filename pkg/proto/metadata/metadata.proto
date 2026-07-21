@@ -20,9 +20,6 @@ service Metadata {
   // Metadata удаляет бакет. Бакет обязан быть пустым
   rpc DeleteBucket(DeleteBucketRequest) returns (google.protobuf.Empty) {}
 
-  // Metadata возвращает метаданные бакета
-  rpc HeadBucket(HeadBucketRequest) returns (HeadBucketResponse) {}
-
   // Metadata выбирает Storage Node, куда сохранить файл, сохраняет текущее состояние загрузки
   rpc InitUpload(InitUploadRequest) returns (InitUploadResponse) {}
 
@@ -37,9 +34,6 @@ service Metadata {
 
   // Metadata удаляет запись об объекте и GC со временем отчищает хранилище 
   rpc DeleteObject(DeleteObjectRequest) returns (google.protobuf.Empty) {}
-
-  // Metadata возвращает метаданные объекта
-  rpc HeadObject(HeadObjectRequest) returns (HeadObjectResponse) {}
 }
 
 // DTOs
@@ -100,14 +94,6 @@ message DeleteBucketRequest {
   string name = 1;
 }
 
-message HeadBucketRequest {
-  string name = 1;
-}
-
-message HeadBucketResponse {
-  BucketMetadata bucket_meta = 1;
-}
-
 message InitUploadRequest {
   string bucket = 1;
   string key = 2;
@@ -142,13 +128,4 @@ message GetObjectResponse {
 message DeleteObjectRequest {
   string bucket = 1;
   string key = 2;
-}
-
-message HeadObjectRequest {
-  string bucket = 1;
-  string key = 2;
-}
-
-message HeadObjectResponse {
-  ObjectMetadata object_meta = 1;
 }

@@ -24,13 +24,11 @@ const (
 	Metadata_CreateBucket_FullMethodName = "/metadata.Metadata/CreateBucket"
 	Metadata_ListObjects_FullMethodName  = "/metadata.Metadata/ListObjects"
 	Metadata_DeleteBucket_FullMethodName = "/metadata.Metadata/DeleteBucket"
-	Metadata_HeadBucket_FullMethodName   = "/metadata.Metadata/HeadBucket"
 	Metadata_InitUpload_FullMethodName   = "/metadata.Metadata/InitUpload"
 	Metadata_CommitUpload_FullMethodName = "/metadata.Metadata/CommitUpload"
 	Metadata_AbortUpload_FullMethodName  = "/metadata.Metadata/AbortUpload"
 	Metadata_GetObject_FullMethodName    = "/metadata.Metadata/GetObject"
 	Metadata_DeleteObject_FullMethodName = "/metadata.Metadata/DeleteObject"
-	Metadata_HeadObject_FullMethodName   = "/metadata.Metadata/HeadObject"
 )
 
 // MetadataClient is the client API for Metadata service.
@@ -45,8 +43,6 @@ type MetadataClient interface {
 	ListObjects(ctx context.Context, in *ListObjectsRequest, opts ...grpc.CallOption) (*ListObjectsResponse, error)
 	// Metadata удаляет бакет. Бакет обязан быть пустым
 	DeleteBucket(ctx context.Context, in *DeleteBucketRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// Metadata возвращает метаданные бакета
-	HeadBucket(ctx context.Context, in *HeadBucketRequest, opts ...grpc.CallOption) (*HeadBucketResponse, error)
 	// Metadata выбирает Storage Node, куда сохранить файл, сохраняет текущее состояние загрузки
 	InitUpload(ctx context.Context, in *InitUploadRequest, opts ...grpc.CallOption) (*InitUploadResponse, error)
 	// Metadata обновляет поле updated_at, записывает checksum и помечает объект сохраненным
@@ -57,8 +53,6 @@ type MetadataClient interface {
 	GetObject(ctx context.Context, in *GetObjectRequest, opts ...grpc.CallOption) (*GetObjectResponse, error)
 	// Metadata удаляет запись об объекте и GC со временем отчищает хранилище
 	DeleteObject(ctx context.Context, in *DeleteObjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// Metadata возвращает метаданные объекта
-	HeadObject(ctx context.Context, in *HeadObjectRequest, opts ...grpc.CallOption) (*HeadObjectResponse, error)
 }
 
 type metadataClient struct {
@@ -103,16 +97,6 @@ func (c *metadataClient) DeleteBucket(ctx context.Context, in *DeleteBucketReque
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, Metadata_DeleteBucket_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *metadataClient) HeadBucket(ctx context.Context, in *HeadBucketRequest, opts ...grpc.CallOption) (*HeadBucketResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(HeadBucketResponse)
-	err := c.cc.Invoke(ctx, Metadata_HeadBucket_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -169,16 +153,6 @@ func (c *metadataClient) DeleteObject(ctx context.Context, in *DeleteObjectReque
 	return out, nil
 }
 
-func (c *metadataClient) HeadObject(ctx context.Context, in *HeadObjectRequest, opts ...grpc.CallOption) (*HeadObjectResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(HeadObjectResponse)
-	err := c.cc.Invoke(ctx, Metadata_HeadObject_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // MetadataServer is the server API for Metadata service.
 // All implementations must embed UnimplementedMetadataServer
 // for forward compatibility.
@@ -191,8 +165,6 @@ type MetadataServer interface {
 	ListObjects(context.Context, *ListObjectsRequest) (*ListObjectsResponse, error)
 	// Metadata удаляет бакет. Бакет обязан быть пустым
 	DeleteBucket(context.Context, *DeleteBucketRequest) (*emptypb.Empty, error)
-	// Metadata возвращает метаданные бакета
-	HeadBucket(context.Context, *HeadBucketRequest) (*HeadBucketResponse, error)
 	// Metadata выбирает Storage Node, куда сохранить файл, сохраняет текущее состояние загрузки
 	InitUpload(context.Context, *InitUploadRequest) (*InitUploadResponse, error)
 	// Metadata обновляет поле updated_at, записывает checksum и помечает объект сохраненным
@@ -203,8 +175,6 @@ type MetadataServer interface {
 	GetObject(context.Context, *GetObjectRequest) (*GetObjectResponse, error)
 	// Metadata удаляет запись об объекте и GC со временем отчищает хранилище
 	DeleteObject(context.Context, *DeleteObjectRequest) (*emptypb.Empty, error)
-	// Metadata возвращает метаданные объекта
-	HeadObject(context.Context, *HeadObjectRequest) (*HeadObjectResponse, error)
 	mustEmbedUnimplementedMetadataServer()
 }
 
@@ -227,9 +197,6 @@ func (UnimplementedMetadataServer) ListObjects(context.Context, *ListObjectsRequ
 func (UnimplementedMetadataServer) DeleteBucket(context.Context, *DeleteBucketRequest) (*emptypb.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteBucket not implemented")
 }
-func (UnimplementedMetadataServer) HeadBucket(context.Context, *HeadBucketRequest) (*HeadBucketResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method HeadBucket not implemented")
-}
 func (UnimplementedMetadataServer) InitUpload(context.Context, *InitUploadRequest) (*InitUploadResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method InitUpload not implemented")
 }
@@ -244,9 +211,6 @@ func (UnimplementedMetadataServer) GetObject(context.Context, *GetObjectRequest)
 }
 func (UnimplementedMetadataServer) DeleteObject(context.Context, *DeleteObjectRequest) (*emptypb.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteObject not implemented")
-}
-func (UnimplementedMetadataServer) HeadObject(context.Context, *HeadObjectRequest) (*HeadObjectResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method HeadObject not implemented")
 }
 func (UnimplementedMetadataServer) mustEmbedUnimplementedMetadataServer() {}
 func (UnimplementedMetadataServer) testEmbeddedByValue()                  {}
@@ -341,24 +305,6 @@ func _Metadata_DeleteBucket_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Metadata_HeadBucket_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(HeadBucketRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MetadataServer).HeadBucket(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Metadata_HeadBucket_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MetadataServer).HeadBucket(ctx, req.(*HeadBucketRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Metadata_InitUpload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(InitUploadRequest)
 	if err := dec(in); err != nil {
@@ -449,24 +395,6 @@ func _Metadata_DeleteObject_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Metadata_HeadObject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(HeadObjectRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MetadataServer).HeadObject(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Metadata_HeadObject_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MetadataServer).HeadObject(ctx, req.(*HeadObjectRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // Metadata_ServiceDesc is the grpc.ServiceDesc for Metadata service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -491,10 +419,6 @@ var Metadata_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Metadata_DeleteBucket_Handler,
 		},
 		{
-			MethodName: "HeadBucket",
-			Handler:    _Metadata_HeadBucket_Handler,
-		},
-		{
 			MethodName: "InitUpload",
 			Handler:    _Metadata_InitUpload_Handler,
 		},
@@ -513,10 +437,6 @@ var Metadata_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteObject",
 			Handler:    _Metadata_DeleteObject_Handler,
-		},
-		{
-			MethodName: "HeadObject",
-			Handler:    _Metadata_HeadObject_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
