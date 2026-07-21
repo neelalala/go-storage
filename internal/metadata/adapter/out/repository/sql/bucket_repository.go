@@ -65,7 +65,7 @@ func (r *BucketRepository) GetBuckets(ctx context.Context, limit, offset int) ([
 func (r *BucketRepository) CreateBucket(ctx context.Context, name string) (domain.Bucket, error) {
 	query := `
 		INSERT INTO buckets (name)
-		VALUES $1
+		VALUES ($1)
 		RETURNING name, created_at
 	`
 
