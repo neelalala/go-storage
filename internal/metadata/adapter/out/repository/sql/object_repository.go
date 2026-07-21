@@ -7,6 +7,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+
 	"github.com/neelalala/go-storage/internal/metadata/domain"
 )
 
@@ -105,7 +106,7 @@ func (r *ObjectRepository) SoftDeleteObject(ctx context.Context, bucket, key str
 			DELETE FROM objects
 			WHERE bucket = $1 AND key = $2
 			RETURNING object_path, storage_node_id
-		),
+		)
 		INSERT INTO gc_queue (object_path, storage_node_id)
 		SELECT object_path, storage_node_id FROM deleted
 	`
