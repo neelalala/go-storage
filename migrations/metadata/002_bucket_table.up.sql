@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS bucekts (
+CREATE TABLE IF NOT EXISTS buckets (
   name TEXT PRIMARY KEY,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -14,5 +14,5 @@ GROUP BY bucket;
 
 ALTER TABLE objects
 ADD CONSTRAINT fk_objects_bucket
-FOREIGN KEY (bucket) REFERENCES bucekts(name)
+FOREIGN KEY (bucket) REFERENCES buckets(name)
 ON DELETE RESTRICT;
