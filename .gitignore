@@ -3,3 +3,4 @@ bin/
 docs/architecture.jpg
 pgdata/
 .env
+.idea/
