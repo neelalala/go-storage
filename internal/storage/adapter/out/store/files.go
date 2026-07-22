@@ -32,26 +32,23 @@ func New(root string, hasher domain.Hasher) (FileStore, error) {
 	}, nil
 }
 
-func (s FileStore) Save(_ context.Context, obj domain.Object) (uint32, error) {
+func (s FileStore) Save(_ context.Context, obj domain.Object) (string, error) {
 	if err := os.WriteFile(s.root+obj.Name, obj.Data, 0644); err != nil {
-		return 0, fmt.Errorf("error saving object: %w", err)
+		return "", fmt.Errorf("error saving object: %w", err)
 	}
 
-	checksum := s.hasher.Checksum(obj.Data)
+	etag := s.hasher.Hash(obj.Data)
 
-	return checksum, nil
+	return etag, nil
 }
 
-func (s FileStore) Get(_ context.Context, name string) (domain.Object, error) {
+func (s FileStore) Get(_ context.Context, name string) ([]byte, error) {
 	data, err := os.ReadFile(s.root + name)
 	if errors.Is(err, os.ErrNotExist) {
-		return domain.Object{}, fmt.Errorf("%w: %s", domain.ErrFileNotFound, name)
+		return nil, fmt.Errorf("%w: %s", domain.ErrFileNotFound, name)
 	}
 
-	return domain.Object{
-		Name: name,
-		Data: data,
-	}, nil
+	return data, nil
 }
 
 func (s FileStore) Delete(_ context.Context, name string) error {

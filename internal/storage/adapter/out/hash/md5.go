@@ -1,7 +1,8 @@
 package hash
 
 import (
-	"hash/crc32"
+	"crypto/md5"
+	"fmt"
 
 	"github.com/neelalala/go-storage/internal/storage/domain"
 )
@@ -16,5 +17,5 @@ func NewMD5() MD5 {
 }
 
 func (_ MD5) Hash(b []byte) string {
-	return crc32.ChecksumIEEE(b)
+	return fmt.Sprintf("%x", md5.New().Sum(b))
 }

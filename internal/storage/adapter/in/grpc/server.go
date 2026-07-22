@@ -7,17 +7,18 @@ import (
 	"log/slog"
 	"net"
 
-	"github.com/neelalala/go-storage/internal/storage/domain"
-	storagepb "github.com/neelalala/go-storage/pkg/proto/storage"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+
+	"github.com/neelalala/go-storage/internal/storage/domain"
+	storagepb "github.com/neelalala/go-storage/pkg/proto/storage"
 )
 
 type Storage interface {
-	SaveObject(ctx context.Context, obj domain.Object) (uint32, error)
-	GetObject(ctx context.Context, name string) (domain.Object, error)
+	SaveObject(ctx context.Context, obj domain.Object) (string, error)
+	GetObject(ctx context.Context, name string) ([]byte, error)
 	DeleteObject(ctx context.Context, name string) error
 }
 
@@ -85,36 +86,31 @@ func (s *Server) SaveObject(ctx context.Context, req *storagepb.SaveRequest) (*s
 		Data: req.GetObject().GetData(),
 	}
 
-	checksum, err := s.storage.SaveObject(ctx, obj)
+	etag, err := s.storage.SaveObject(ctx, obj)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error saving object: %v", err)
 	}
 
 	return &storagepb.SaveResponse{
-		Checksum: checksum,
+		Etag: etag,
 	}, nil
 }
 
 func (s *Server) GetObject(ctx context.Context, req *storagepb.GetRequest) (*storagepb.GetResponse, error) {
 	s.log.Debug("get object request")
 
-	obj, err := s.storage.GetObject(ctx, req.GetName())
+	data, err := s.storage.GetObject(ctx, req.GetName())
 	if err != nil {
 		if errors.Is(err, domain.ErrFileNotFound) {
-			return nil, status.Errorf(codes.InvalidArgument, "%v", err)
+			return nil, status.Errorf(codes.NotFound, "%v", err)
 		}
 
 		return nil, status.Errorf(codes.Internal, "error getting object: %v", err)
 	}
 
-	resp := &storagepb.GetResponse{
-		Object: &storagepb.Object{
-			Name: obj.Name,
-			Data: obj.Data,
-		},
-	}
-
-	return resp, nil
+	return &storagepb.GetResponse{
+		Data: data,
+	}, nil
 }
 
 func (s *Server) DeleteObject(ctx context.Context, req *storagepb.DeleteRequest) (*emptypb.Empty, error) {
@@ -123,11 +119,11 @@ func (s *Server) DeleteObject(ctx context.Context, req *storagepb.DeleteRequest)
 	err := s.storage.DeleteObject(ctx, req.GetName())
 	if err != nil {
 		if errors.Is(err, domain.ErrFileNotFound) {
-			return nil, status.Errorf(codes.InvalidArgument, "%v", err)
+			return nil, status.Errorf(codes.NotFound, "%v", err)
 		}
 
 		return nil, status.Errorf(codes.Internal, "error deleting object: %v", err)
 	}
 
-	return nil, nil
+	return &emptypb.Empty{}, nil
 }
