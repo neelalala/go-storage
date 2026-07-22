@@ -120,7 +120,7 @@ func (x *SaveRequest) GetObject() *Object {
 
 type SaveResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Checksum      uint32                 `protobuf:"varint,1,opt,name=checksum,proto3" json:"checksum,omitempty"`
+	Etag          string                 `protobuf:"bytes,2,opt,name=etag,proto3" json:"etag,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -155,11 +155,11 @@ func (*SaveResponse) Descriptor() ([]byte, []int) {
 	return file_pkg_proto_storage_storage_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *SaveResponse) GetChecksum() uint32 {
+func (x *SaveResponse) GetEtag() string {
 	if x != nil {
-		return x.Checksum
+		return x.Etag
 	}
-	return 0
+	return ""
 }
 
 type GetRequest struct {
@@ -208,7 +208,7 @@ func (x *GetRequest) GetName() string {
 
 type GetResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Object        *Object                `protobuf:"bytes,1,opt,name=object,proto3" json:"object,omitempty"`
+	Data          []byte                 `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -243,9 +243,9 @@ func (*GetResponse) Descriptor() ([]byte, []int) {
 	return file_pkg_proto_storage_storage_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *GetResponse) GetObject() *Object {
+func (x *GetResponse) GetData() []byte {
 	if x != nil {
-		return x.Object
+		return x.Data
 	}
 	return nil
 }
@@ -303,14 +303,14 @@ const file_pkg_proto_storage_storage_proto_rawDesc = "" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
 	"\x04data\x18\x02 \x01(\fR\x04data\"6\n" +
 	"\vSaveRequest\x12'\n" +
-	"\x06object\x18\x01 \x01(\v2\x0f.storage.ObjectR\x06object\"*\n" +
-	"\fSaveResponse\x12\x1a\n" +
-	"\bchecksum\x18\x01 \x01(\rR\bchecksum\" \n" +
+	"\x06object\x18\x01 \x01(\v2\x0f.storage.ObjectR\x06object\"\"\n" +
+	"\fSaveResponse\x12\x12\n" +
+	"\x04etag\x18\x02 \x01(\tR\x04etag\" \n" +
 	"\n" +
 	"GetRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"6\n" +
-	"\vGetResponse\x12'\n" +
-	"\x06object\x18\x01 \x01(\v2\x0f.storage.ObjectR\x06object\"#\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"!\n" +
+	"\vGetResponse\x12\x12\n" +
+	"\x04data\x18\x02 \x01(\fR\x04data\"#\n" +
 	"\rDeleteRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name2\xc2\x01\n" +
 	"\aStorage\x12;\n" +
@@ -343,18 +343,17 @@ var file_pkg_proto_storage_storage_proto_goTypes = []any{
 }
 var file_pkg_proto_storage_storage_proto_depIdxs = []int32{
 	0, // 0: storage.SaveRequest.object:type_name -> storage.Object
-	0, // 1: storage.GetResponse.object:type_name -> storage.Object
-	1, // 2: storage.Storage.SaveObject:input_type -> storage.SaveRequest
-	3, // 3: storage.Storage.GetObject:input_type -> storage.GetRequest
-	5, // 4: storage.Storage.DeleteObject:input_type -> storage.DeleteRequest
-	2, // 5: storage.Storage.SaveObject:output_type -> storage.SaveResponse
-	4, // 6: storage.Storage.GetObject:output_type -> storage.GetResponse
-	6, // 7: storage.Storage.DeleteObject:output_type -> google.protobuf.Empty
-	5, // [5:8] is the sub-list for method output_type
-	2, // [2:5] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	1, // 1: storage.Storage.SaveObject:input_type -> storage.SaveRequest
+	3, // 2: storage.Storage.GetObject:input_type -> storage.GetRequest
+	5, // 3: storage.Storage.DeleteObject:input_type -> storage.DeleteRequest
+	2, // 4: storage.Storage.SaveObject:output_type -> storage.SaveResponse
+	4, // 5: storage.Storage.GetObject:output_type -> storage.GetResponse
+	6, // 6: storage.Storage.DeleteObject:output_type -> google.protobuf.Empty
+	4, // [4:7] is the sub-list for method output_type
+	1, // [1:4] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_pkg_proto_storage_storage_proto_init() }

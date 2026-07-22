@@ -24,7 +24,7 @@ message SaveRequest {
 }
 
 message SaveResponse {
-  uint32 checksum = 1;
+  string etag = 2;
 }
 
 message GetRequest {
@@ -32,7 +32,7 @@ message GetRequest {
 }
 
 message GetResponse {
-  Object object = 1;
+  bytes data = 2;
 }
 
 message DeleteRequest {
