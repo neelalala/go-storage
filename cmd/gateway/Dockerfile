@@ -21,7 +21,10 @@ RUN protoc --go_out=. --go_opt=paths=source_relative \
   pkg/proto/storage/storage.proto
 RUN protoc --go_out=. --go_opt=paths=source_relative \
   --go-grpc_out=. --go-grpc_opt=paths=source_relative \
-  pkg/proto/metadata/metadata.proto
+  pkg/proto/metadata/metadata.proto \
+RUN protoc --go_out=. --go_opt=paths=source_relative \
+  --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+  pkg/proto/users/users.proto
 
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/gateway ./cmd/gateway/main.go
