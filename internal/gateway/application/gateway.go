@@ -22,7 +22,20 @@ func NewGateway(metadata domain.MetadataService, nodes domain.StorageNodeManager
 	}
 }
 
-func (g *Gateway) PutObject(ctx context.Context, bucket, key string, data []byte) error {
+func (g *Gateway) CreateUser(ctx context.Context, name string) (domain.User, error) {
+	g.log.Debug("create user", "name", name)
+
+	user, err := g.users.CreateUser(ctx, name)
+	if err != nil {
+		if errors.Is(err, domain.ErrUserAlreadyExists) {
+			return domain.User{}, domain.ErrUserAlreadyExists
+		}
+	}
+
+	return user, nil
+}
+
+func (g *Gateway) PutObject(ctx context.Context, userID uuid.UUID, bucket, key string, data []byte, contentType string) error {
 	g.log.Debug("put object",
 		"bucket", bucket,
 		"key", key,

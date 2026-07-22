@@ -1,6 +1,7 @@
 package http
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -9,6 +10,8 @@ import (
 	"strconv"
 
 	"github.com/google/uuid"
+
+	"github.com/neelalala/go-storage/internal/gateway/adapter/in/http/middleware"
 	"github.com/neelalala/go-storage/internal/gateway/domain"
 )
 
@@ -20,21 +23,56 @@ const (
 )
 
 type Handler struct {
-	metadata domain.MetadataService
-	gateway  Gateway
+	gateway Gateway
 
 	marshaller Marshaller
 
 	log *slog.Logger
 }
 
-func NewHandler(metadata domain.MetadataService, gateway Gateway, marshaller Marshaller, log *slog.Logger) *Handler {
+func NewHandler(gateway Gateway, marshaller Marshaller, log *slog.Logger) *Handler {
 	return &Handler{
-		metadata:   metadata,
 		gateway:    gateway,
 		marshaller: marshaller,
 		log:        log,
 	}
+}
+
+func (h *Handler) CreateUser(w http.ResponseWriter, req *http.Request) {
+	requestID, err := middleware.GetRequestID(req.Context())
+	if err != nil {
+		resp, status := h.marshaller.Error(errors.New("error generating request id"), "", uuid.Nil)
+		w.WriteHeader(status)
+		w.Write(resp)
+		return
+	}
+
+	name := req.URL.Query().Get("name")
+	if name == "" {
+		resp, status := h.marshaller.Error(errors.New("name is required"), "", requestID)
+		w.WriteHeader(status)
+		w.Write(resp)
+		return
+	}
+
+	user, err := h.gateway.CreateUser(req.Context(), name)
+	if err != nil {
+		if errors.Is(err, domain.ErrUserAlreadyExists) {
+			resp, status := h.marshaller.Error(err, "", requestID)
+			w.WriteHeader(status)
+			w.Write(resp)
+			return
+		}
+	}
+
+	h.log.Debug("create user",
+		"requestID", requestID,
+		"name", name,
+		"userID", user.ID,
+		"userDisplayName", user.DisplayName,
+	)
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (h *Handler) ListBuckets(w http.ResponseWriter, req *http.Request) {

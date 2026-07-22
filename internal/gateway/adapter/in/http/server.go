@@ -8,10 +8,12 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/neelalala/go-storage/internal/gateway/domain"
 )
 
 type Gateway interface {
+	CreateUser(ctx context.Context, name string) (domain.User, error)
 	PutObject(ctx context.Context, bucket, key string, data []byte) error
 	GetObject(ctx context.Context, bucket, key string) ([]byte, error)
 	DeleteObject(ctx context.Context, bucket, key string) error
@@ -31,25 +33,26 @@ type Server struct {
 }
 
 func NewServer(
-	metadata domain.MetadataService,
 	gateway Gateway,
 	marshaller Marshaller,
 	addr string,
 	timeout time.Duration,
 	log *slog.Logger,
 ) *Server {
-	handler := NewHandler(metadata, gateway, marshaller, log)
+	handler := NewHandler(gateway, marshaller, log)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /", handler.ListBuckets)
+	mux.HandleFunc("PUT /users", handler.CreateUser)
 
-	mux.HandleFunc("PUT /{bucket}", handler.CreateBucket)
-	mux.HandleFunc("GET /{bucket}", handler.ListObjects)
-	mux.HandleFunc("DELETE /{bucket}", handler.DeleteBucket)
+	mux.HandleFunc("GET /storage/", handler.ListBuckets)
 
-	mux.HandleFunc("PUT /{bucket}/{key...}", handler.PutObject)
-	mux.HandleFunc("GET /{bucket}/{key...}", handler.GetObject)
-	mux.HandleFunc("DELETE /{bucket}/{key...}", handler.DeleteObject)
+	mux.HandleFunc("PUT /storage/{bucket}", handler.CreateBucket)
+	mux.HandleFunc("GET /storage/{bucket}", handler.ListObjects)
+	mux.HandleFunc("DELETE /storage/{bucket}", handler.DeleteBucket)
+
+	mux.HandleFunc("PUT /storage/{bucket}/{key...}", handler.PutObject)
+	mux.HandleFunc("GET /storage/{bucket}/{key...}", handler.GetObject)
+	mux.HandleFunc("DELETE /storage/{bucket}/{key...}", handler.DeleteObject)
 
 	server := &http.Server{
 		Addr:        addr,
