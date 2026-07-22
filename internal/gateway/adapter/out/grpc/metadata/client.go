@@ -166,7 +166,7 @@ func (c *Client) InitUpload(
 		ContentType:    contentType,
 		SystemMetadata: systemMetadata,
 		UserMetadata:   userMetadata,
-		UserID:         userID,
+		OwnerID:        userID,
 	}
 
 	storage := domain.StorageNode{

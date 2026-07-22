@@ -51,5 +51,5 @@ type Upload struct {
 	ContentType    string
 	SystemMetadata map[string]string
 	UserMetadata   map[string]string
-	UserID         uuid.UUID
+	OwnerID        uuid.UUID
 }
