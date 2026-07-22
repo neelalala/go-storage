@@ -28,43 +28,44 @@ func NewGateway(metadata domain.MetadataService, users domain.UserService, nodes
 }
 
 func (g *Gateway) CreateUser(ctx context.Context, name string) (domain.User, error) {
-	g.log.Debug("create user", "name", name)
-
-	user, err := g.users.CreateUser(ctx, name)
-	if err != nil {
-		if errors.Is(err, domain.ErrUserAlreadyExists) {
-			return domain.User{}, domain.ErrUserAlreadyExists
-		}
-	}
-
-	return user, nil
-}
-
-func (g *Gateway) GetUserByName(ctx context.Context, name string) (domain.User, error) {
-	g.log.Debug("get user", "name", name)
-
-	return g.users.GetUserByName(ctx, name)
+	return g.users.CreateUser(ctx, name)
 }
 
 func (g *Gateway) ListBuckets(ctx context.Context, userID uuid.UUID, limit, offset int) ([]domain.BucketMetadata, error) {
-	g.log.Debug("list buckets", "userID", userID, "limit", limit, "offset", offset)
-
 	return g.metadata.ListBuckets(ctx, userID, limit, offset)
 }
 
-func (g *Gateway) PutObject(ctx context.Context, userID uuid.UUID, bucket, key string, data []byte, contentType string) error {
-	g.log.Debug("put object",
-		"bucket", bucket,
-		"key", key,
-		"data_size", len(data),
-	)
+func (g *Gateway) CreateBucket(ctx context.Context, userID uuid.UUID, name string) (domain.BucketMetadata, error) {
+	return g.metadata.CreateBucket(ctx, userID, name)
+}
 
-	upload, node, err := g.metadata.InitUpload(ctx, bucket, key, uint64(len(data)))
+func (g *Gateway) ListObjects(
+	ctx context.Context,
+	userID uuid.UUID,
+	bucket, prefix, delimiter string,
+	limit, offset int,
+) ([]domain.ObjectMetadata, error) {
+	return g.metadata.ListObjects(ctx, userID, bucket, prefix, delimiter, limit, offset)
+}
+
+func (g *Gateway) DeleteBucket(ctx context.Context, userID uuid.UUID, name string) error {
+	return g.metadata.DeleteBucket(ctx, userID, name)
+}
+
+func (g *Gateway) PutObject(
+	ctx context.Context,
+	userID uuid.UUID,
+	bucket string,
+	key string,
+	data []byte,
+	contentType string,
+	systemMetadata map[string]string,
+	userMetadata map[string]string,
+) error {
+	upload, node, err := g.metadata.InitUpload(ctx, userID, bucket, key, uint64(len(data)), contentType, systemMetadata, userMetadata)
 	if err != nil {
 		return err
 	}
-
-	g.log.Debug("put object", "object_path", upload.ObjectPath)
 
 	obj := domain.Object{
 		Name: upload.ObjectPath,
@@ -73,48 +74,46 @@ func (g *Gateway) PutObject(ctx context.Context, userID uuid.UUID, bucket, key s
 
 	storage, err := g.nodes.GetStorage(node.Address)
 	if err != nil {
-		g.metadata.AbortUpload(ctx, upload.UploadID)
+		if err := g.metadata.AbortUpload(ctx, userID, upload.UploadID); err != nil {
+			g.log.Error("Failed to abort upload", "error", err, "upload_id", upload.UploadID)
+		}
 		return err
 	}
 
-	checksum, err := storage.SaveObject(ctx, obj)
+	etag, err := storage.SaveObject(ctx, obj)
 	if err != nil {
-		g.metadata.AbortUpload(ctx, upload.UploadID)
+		if err := g.metadata.AbortUpload(ctx, userID, upload.UploadID); err != nil {
+			g.log.Error("Failed to abort upload", "error", err, "upload_id", upload.UploadID)
+		}
 		return err
 	}
 
-	return g.metadata.CommitUpload(ctx, upload.UploadID, checksum)
+	return g.metadata.CommitUpload(ctx, userID, upload.UploadID, etag)
 }
 
-func (g *Gateway) GetObject(ctx context.Context, bucket, key string) ([]byte, error) {
-	g.log.Debug("get object",
-		"bucket", bucket,
-		"key", key,
-	)
-
-	meta, node, err := g.metadata.GetObject(ctx, bucket, key)
+func (g *Gateway) GetObject(ctx context.Context, userID uuid.UUID, bucket, key string) (domain.ObjectMetadata, []byte, error) {
+	meta, node, err := g.metadata.GetObject(ctx, userID, bucket, key)
 	if err != nil {
-		return nil, err
+		return domain.ObjectMetadata{}, nil, err
 	}
 
 	storage, err := g.nodes.GetStorage(node.Address)
 	if err != nil {
-		return nil, err
+		return domain.ObjectMetadata{}, nil, err
 	}
 
 	obj, err := storage.GetObject(ctx, meta.ObjectPath)
 	if err != nil {
-		return nil, err
+		return domain.ObjectMetadata{}, nil, err
 	}
 
-	return obj.Data, nil
+	return meta, obj.Data, nil
 }
 
-func (g *Gateway) DeleteObject(ctx context.Context, bucket, key string) error {
-	g.log.Debug("delete object",
-		"bucket", bucket,
-		"key", key,
-	)
-
-	return g.metadata.DeleteObject(ctx, bucket, key)
+func (g *Gateway) DeleteObject(ctx context.Context, userID uuid.UUID, bucket, key string) error {
+	err := g.metadata.DeleteObject(ctx, userID, bucket, key)
+	if errors.Is(err, domain.ErrKeyNotExists) {
+		return nil // idempotent method
+	}
+	return err
 }

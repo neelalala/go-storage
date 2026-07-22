@@ -6,7 +6,6 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
-	"path"
 	"strconv"
 
 	"github.com/google/uuid"
@@ -23,8 +22,7 @@ const (
 )
 
 type Handler struct {
-	gateway Gateway
-
+	gateway    Gateway
 	marshaller Marshaller
 
 	log *slog.Logger
@@ -41,7 +39,8 @@ func NewHandler(gateway Gateway, marshaller Marshaller, log *slog.Logger) *Handl
 func (h *Handler) CreateUser(w http.ResponseWriter, req *http.Request) {
 	requestID, err := middleware.GetRequestID(req.Context())
 	if err != nil {
-		resp, status := h.marshaller.Error(errors.New("error generating request id"), "", uuid.Nil)
+		h.log.Error("error getting request id", "error", err)
+		resp, status := h.marshaller.Error(errors.New("error getting request id"), "", uuid.Nil)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
@@ -49,28 +48,23 @@ func (h *Handler) CreateUser(w http.ResponseWriter, req *http.Request) {
 
 	name := req.URL.Query().Get("name")
 	if name == "" {
+		h.log.Debug("name is required", "name", name, "request_id", requestID)
 		resp, status := h.marshaller.Error(errors.New("name is required"), "", requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
 	}
 
-	user, err := h.gateway.CreateUser(req.Context(), name)
+	_, err = h.gateway.CreateUser(req.Context(), name)
 	if err != nil {
-		if errors.Is(err, domain.ErrUserAlreadyExists) {
-			resp, status := h.marshaller.Error(err, "", requestID)
-			w.WriteHeader(status)
-			w.Write(resp)
-			return
+		if !errors.Is(err, domain.ErrUserAlreadyExists) {
+			h.log.Error("error creating user", "error", err, "request_id", requestID)
 		}
+		resp, status := h.marshaller.Error(err, "", requestID)
+		w.WriteHeader(status)
+		w.Write(resp)
+		return
 	}
-
-	h.log.Debug("create user",
-		"requestID", requestID,
-		"name", name,
-		"userID", user.ID,
-		"userDisplayName", user.DisplayName,
-	)
 
 	w.WriteHeader(http.StatusOK)
 }
@@ -78,13 +72,19 @@ func (h *Handler) CreateUser(w http.ResponseWriter, req *http.Request) {
 func (h *Handler) ListBuckets(w http.ResponseWriter, req *http.Request) {
 	requestID, err := middleware.GetRequestID(req.Context())
 	if err != nil {
-		http.Error(w, "error generating request id", http.StatusInternalServerError)
+		h.log.Error("error getting request id", "error", err)
+		resp, status := h.marshaller.Error(errors.New("error getting request id"), "", uuid.Nil)
+		w.WriteHeader(status)
+		w.Write(resp)
 		return
 	}
 
 	user, err := middleware.GetUser(req.Context())
 	if err != nil {
-		http.Error(w, "error verifying user", http.StatusUnauthorized)
+		h.log.Error("error getting user", "error", err, "request_id", requestID)
+		resp, status := h.marshaller.Error(errors.New("error getting user id"), "", requestID)
+		w.WriteHeader(status)
+		w.Write(resp)
 		return
 	}
 
@@ -104,7 +104,11 @@ func (h *Handler) ListBuckets(w http.ResponseWriter, req *http.Request) {
 
 	buckets, err := h.gateway.ListBuckets(req.Context(), user.ID, limit, offset)
 	if err != nil {
-		h.log.Error("error listing buckets", "request_id", requestID, "error", err)
+		if !errors.Is(err, domain.ErrAccessDenied) {
+			h.log.Error("error listing buckets", "request_id", requestID, "error", err)
+		} else {
+			h.log.Debug("error listing buckets", "request_id", requestID, "error", err)
+		}
 		resp, status := h.marshaller.Error(err, "/", requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
@@ -113,7 +117,12 @@ func (h *Handler) ListBuckets(w http.ResponseWriter, req *http.Request) {
 
 	resp, err := h.marshaller.ListBuckets(user, buckets)
 	if err != nil {
-		resp, status := h.marshaller.Error(err, "/", requestID)
+		h.log.Error("error marshalling response",
+			"method", "list buckets",
+			"request_id", requestID,
+			"error", err,
+		)
+		resp, status := h.marshaller.Error(errors.New("error marshalling response"), "/", requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
@@ -124,9 +133,19 @@ func (h *Handler) ListBuckets(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) CreateBucket(w http.ResponseWriter, req *http.Request) {
-	requestID, err := uuid.NewV7()
+	requestID, err := middleware.GetRequestID(req.Context())
 	if err != nil {
-		resp, status := h.marshaller.Error(err, "/", requestID)
+		h.log.Error("error getting request id", "error", err)
+		resp, status := h.marshaller.Error(errors.New("error getting request id"), "", uuid.Nil)
+		w.WriteHeader(status)
+		w.Write(resp)
+		return
+	}
+
+	user, err := middleware.GetUser(req.Context())
+	if err != nil {
+		h.log.Error("error getting user", "error", err, "request_id", requestID)
+		resp, status := h.marshaller.Error(errors.New("error getting user id"), "", requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
@@ -134,13 +153,18 @@ func (h *Handler) CreateBucket(w http.ResponseWriter, req *http.Request) {
 
 	name := req.PathValue("bucket")
 	if name == "" {
-		resp, status := h.marshaller.Error(domain.ErrInvalidRequest, "", requestID)
+		resp, status := h.marshaller.Error(fmt.Errorf("%w: no name specified in path", domain.ErrInvalidRequest), "", requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
 	}
 
-	if _, err := h.metadata.CreateBucket(req.Context(), name); err != nil {
+	if _, err := h.gateway.CreateBucket(req.Context(), user.ID, name); err != nil {
+		if !errors.Is(err, domain.ErrAccessDenied) && !errors.Is(err, domain.ErrBucketAlreadyExists) {
+			h.log.Error("error creating bucket", "error", err, "request_id", requestID)
+		} else {
+			h.log.Debug("error creating bucket", "error", err, "request_id", requestID)
+		}
 		resp, status := h.marshaller.Error(err, fmt.Sprintf("/%s", name), requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
@@ -152,9 +176,19 @@ func (h *Handler) CreateBucket(w http.ResponseWriter, req *http.Request) {
 
 func (h *Handler) ListObjects(w http.ResponseWriter, req *http.Request) {
 	// TODO: should list all objects when prefix=""?
-	requestID, err := uuid.NewV7()
+	requestID, err := middleware.GetRequestID(req.Context())
 	if err != nil {
-		resp, status := h.marshaller.Error(err, "/", requestID)
+		h.log.Error("error getting request id", "error", err)
+		resp, status := h.marshaller.Error(errors.New("error getting request id"), "", uuid.Nil)
+		w.WriteHeader(status)
+		w.Write(resp)
+		return
+	}
+
+	user, err := middleware.GetUser(req.Context())
+	if err != nil {
+		h.log.Error("error getting user", "error", err, "request_id", requestID)
+		resp, status := h.marshaller.Error(errors.New("error getting user id"), "", requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
@@ -162,7 +196,7 @@ func (h *Handler) ListObjects(w http.ResponseWriter, req *http.Request) {
 
 	bucket := req.PathValue("bucket")
 	if bucket == "" {
-		resp, status := h.marshaller.Error(domain.ErrInvalidRequest, "", requestID)
+		resp, status := h.marshaller.Error(fmt.Errorf("%w: no bucket specified in path", domain.ErrInvalidRequest), "", requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
@@ -189,8 +223,13 @@ func (h *Handler) ListObjects(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	objs, err := h.metadata.ListObjects(req.Context(), bucket, prefix, delimiter, limit, offset)
+	objs, err := h.gateway.ListObjects(req.Context(), user.ID, bucket, prefix, delimiter, limit, offset)
 	if err != nil {
+		if !errors.Is(err, domain.ErrAccessDenied) && !errors.Is(err, domain.ErrBucketNotExists) {
+			h.log.Error("error listing objects", "request_id", requestID, "error", err)
+		} else {
+			h.log.Debug("error listing objects", "request_id", requestID, "error", err)
+		}
 		resp, status := h.marshaller.Error(err, fmt.Sprintf("/%s/%s", bucket, prefix), requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
@@ -199,7 +238,12 @@ func (h *Handler) ListObjects(w http.ResponseWriter, req *http.Request) {
 
 	resp, err := h.marshaller.ListObjectsV2(bucket, prefix, delimiter, objs)
 	if err != nil {
-		resp, status := h.marshaller.Error(err, "", requestID)
+		h.log.Error("error marshalling response",
+			"method", "list objects v2",
+			"request_id", requestID,
+			"error", err,
+		)
+		resp, status := h.marshaller.Error(errors.New("error marshalling response"), "/", requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
@@ -210,10 +254,19 @@ func (h *Handler) ListObjects(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) DeleteBucket(w http.ResponseWriter, req *http.Request) {
-	// TODO: not idempotent; returns 500 if bucket did not exists and if bucket wasnt empty
-	requestID, err := uuid.NewV7()
+	requestID, err := middleware.GetRequestID(req.Context())
 	if err != nil {
-		resp, status := h.marshaller.Error(err, "/", requestID)
+		h.log.Error("error getting request id", "error", err)
+		resp, status := h.marshaller.Error(errors.New("error getting request id"), "", uuid.Nil)
+		w.WriteHeader(status)
+		w.Write(resp)
+		return
+	}
+
+	user, err := middleware.GetUser(req.Context())
+	if err != nil {
+		h.log.Error("error getting user", "error", err, "request_id", requestID)
+		resp, status := h.marshaller.Error(errors.New("error getting user id"), "", requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
@@ -221,15 +274,23 @@ func (h *Handler) DeleteBucket(w http.ResponseWriter, req *http.Request) {
 
 	bucket := req.PathValue("bucket")
 	if bucket == "" {
-		resp, status := h.marshaller.Error(domain.ErrInvalidRequest, "", requestID)
+		resp, status := h.marshaller.Error(fmt.Errorf("%w: no bucket specified in path", domain.ErrInvalidRequest), "", requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
 	}
 
-	if err := h.metadata.DeleteBucket(req.Context(), bucket); err != nil {
-		_, status := h.marshaller.Error(err, fmt.Sprintf("/%s", bucket), requestID)
+	if err := h.gateway.DeleteBucket(req.Context(), user.ID, bucket); err != nil {
+		if !errors.Is(err, domain.ErrAccessDenied) &&
+			!errors.Is(err, domain.ErrBucketNotExists) &&
+			!errors.Is(err, domain.ErrBucketNotEmpty) {
+			h.log.Error("error deleting bucket", "request_id", requestID, "error", err)
+		} else {
+			h.log.Debug("error deleting bucket", "request_id", requestID, "error", err)
+		}
+		resp, status := h.marshaller.Error(err, fmt.Sprintf("/%s", bucket), requestID)
 		w.WriteHeader(status)
+		w.Write(resp)
 		return
 	}
 
@@ -237,9 +298,19 @@ func (h *Handler) DeleteBucket(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) PutObject(w http.ResponseWriter, req *http.Request) {
-	requestID, err := uuid.NewV7()
+	requestID, err := middleware.GetRequestID(req.Context())
 	if err != nil {
-		resp, status := h.marshaller.Error(err, "/", requestID)
+		h.log.Error("error getting request id", "error", err)
+		resp, status := h.marshaller.Error(errors.New("error getting request id"), "", uuid.Nil)
+		w.WriteHeader(status)
+		w.Write(resp)
+		return
+	}
+
+	user, err := middleware.GetUser(req.Context())
+	if err != nil {
+		h.log.Error("error getting user", "error", err, "request_id", requestID)
+		resp, status := h.marshaller.Error(errors.New("error getting user id"), "", requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
@@ -247,7 +318,7 @@ func (h *Handler) PutObject(w http.ResponseWriter, req *http.Request) {
 
 	bucket := req.PathValue("bucket")
 	if bucket == "" {
-		resp, status := h.marshaller.Error(domain.ErrInvalidRequest, "", requestID)
+		resp, status := h.marshaller.Error(fmt.Errorf("%w: no bucket specified in path", domain.ErrInvalidRequest), "", requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
@@ -255,7 +326,7 @@ func (h *Handler) PutObject(w http.ResponseWriter, req *http.Request) {
 
 	key := req.PathValue("key")
 	if key == "" {
-		resp, status := h.marshaller.Error(domain.ErrInvalidRequest, "", requestID)
+		resp, status := h.marshaller.Error(fmt.Errorf("%w: no key specified in path", domain.ErrInvalidRequest), "", requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
@@ -268,23 +339,35 @@ func (h *Handler) PutObject(w http.ResponseWriter, req *http.Request) {
 			"bucket", bucket,
 			"key", key,
 			"error", err,
+			"request_id", requestID,
 		)
-
 		resp, status := h.marshaller.Error(err, fmt.Sprintf("/%s/%s", bucket, key), requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
 	}
 
-	err = h.gateway.PutObject(req.Context(), bucket, key, data)
-	if err != nil {
-		h.log.Error(
-			"put object",
-			"bucket", bucket,
-			"key", key,
-			"error", err,
-		)
+	contentType := req.Header.Get("Content-Type")
+	systemMetadata, userMetadata := ExtractMetadata(req)
 
+	err = h.gateway.PutObject(req.Context(), user.ID, bucket, key, data, contentType, systemMetadata, userMetadata)
+	if err != nil {
+		if !errors.Is(err, domain.ErrAccessDenied) &&
+			!errors.Is(err, domain.ErrBucketNotExists) {
+			h.log.Error(
+				"put object",
+				"bucket", bucket,
+				"key", key,
+				"error", err,
+			)
+		} else {
+			h.log.Debug(
+				"put object",
+				"bucket", bucket,
+				"key", key,
+				"error", err,
+			)
+		}
 		resp, status := h.marshaller.Error(err, fmt.Sprintf("/%s/%s", bucket, key), requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
@@ -295,9 +378,19 @@ func (h *Handler) PutObject(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) GetObject(w http.ResponseWriter, req *http.Request) {
-	requestID, err := uuid.NewV7()
+	requestID, err := middleware.GetRequestID(req.Context())
 	if err != nil {
-		resp, status := h.marshaller.Error(err, "/", requestID)
+		h.log.Error("error getting request id", "error", err)
+		resp, status := h.marshaller.Error(errors.New("error getting request id"), "", uuid.Nil)
+		w.WriteHeader(status)
+		w.Write(resp)
+		return
+	}
+
+	user, err := middleware.GetUser(req.Context())
+	if err != nil {
+		h.log.Error("error getting user", "error", err, "request_id", requestID)
+		resp, status := h.marshaller.Error(errors.New("error getting user id"), "", requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
@@ -305,7 +398,7 @@ func (h *Handler) GetObject(w http.ResponseWriter, req *http.Request) {
 
 	bucket := req.PathValue("bucket")
 	if bucket == "" {
-		resp, status := h.marshaller.Error(domain.ErrInvalidRequest, "", requestID)
+		resp, status := h.marshaller.Error(fmt.Errorf("%w: no bucket specified in path", domain.ErrInvalidRequest), "", requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
@@ -313,42 +406,63 @@ func (h *Handler) GetObject(w http.ResponseWriter, req *http.Request) {
 
 	key := req.PathValue("key")
 	if key == "" {
-		resp, status := h.marshaller.Error(domain.ErrInvalidRequest, "", requestID)
+		resp, status := h.marshaller.Error(fmt.Errorf("%w: no key specified in path", domain.ErrInvalidRequest), "", requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
 	}
 
-	object, err := h.gateway.GetObject(req.Context(), bucket, key)
+	meta, data, err := h.gateway.GetObject(req.Context(), user.ID, bucket, key)
 	if err != nil {
-		h.log.Error(
-			"get object",
-			"bucket", bucket,
-			"key", key,
-			"error", err,
-		)
-
+		if !errors.Is(err, domain.ErrAccessDenied) &&
+			!errors.Is(err, domain.ErrBucketNotExists) &&
+			!errors.Is(err, domain.ErrKeyNotExists) {
+			h.log.Error("error getting object", "error", err, "request_id", requestID)
+		} else {
+			h.log.Debug("error getting object", "error", err, "request_id", requestID)
+		}
 		resp, status := h.marshaller.Error(err, fmt.Sprintf("/%s/%s", bucket, key), requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
 	}
 
-	filename := path.Base(key)
+	w.Header().Set("Content-Length", strconv.FormatInt(int64(meta.Size), 10))
 
-	w.Header().Set("Content-Type", "image/jpeg") // TODO: save mime type in object metadata
-	w.Header().Set("Content-Length", strconv.FormatInt(int64(len(object)), 10))
+	if meta.ContentType != "" {
+		w.Header().Set("Content-Type", meta.ContentType)
+	}
 
-	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
+	if meta.ETag != "" {
+		w.Header().Set("ETag", fmt.Sprintf("\"%s\"", meta.ETag))
+	}
+
+	for header, value := range meta.SystemMetadata {
+		w.Header().Set(header, value)
+	}
+
+	for header, value := range meta.UserMetadata {
+		w.Header().Set(header, value)
+	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write(object)
+	w.Write(data)
 }
 
 func (h *Handler) DeleteObject(w http.ResponseWriter, req *http.Request) {
-	requestID, err := uuid.NewV7()
+	requestID, err := middleware.GetRequestID(req.Context())
 	if err != nil {
-		resp, status := h.marshaller.Error(err, "/", requestID)
+		h.log.Error("error getting request id", "error", err)
+		resp, status := h.marshaller.Error(errors.New("error getting request id"), "", uuid.Nil)
+		w.WriteHeader(status)
+		w.Write(resp)
+		return
+	}
+
+	user, err := middleware.GetUser(req.Context())
+	if err != nil {
+		h.log.Error("error getting user", "error", err, "request_id", requestID)
+		resp, status := h.marshaller.Error(errors.New("error getting user id"), "", requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
@@ -356,7 +470,7 @@ func (h *Handler) DeleteObject(w http.ResponseWriter, req *http.Request) {
 
 	bucket := req.PathValue("bucket")
 	if bucket == "" {
-		resp, status := h.marshaller.Error(domain.ErrInvalidRequest, "", requestID)
+		resp, status := h.marshaller.Error(fmt.Errorf("%w: no bucket specified in path", domain.ErrInvalidRequest), "", requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
@@ -364,20 +478,20 @@ func (h *Handler) DeleteObject(w http.ResponseWriter, req *http.Request) {
 
 	key := req.PathValue("key")
 	if key == "" {
-		resp, status := h.marshaller.Error(domain.ErrInvalidRequest, "", requestID)
+		resp, status := h.marshaller.Error(fmt.Errorf("%w: no key specified in path", domain.ErrInvalidRequest), "", requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
 	}
 
-	err = h.gateway.DeleteObject(req.Context(), bucket, key)
-	if err != nil {
-		h.log.Error(
-			"delete objec",
-			"bucket", bucket,
-			"key", key,
-			"error", err,
-		)
+	err = h.gateway.DeleteObject(req.Context(), user.ID, bucket, key)
+	if err != nil && !errors.Is(err, domain.ErrKeyNotExists) {
+		if !errors.Is(err, domain.ErrAccessDenied) &&
+			!errors.Is(err, domain.ErrBucketNotExists) {
+			h.log.Error("error deleting object", "error", err, "request_id", requestID)
+		} else {
+			h.log.Debug("error deleting object", "error", err, "request_id", requestID)
+		}
 
 		resp, status := h.marshaller.Error(err, fmt.Sprintf("/%s/%s", bucket, key), requestID)
 		w.WriteHeader(status)
