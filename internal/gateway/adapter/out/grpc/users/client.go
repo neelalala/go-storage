@@ -19,7 +19,7 @@ type Client struct {
 	conn   *grpc.ClientConn
 }
 
-func NewClient(addr string) (*Client, error) {
+func New(addr string) (*Client, error) {
 	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
