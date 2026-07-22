@@ -20,10 +20,15 @@ type MetadataServiceConfig struct {
 	Address string `yaml:"address" env:"METADATA_SERVICE_ADDRESS" env-default:"metadata:50051"`
 }
 
+type UsersServiceConfig struct {
+	Address string `yaml:"address" env:"USERS_SERVICE_ADDRESS" env-default:"users:50051"`
+}
+
 type Config struct {
-	HTTP            HTTPConfig            `yaml:"http"`
 	Logger          LoggerConfig          `yaml:"logger"`
+	HTTP            HTTPConfig            `yaml:"http"`
 	MetadataService MetadataServiceConfig `yaml:"metadata"`
+	UsersService    UsersServiceConfig    `yaml:"users"`
 }
 
 func MustLoad(configPath string) Config {

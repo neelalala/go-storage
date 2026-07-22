@@ -1,6 +1,12 @@
+logger:
+  log_level: DEBUG
+
 http:
   address: ":80"
   timeout: 5s
 
-log_lecel: DEBUG
-storage_address: "storage:50051"
+metadata:
+  address: metadata:50051
+
+users:
+  address: users:50051
