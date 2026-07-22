@@ -1,0 +1,22 @@
+ALTER TABLE uploads
+DROP COLUMN IF EXISTS owner_id,
+DROP COLUMN IF EXISTS user_metadata,
+DROP COLUMN IF EXISTS system_metadata,
+DROP COLUMN IF EXISTS content_type;
+
+DROP INDEX IF EXISTS idx_objects_prefix;
+
+ALTER TABLE objects
+ADD COLUMN IF NOT EXISTS checksum BIGINT NOT NULL DEFAULT 0;
+
+ALTER TABLE objects
+DROP COLUMN IF EXISTS owner_id,
+DROP COLUMN IF EXISTS user_metadata,
+DROP COLUMN IF EXISTS system_metadata,
+DROP COLUMN IF EXISTS etag,
+DROP COLUMN IF EXISTS content_type;
+
+ALTER TABLE buckets
+DROP COLUMN IF EXISTS owner_id;
+
+DROP TABLE IF EXISTS users;
