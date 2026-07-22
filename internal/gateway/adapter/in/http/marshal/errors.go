@@ -11,13 +11,16 @@ const (
 	AccessDenied        = "AccessDenied"
 	BucketAlreadyExists = "BucketAlreadyExists"
 	BucketNotEmpty      = "BucketNotEmpty"
-	EndpointNotFound    = "EndpointNotFound"
 	InternalError       = "InternalError"
-	InvalidPrefix       = "InvalidPrefix"
 	InvalidRequest      = "InvalidRequest"
 	NoSuchBucket        = "NoSuchBucket"
 	NoSuchKey           = "NoSuchKey"
 	NoSuchUpload        = "NoSuchUpload"
+)
+
+const (
+	UserAlreadyExists = "UserAlreadyExists"
+	NoSuchUser        = "NoSuchUser"
 )
 
 func ErrorToCode(err error) (string, int) {
@@ -38,5 +41,9 @@ func ErrorToCode(err error) (string, int) {
 		return NoSuchUpload, http.StatusNotFound
 	case errors.Is(err, domain.ErrInvalidRequest):
 		return InvalidRequest, http.StatusBadRequest
+	case errors.Is(err, domain.ErrUserAlreadyExists):
+		return UserAlreadyExists, http.StatusConflict
+	case errors.Is(err, domain.ErrUserNotFound):
+		return NoSuchUser, http.StatusNotFound
 	}
 }

@@ -7,12 +7,15 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/neelalala/go-storage/internal/gateway/domain"
 )
 
+const errorMarshallingErrorResponse = `{"code": "InternalError", "message": "error marshalling error", "resource": "%s", "requestID": "%s"}`
+
 type JSONMarshaller struct{}
 
-func (_ JSONMarshaller) ListBuckets(buckets []domain.BucketMetadata) ([]byte, error) {
+func (_ JSONMarshaller) ListBuckets(owner domain.User, buckets []domain.BucketMetadata) ([]byte, error) {
 	type Bucket struct {
 		Name         string `json:"name"`
 		CreationDate string `json:"creationDate"`
@@ -21,8 +24,8 @@ func (_ JSONMarshaller) ListBuckets(buckets []domain.BucketMetadata) ([]byte, er
 	type Response struct {
 		ListAllMyBucketsResult struct {
 			Owner struct {
-				ID          string `json:"id"`          // TODO:
-				DisplayName string `json:"displayName"` // TODO:
+				ID          string `json:"id"`
+				DisplayName string `json:"displayName"`
 			} `json:"owner"`
 			Buckets struct {
 				Bucket []Bucket `json:"bucket"`
@@ -32,8 +35,8 @@ func (_ JSONMarshaller) ListBuckets(buckets []domain.BucketMetadata) ([]byte, er
 
 	var resp Response
 
-	resp.ListAllMyBucketsResult.Owner.ID = "not-implemented"
-	resp.ListAllMyBucketsResult.Owner.DisplayName = "not-implemented"
+	resp.ListAllMyBucketsResult.Owner.ID = owner.ID.String()
+	resp.ListAllMyBucketsResult.Owner.DisplayName = owner.DisplayName
 
 	resp.ListAllMyBucketsResult.Buckets.Bucket = make([]Bucket, 0, len(buckets))
 
@@ -44,7 +47,7 @@ func (_ JSONMarshaller) ListBuckets(buckets []domain.BucketMetadata) ([]byte, er
 		})
 	}
 
-	return json.MarshalIndent(resp, "", "	")
+	return json.MarshalIndent(resp, "", " ")
 }
 
 func (_ JSONMarshaller) ListObjectsV2(name, prefix, delimiter string, objects []domain.ObjectMetadata) ([]byte, error) {
@@ -90,15 +93,15 @@ func (_ JSONMarshaller) ListObjectsV2(name, prefix, delimiter string, objects []
 		resp.ListBucketResult.Contents = append(resp.ListBucketResult.Contents, Content{
 			Key:          object.Key,
 			LastModified: object.UpdatedAt.Format(time.RFC3339),
-			ETag:         fmt.Sprintf("%x", object.Checksum),
+			ETag:         fmt.Sprintf("\"%s\"", object.ETag),
 			Size:         int64(object.Size),
-			StorageClass: "STANDART",
+			StorageClass: "STANDARD",
 		})
 	}
 
 	resp.ListBucketResult.CommonPrefixes = make([]CommonPrefix, 0)
 
-	return json.MarshalIndent(resp, "", "	")
+	return json.MarshalIndent(resp, "", " ")
 }
 
 func (_ JSONMarshaller) Error(err error, resource string, requestID uuid.UUID) ([]byte, int) {
@@ -118,8 +121,8 @@ func (_ JSONMarshaller) Error(err error, resource string, requestID uuid.UUID) (
 	resp.Error.Resource = resource
 	resp.Error.RequestID = requestID.String()
 
-	if bytes, err := json.MarshalIndent(resp, "", "	"); err == nil {
-		return bytes, http.StatusInternalServerError
+	if bytes, err := json.MarshalIndent(resp, "", " "); err == nil {
+		return bytes, status
 	}
-	return []byte("error marshalling error"), status
+	return []byte(fmt.Sprintf(errorMarshallingErrorResponse, resource, requestID.String())), http.StatusInternalServerError
 }
