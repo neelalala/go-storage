@@ -7,7 +7,7 @@ import (
 )
 
 type Storage interface {
-	SaveObject(ctx context.Context, object Object) (uint32, error)
+	SaveObject(ctx context.Context, object Object) (string, error)
 	GetObject(ctx context.Context, name string) (Object, error)
 	DeleteObject(ctx context.Context, name string) error
 }
