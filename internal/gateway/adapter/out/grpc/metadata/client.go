@@ -2,7 +2,6 @@ package metadata
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -122,7 +121,7 @@ func (c *Client) InitUpload(
 	bucket, key string,
 	size uint64,
 	contentType string,
-	systemMetadata json.RawMessage,
+	systemMetadata map[string]string,
 	userMetadata map[string]string,
 ) (domain.Upload, domain.StorageNode, error) {
 	req := &metadatapb.InitUploadRequest{

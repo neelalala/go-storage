@@ -27,6 +27,7 @@ type BucketMetadata struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	OwnerId       string                 `protobuf:"bytes,3,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -75,18 +76,29 @@ func (x *BucketMetadata) GetCreatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *BucketMetadata) GetOwnerId() string {
+	if x != nil {
+		return x.OwnerId
+	}
+	return ""
+}
+
 type ObjectMetadata struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Bucket        string                 `protobuf:"bytes,1,opt,name=bucket,proto3" json:"bucket,omitempty"`
-	Key           string                 `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
-	Size          uint64                 `protobuf:"varint,3,opt,name=size,proto3" json:"size,omitempty"`
-	Checksum      uint32                 `protobuf:"varint,4,opt,name=checksum,proto3" json:"checksum,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	StorageNodeId string                 `protobuf:"bytes,7,opt,name=storage_node_id,json=storageNodeId,proto3" json:"storage_node_id,omitempty"`
-	ObjectPath    string                 `protobuf:"bytes,8,opt,name=object_path,json=objectPath,proto3" json:"object_path,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Bucket         string                 `protobuf:"bytes,1,opt,name=bucket,proto3" json:"bucket,omitempty"`
+	Key            string                 `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
+	Size           uint64                 `protobuf:"varint,3,opt,name=size,proto3" json:"size,omitempty"`
+	CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt      *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	StorageNodeId  string                 `protobuf:"bytes,7,opt,name=storage_node_id,json=storageNodeId,proto3" json:"storage_node_id,omitempty"`
+	ObjectPath     string                 `protobuf:"bytes,8,opt,name=object_path,json=objectPath,proto3" json:"object_path,omitempty"`
+	ContentType    string                 `protobuf:"bytes,9,opt,name=content_type,json=contentType,proto3" json:"content_type,omitempty"`
+	Etag           string                 `protobuf:"bytes,10,opt,name=etag,proto3" json:"etag,omitempty"`
+	SystemMetadata map[string]string      `protobuf:"bytes,11,rep,name=system_metadata,json=systemMetadata,proto3" json:"system_metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	UserMetadata   map[string]string      `protobuf:"bytes,12,rep,name=user_metadata,json=userMetadata,proto3" json:"user_metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	OwnerId        string                 `protobuf:"bytes,13,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *ObjectMetadata) Reset() {
@@ -140,13 +152,6 @@ func (x *ObjectMetadata) GetSize() uint64 {
 	return 0
 }
 
-func (x *ObjectMetadata) GetChecksum() uint32 {
-	if x != nil {
-		return x.Checksum
-	}
-	return 0
-}
-
 func (x *ObjectMetadata) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreatedAt
@@ -171,6 +176,41 @@ func (x *ObjectMetadata) GetStorageNodeId() string {
 func (x *ObjectMetadata) GetObjectPath() string {
 	if x != nil {
 		return x.ObjectPath
+	}
+	return ""
+}
+
+func (x *ObjectMetadata) GetContentType() string {
+	if x != nil {
+		return x.ContentType
+	}
+	return ""
+}
+
+func (x *ObjectMetadata) GetEtag() string {
+	if x != nil {
+		return x.Etag
+	}
+	return ""
+}
+
+func (x *ObjectMetadata) GetSystemMetadata() map[string]string {
+	if x != nil {
+		return x.SystemMetadata
+	}
+	return nil
+}
+
+func (x *ObjectMetadata) GetUserMetadata() map[string]string {
+	if x != nil {
+		return x.UserMetadata
+	}
+	return nil
+}
+
+func (x *ObjectMetadata) GetOwnerId() string {
+	if x != nil {
+		return x.OwnerId
 	}
 	return ""
 }
@@ -231,6 +271,7 @@ type ListBucketsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
 	Offset        int32                  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
+	OwnerId       string                 `protobuf:"bytes,3,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -277,6 +318,13 @@ func (x *ListBucketsRequest) GetOffset() int32 {
 		return x.Offset
 	}
 	return 0
+}
+
+func (x *ListBucketsRequest) GetOwnerId() string {
+	if x != nil {
+		return x.OwnerId
+	}
+	return ""
 }
 
 type ListBucketsResponse struct {
@@ -326,6 +374,7 @@ func (x *ListBucketsResponse) GetBuckets() []*BucketMetadata {
 type CreateBucketRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -363,6 +412,13 @@ func (*CreateBucketRequest) Descriptor() ([]byte, []int) {
 func (x *CreateBucketRequest) GetName() string {
 	if x != nil {
 		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateBucketRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
 	}
 	return ""
 }
@@ -418,6 +474,7 @@ type ListObjectsRequest struct {
 	Delimiter     string                 `protobuf:"bytes,3,opt,name=delimiter,proto3" json:"delimiter,omitempty"`
 	Limit         int32                  `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"`
 	Offset        int32                  `protobuf:"varint,5,opt,name=offset,proto3" json:"offset,omitempty"`
+	UserId        string                 `protobuf:"bytes,6,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -487,6 +544,13 @@ func (x *ListObjectsRequest) GetOffset() int32 {
 	return 0
 }
 
+func (x *ListObjectsRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
 type ListObjectsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Objects       []*ObjectMetadata      `protobuf:"bytes,1,rep,name=objects,proto3" json:"objects,omitempty"`
@@ -534,6 +598,7 @@ func (x *ListObjectsResponse) GetObjects() []*ObjectMetadata {
 type DeleteBucketRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -575,13 +640,24 @@ func (x *DeleteBucketRequest) GetName() string {
 	return ""
 }
 
+func (x *DeleteBucketRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
 type InitUploadRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Bucket        string                 `protobuf:"bytes,1,opt,name=bucket,proto3" json:"bucket,omitempty"`
-	Key           string                 `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
-	Size          uint64                 `protobuf:"varint,3,opt,name=size,proto3" json:"size,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Bucket         string                 `protobuf:"bytes,1,opt,name=bucket,proto3" json:"bucket,omitempty"`
+	Key            string                 `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
+	Size           uint64                 `protobuf:"varint,3,opt,name=size,proto3" json:"size,omitempty"`
+	ContentType    string                 `protobuf:"bytes,4,opt,name=content_type,json=contentType,proto3" json:"content_type,omitempty"`
+	SystemMetadata map[string]string      `protobuf:"bytes,5,rep,name=system_metadata,json=systemMetadata,proto3" json:"system_metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	UserMetadata   map[string]string      `protobuf:"bytes,6,rep,name=user_metadata,json=userMetadata,proto3" json:"user_metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	UserId         string                 `protobuf:"bytes,7,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *InitUploadRequest) Reset() {
@@ -635,11 +711,40 @@ func (x *InitUploadRequest) GetSize() uint64 {
 	return 0
 }
 
+func (x *InitUploadRequest) GetContentType() string {
+	if x != nil {
+		return x.ContentType
+	}
+	return ""
+}
+
+func (x *InitUploadRequest) GetSystemMetadata() map[string]string {
+	if x != nil {
+		return x.SystemMetadata
+	}
+	return nil
+}
+
+func (x *InitUploadRequest) GetUserMetadata() map[string]string {
+	if x != nil {
+		return x.UserMetadata
+	}
+	return nil
+}
+
+func (x *InitUploadRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
 type InitUploadResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UploadId      string                 `protobuf:"bytes,1,opt,name=upload_id,json=uploadId,proto3" json:"upload_id,omitempty"`
 	StorageNode   *Node                  `protobuf:"bytes,2,opt,name=storage_node,json=storageNode,proto3" json:"storage_node,omitempty"`
 	ObjectPath    string                 `protobuf:"bytes,3,opt,name=object_path,json=objectPath,proto3" json:"object_path,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -695,10 +800,18 @@ func (x *InitUploadResponse) GetObjectPath() string {
 	return ""
 }
 
+func (x *InitUploadResponse) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
 type CommitUploadRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UploadId      string                 `protobuf:"bytes,1,opt,name=upload_id,json=uploadId,proto3" json:"upload_id,omitempty"`
-	Checksum      uint32                 `protobuf:"varint,2,opt,name=checksum,proto3" json:"checksum,omitempty"`
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Etag          string                 `protobuf:"bytes,4,opt,name=etag,proto3" json:"etag,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -740,16 +853,24 @@ func (x *CommitUploadRequest) GetUploadId() string {
 	return ""
 }
 
-func (x *CommitUploadRequest) GetChecksum() uint32 {
+func (x *CommitUploadRequest) GetUserId() string {
 	if x != nil {
-		return x.Checksum
+		return x.UserId
 	}
-	return 0
+	return ""
+}
+
+func (x *CommitUploadRequest) GetEtag() string {
+	if x != nil {
+		return x.Etag
+	}
+	return ""
 }
 
 type AbortUploadRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UploadId      string                 `protobuf:"bytes,1,opt,name=upload_id,json=uploadId,proto3" json:"upload_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -791,10 +912,18 @@ func (x *AbortUploadRequest) GetUploadId() string {
 	return ""
 }
 
+func (x *AbortUploadRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
 type GetObjectRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Bucket        string                 `protobuf:"bytes,1,opt,name=bucket,proto3" json:"bucket,omitempty"`
 	Key           string                 `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -839,6 +968,13 @@ func (x *GetObjectRequest) GetBucket() string {
 func (x *GetObjectRequest) GetKey() string {
 	if x != nil {
 		return x.Key
+	}
+	return ""
+}
+
+func (x *GetObjectRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
 	}
 	return ""
 }
@@ -899,6 +1035,7 @@ type DeleteObjectRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Bucket        string                 `protobuf:"bytes,1,opt,name=bucket,proto3" json:"bucket,omitempty"`
 	Key           string                 `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -947,72 +1084,111 @@ func (x *DeleteObjectRequest) GetKey() string {
 	return ""
 }
 
+func (x *DeleteObjectRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
 var File_pkg_proto_metadata_metadata_proto protoreflect.FileDescriptor
 
 const file_pkg_proto_metadata_metadata_proto_rawDesc = "" +
 	"\n" +
-	"!pkg/proto/metadata/metadata.proto\x12\bmetadata\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"_\n" +
+	"!pkg/proto/metadata/metadata.proto\x12\bmetadata\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"z\n" +
 	"\x0eBucketMetadata\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x129\n" +
 	"\n" +
-	"created_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\xa9\x02\n" +
+	"created_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x19\n" +
+	"\bowner_id\x18\x03 \x01(\tR\aownerId\"\x8b\x05\n" +
 	"\x0eObjectMetadata\x12\x16\n" +
 	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x10\n" +
 	"\x03key\x18\x02 \x01(\tR\x03key\x12\x12\n" +
-	"\x04size\x18\x03 \x01(\x04R\x04size\x12\x1a\n" +
-	"\bchecksum\x18\x04 \x01(\rR\bchecksum\x129\n" +
+	"\x04size\x18\x03 \x01(\x04R\x04size\x129\n" +
 	"\n" +
 	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12&\n" +
 	"\x0fstorage_node_id\x18\a \x01(\tR\rstorageNodeId\x12\x1f\n" +
 	"\vobject_path\x18\b \x01(\tR\n" +
-	"objectPath\"0\n" +
+	"objectPath\x12!\n" +
+	"\fcontent_type\x18\t \x01(\tR\vcontentType\x12\x12\n" +
+	"\x04etag\x18\n" +
+	" \x01(\tR\x04etag\x12U\n" +
+	"\x0fsystem_metadata\x18\v \x03(\v2,.metadata.ObjectMetadata.SystemMetadataEntryR\x0esystemMetadata\x12O\n" +
+	"\ruser_metadata\x18\f \x03(\v2*.metadata.ObjectMetadata.UserMetadataEntryR\fuserMetadata\x12\x19\n" +
+	"\bowner_id\x18\r \x01(\tR\aownerId\x1aA\n" +
+	"\x13SystemMetadataEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a?\n" +
+	"\x11UserMetadataEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"0\n" +
 	"\x04Node\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
-	"\aaddress\x18\x02 \x01(\tR\aaddress\"B\n" +
+	"\aaddress\x18\x02 \x01(\tR\aaddress\"]\n" +
 	"\x12ListBucketsRequest\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x16\n" +
-	"\x06offset\x18\x02 \x01(\x05R\x06offset\"I\n" +
+	"\x06offset\x18\x02 \x01(\x05R\x06offset\x12\x19\n" +
+	"\bowner_id\x18\x03 \x01(\tR\aownerId\"I\n" +
 	"\x13ListBucketsResponse\x122\n" +
-	"\abuckets\x18\x01 \x03(\v2\x18.metadata.BucketMetadataR\abuckets\")\n" +
+	"\abuckets\x18\x01 \x03(\v2\x18.metadata.BucketMetadataR\abuckets\"B\n" +
 	"\x13CreateBucketRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"H\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"H\n" +
 	"\x14CreateBucketResponse\x120\n" +
-	"\x06bucket\x18\x01 \x01(\v2\x18.metadata.BucketMetadataR\x06bucket\"\x90\x01\n" +
+	"\x06bucket\x18\x01 \x01(\v2\x18.metadata.BucketMetadataR\x06bucket\"\xa9\x01\n" +
 	"\x12ListObjectsRequest\x12\x16\n" +
 	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x16\n" +
 	"\x06prefix\x18\x02 \x01(\tR\x06prefix\x12\x1c\n" +
 	"\tdelimiter\x18\x03 \x01(\tR\tdelimiter\x12\x14\n" +
 	"\x05limit\x18\x04 \x01(\x05R\x05limit\x12\x16\n" +
-	"\x06offset\x18\x05 \x01(\x05R\x06offset\"I\n" +
+	"\x06offset\x18\x05 \x01(\x05R\x06offset\x12\x17\n" +
+	"\auser_id\x18\x06 \x01(\tR\x06userId\"I\n" +
 	"\x13ListObjectsResponse\x122\n" +
-	"\aobjects\x18\x01 \x03(\v2\x18.metadata.ObjectMetadataR\aobjects\")\n" +
+	"\aobjects\x18\x01 \x03(\v2\x18.metadata.ObjectMetadataR\aobjects\"B\n" +
 	"\x13DeleteBucketRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"Q\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"\xbf\x03\n" +
 	"\x11InitUploadRequest\x12\x16\n" +
 	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x10\n" +
 	"\x03key\x18\x02 \x01(\tR\x03key\x12\x12\n" +
-	"\x04size\x18\x03 \x01(\x04R\x04size\"\x85\x01\n" +
+	"\x04size\x18\x03 \x01(\x04R\x04size\x12!\n" +
+	"\fcontent_type\x18\x04 \x01(\tR\vcontentType\x12X\n" +
+	"\x0fsystem_metadata\x18\x05 \x03(\v2/.metadata.InitUploadRequest.SystemMetadataEntryR\x0esystemMetadata\x12R\n" +
+	"\ruser_metadata\x18\x06 \x03(\v2-.metadata.InitUploadRequest.UserMetadataEntryR\fuserMetadata\x12\x17\n" +
+	"\auser_id\x18\a \x01(\tR\x06userId\x1aA\n" +
+	"\x13SystemMetadataEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a?\n" +
+	"\x11UserMetadataEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xc0\x01\n" +
 	"\x12InitUploadResponse\x12\x1b\n" +
 	"\tupload_id\x18\x01 \x01(\tR\buploadId\x121\n" +
 	"\fstorage_node\x18\x02 \x01(\v2\x0e.metadata.NodeR\vstorageNode\x12\x1f\n" +
 	"\vobject_path\x18\x03 \x01(\tR\n" +
-	"objectPath\"N\n" +
+	"objectPath\x129\n" +
+	"\n" +
+	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"_\n" +
 	"\x13CommitUploadRequest\x12\x1b\n" +
-	"\tupload_id\x18\x01 \x01(\tR\buploadId\x12\x1a\n" +
-	"\bchecksum\x18\x02 \x01(\rR\bchecksum\"1\n" +
+	"\tupload_id\x18\x01 \x01(\tR\buploadId\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x12\n" +
+	"\x04etag\x18\x04 \x01(\tR\x04etag\"J\n" +
 	"\x12AbortUploadRequest\x12\x1b\n" +
-	"\tupload_id\x18\x01 \x01(\tR\buploadId\"<\n" +
+	"\tupload_id\x18\x01 \x01(\tR\buploadId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"U\n" +
 	"\x10GetObjectRequest\x12\x16\n" +
 	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x10\n" +
-	"\x03key\x18\x02 \x01(\tR\x03key\"|\n" +
+	"\x03key\x18\x02 \x01(\tR\x03key\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\"|\n" +
 	"\x11GetObjectResponse\x124\n" +
 	"\bmetadata\x18\x01 \x01(\v2\x18.metadata.ObjectMetadataR\bmetadata\x121\n" +
-	"\fstorage_node\x18\x02 \x01(\v2\x0e.metadata.NodeR\vstorageNode\"?\n" +
+	"\fstorage_node\x18\x02 \x01(\v2\x0e.metadata.NodeR\vstorageNode\"X\n" +
 	"\x13DeleteObjectRequest\x12\x16\n" +
 	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x10\n" +
-	"\x03key\x18\x02 \x01(\tR\x03key2\xac\x05\n" +
+	"\x03key\x18\x02 \x01(\tR\x03key\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId2\xac\x05\n" +
 	"\bMetadata\x12L\n" +
 	"\vListBuckets\x12\x1c.metadata.ListBucketsRequest\x1a\x1d.metadata.ListBucketsResponse\"\x00\x12O\n" +
 	"\fCreateBucket\x12\x1d.metadata.CreateBucketRequest\x1a\x1e.metadata.CreateBucketResponse\"\x00\x12L\n" +
@@ -1037,7 +1213,7 @@ func file_pkg_proto_metadata_metadata_proto_rawDescGZIP() []byte {
 	return file_pkg_proto_metadata_metadata_proto_rawDescData
 }
 
-var file_pkg_proto_metadata_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
+var file_pkg_proto_metadata_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
 var file_pkg_proto_metadata_metadata_proto_goTypes = []any{
 	(*BucketMetadata)(nil),        // 0: metadata.BucketMetadata
 	(*ObjectMetadata)(nil),        // 1: metadata.ObjectMetadata
@@ -1056,42 +1232,51 @@ var file_pkg_proto_metadata_metadata_proto_goTypes = []any{
 	(*GetObjectRequest)(nil),      // 14: metadata.GetObjectRequest
 	(*GetObjectResponse)(nil),     // 15: metadata.GetObjectResponse
 	(*DeleteObjectRequest)(nil),   // 16: metadata.DeleteObjectRequest
-	(*timestamppb.Timestamp)(nil), // 17: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),         // 18: google.protobuf.Empty
+	nil,                           // 17: metadata.ObjectMetadata.SystemMetadataEntry
+	nil,                           // 18: metadata.ObjectMetadata.UserMetadataEntry
+	nil,                           // 19: metadata.InitUploadRequest.SystemMetadataEntry
+	nil,                           // 20: metadata.InitUploadRequest.UserMetadataEntry
+	(*timestamppb.Timestamp)(nil), // 21: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),         // 22: google.protobuf.Empty
 }
 var file_pkg_proto_metadata_metadata_proto_depIdxs = []int32{
-	17, // 0: metadata.BucketMetadata.created_at:type_name -> google.protobuf.Timestamp
-	17, // 1: metadata.ObjectMetadata.created_at:type_name -> google.protobuf.Timestamp
-	17, // 2: metadata.ObjectMetadata.updated_at:type_name -> google.protobuf.Timestamp
-	0,  // 3: metadata.ListBucketsResponse.buckets:type_name -> metadata.BucketMetadata
-	0,  // 4: metadata.CreateBucketResponse.bucket:type_name -> metadata.BucketMetadata
-	1,  // 5: metadata.ListObjectsResponse.objects:type_name -> metadata.ObjectMetadata
-	2,  // 6: metadata.InitUploadResponse.storage_node:type_name -> metadata.Node
-	1,  // 7: metadata.GetObjectResponse.metadata:type_name -> metadata.ObjectMetadata
-	2,  // 8: metadata.GetObjectResponse.storage_node:type_name -> metadata.Node
-	3,  // 9: metadata.Metadata.ListBuckets:input_type -> metadata.ListBucketsRequest
-	5,  // 10: metadata.Metadata.CreateBucket:input_type -> metadata.CreateBucketRequest
-	7,  // 11: metadata.Metadata.ListObjects:input_type -> metadata.ListObjectsRequest
-	9,  // 12: metadata.Metadata.DeleteBucket:input_type -> metadata.DeleteBucketRequest
-	10, // 13: metadata.Metadata.InitUpload:input_type -> metadata.InitUploadRequest
-	12, // 14: metadata.Metadata.CommitUpload:input_type -> metadata.CommitUploadRequest
-	13, // 15: metadata.Metadata.AbortUpload:input_type -> metadata.AbortUploadRequest
-	14, // 16: metadata.Metadata.GetObject:input_type -> metadata.GetObjectRequest
-	16, // 17: metadata.Metadata.DeleteObject:input_type -> metadata.DeleteObjectRequest
-	4,  // 18: metadata.Metadata.ListBuckets:output_type -> metadata.ListBucketsResponse
-	6,  // 19: metadata.Metadata.CreateBucket:output_type -> metadata.CreateBucketResponse
-	8,  // 20: metadata.Metadata.ListObjects:output_type -> metadata.ListObjectsResponse
-	18, // 21: metadata.Metadata.DeleteBucket:output_type -> google.protobuf.Empty
-	11, // 22: metadata.Metadata.InitUpload:output_type -> metadata.InitUploadResponse
-	18, // 23: metadata.Metadata.CommitUpload:output_type -> google.protobuf.Empty
-	18, // 24: metadata.Metadata.AbortUpload:output_type -> google.protobuf.Empty
-	15, // 25: metadata.Metadata.GetObject:output_type -> metadata.GetObjectResponse
-	18, // 26: metadata.Metadata.DeleteObject:output_type -> google.protobuf.Empty
-	18, // [18:27] is the sub-list for method output_type
-	9,  // [9:18] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	21, // 0: metadata.BucketMetadata.created_at:type_name -> google.protobuf.Timestamp
+	21, // 1: metadata.ObjectMetadata.created_at:type_name -> google.protobuf.Timestamp
+	21, // 2: metadata.ObjectMetadata.updated_at:type_name -> google.protobuf.Timestamp
+	17, // 3: metadata.ObjectMetadata.system_metadata:type_name -> metadata.ObjectMetadata.SystemMetadataEntry
+	18, // 4: metadata.ObjectMetadata.user_metadata:type_name -> metadata.ObjectMetadata.UserMetadataEntry
+	0,  // 5: metadata.ListBucketsResponse.buckets:type_name -> metadata.BucketMetadata
+	0,  // 6: metadata.CreateBucketResponse.bucket:type_name -> metadata.BucketMetadata
+	1,  // 7: metadata.ListObjectsResponse.objects:type_name -> metadata.ObjectMetadata
+	19, // 8: metadata.InitUploadRequest.system_metadata:type_name -> metadata.InitUploadRequest.SystemMetadataEntry
+	20, // 9: metadata.InitUploadRequest.user_metadata:type_name -> metadata.InitUploadRequest.UserMetadataEntry
+	2,  // 10: metadata.InitUploadResponse.storage_node:type_name -> metadata.Node
+	21, // 11: metadata.InitUploadResponse.created_at:type_name -> google.protobuf.Timestamp
+	1,  // 12: metadata.GetObjectResponse.metadata:type_name -> metadata.ObjectMetadata
+	2,  // 13: metadata.GetObjectResponse.storage_node:type_name -> metadata.Node
+	3,  // 14: metadata.Metadata.ListBuckets:input_type -> metadata.ListBucketsRequest
+	5,  // 15: metadata.Metadata.CreateBucket:input_type -> metadata.CreateBucketRequest
+	7,  // 16: metadata.Metadata.ListObjects:input_type -> metadata.ListObjectsRequest
+	9,  // 17: metadata.Metadata.DeleteBucket:input_type -> metadata.DeleteBucketRequest
+	10, // 18: metadata.Metadata.InitUpload:input_type -> metadata.InitUploadRequest
+	12, // 19: metadata.Metadata.CommitUpload:input_type -> metadata.CommitUploadRequest
+	13, // 20: metadata.Metadata.AbortUpload:input_type -> metadata.AbortUploadRequest
+	14, // 21: metadata.Metadata.GetObject:input_type -> metadata.GetObjectRequest
+	16, // 22: metadata.Metadata.DeleteObject:input_type -> metadata.DeleteObjectRequest
+	4,  // 23: metadata.Metadata.ListBuckets:output_type -> metadata.ListBucketsResponse
+	6,  // 24: metadata.Metadata.CreateBucket:output_type -> metadata.CreateBucketResponse
+	8,  // 25: metadata.Metadata.ListObjects:output_type -> metadata.ListObjectsResponse
+	22, // 26: metadata.Metadata.DeleteBucket:output_type -> google.protobuf.Empty
+	11, // 27: metadata.Metadata.InitUpload:output_type -> metadata.InitUploadResponse
+	22, // 28: metadata.Metadata.CommitUpload:output_type -> google.protobuf.Empty
+	22, // 29: metadata.Metadata.AbortUpload:output_type -> google.protobuf.Empty
+	15, // 30: metadata.Metadata.GetObject:output_type -> metadata.GetObjectResponse
+	22, // 31: metadata.Metadata.DeleteObject:output_type -> google.protobuf.Empty
+	23, // [23:32] is the sub-list for method output_type
+	14, // [14:23] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_pkg_proto_metadata_metadata_proto_init() }
@@ -1105,7 +1290,7 @@ func file_pkg_proto_metadata_metadata_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_proto_metadata_metadata_proto_rawDesc), len(file_pkg_proto_metadata_metadata_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   17,
+			NumMessages:   21,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
