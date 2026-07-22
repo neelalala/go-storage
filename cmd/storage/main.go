@@ -37,7 +37,7 @@ func run(cfg config.Config, log *slog.Logger) error {
 
 	log.Debug("config", fmt.Sprintf("%+v", cfg))
 
-	hasher := hash.NewCRC32()
+	hasher := hash.NewMD5()
 
 	store, err := store.New(cfg.UploadRoot, hasher)
 	if err != nil {
