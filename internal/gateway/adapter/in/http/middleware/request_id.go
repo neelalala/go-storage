@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -26,10 +27,10 @@ func RequestID(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func GetRequestID(ctx context.Context) uuid.UUID {
+func GetRequestID(ctx context.Context) (uuid.UUID, error) {
 	id, ok := ctx.Value(requestIDKey).(uuid.UUID)
 	if !ok {
-		return uuid.Nil
+		return uuid.Nil, errors.New("no request ID found")
 	}
-	return id
+	return id, nil
 }
