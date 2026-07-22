@@ -107,6 +107,9 @@ func (c *Client) DeleteBucket(ctx context.Context, userID uuid.UUID, name string
 		if status.Code(err) == codes.FailedPrecondition {
 			return fmt.Errorf("%w: %v", domain.ErrBucketNotEmpty, err)
 		}
+		if status.Code(err) == codes.NotFound {
+			return fmt.Errorf("%w: %v", domain.ErrBucketNotExists, err)
+		}
 		return err
 	}
 
