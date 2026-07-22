@@ -76,11 +76,15 @@ func (h *Handler) CreateUser(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) ListBuckets(w http.ResponseWriter, req *http.Request) {
-	requestID, err := uuid.NewV7()
+	requestID, err := middleware.GetRequestID(req.Context())
 	if err != nil {
-		resp, status := h.marshaller.Error(err, "/", requestID)
-		w.WriteHeader(status)
-		w.Write(resp)
+		http.Error(w, "error generating request id", http.StatusInternalServerError)
+		return
+	}
+
+	user, err := middleware.GetUser(req.Context())
+	if err != nil {
+		http.Error(w, "error verifying user", http.StatusUnauthorized)
 		return
 	}
 
@@ -98,15 +102,16 @@ func (h *Handler) ListBuckets(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	buckets, err := h.metadata.ListBuckets(req.Context(), limit, offset)
+	buckets, err := h.gateway.ListBuckets(req.Context(), user.ID, limit, offset)
 	if err != nil {
+		h.log.Error("error listing buckets", "request_id", requestID, "error", err)
 		resp, status := h.marshaller.Error(err, "/", requestID)
 		w.WriteHeader(status)
 		w.Write(resp)
 		return
 	}
 
-	resp, err := h.marshaller.ListBuckets(buckets)
+	resp, err := h.marshaller.ListBuckets(user, buckets)
 	if err != nil {
 		resp, status := h.marshaller.Error(err, "/", requestID)
 		w.WriteHeader(status)

@@ -2,21 +2,26 @@ package application
 
 import (
 	"context"
+	"errors"
 	"log/slog"
+
+	"github.com/google/uuid"
 
 	"github.com/neelalala/go-storage/internal/gateway/domain"
 )
 
 type Gateway struct {
 	metadata domain.MetadataService
+	users    domain.UserService
 	nodes    domain.StorageNodeManager
 
 	log *slog.Logger
 }
 
-func NewGateway(metadata domain.MetadataService, nodes domain.StorageNodeManager, log *slog.Logger) *Gateway {
+func NewGateway(metadata domain.MetadataService, users domain.UserService, nodes domain.StorageNodeManager, log *slog.Logger) *Gateway {
 	return &Gateway{
 		metadata: metadata,
+		users:    users,
 		nodes:    nodes,
 		log:      log,
 	}
@@ -33,6 +38,18 @@ func (g *Gateway) CreateUser(ctx context.Context, name string) (domain.User, err
 	}
 
 	return user, nil
+}
+
+func (g *Gateway) GetUserByName(ctx context.Context, name string) (domain.User, error) {
+	g.log.Debug("get user", "name", name)
+
+	return g.users.GetUserByName(ctx, name)
+}
+
+func (g *Gateway) ListBuckets(ctx context.Context, userID uuid.UUID, limit, offset int) ([]domain.BucketMetadata, error) {
+	g.log.Debug("list buckets", "userID", userID, "limit", limit, "offset", offset)
+
+	return g.metadata.ListBuckets(ctx, userID, limit, offset)
 }
 
 func (g *Gateway) PutObject(ctx context.Context, userID uuid.UUID, bucket, key string, data []byte, contentType string) error {
