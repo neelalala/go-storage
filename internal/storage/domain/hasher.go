@@ -1,5 +1,5 @@
 package domain
 
 type Hasher interface {
-	Checksum(b []byte) uint32
+	Hash(b []byte) string
 }
