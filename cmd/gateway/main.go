@@ -11,6 +11,7 @@ import (
 
 	"github.com/neelalala/go-storage/internal/gateway/adapter/in/http"
 	"github.com/neelalala/go-storage/internal/gateway/adapter/in/http/marshal"
+	"github.com/neelalala/go-storage/internal/gateway/adapter/out/auth"
 	"github.com/neelalala/go-storage/internal/gateway/adapter/out/grpc/metadata"
 	"github.com/neelalala/go-storage/internal/gateway/adapter/out/grpc/storage"
 	"github.com/neelalala/go-storage/internal/gateway/adapter/out/grpc/users"
@@ -57,8 +58,9 @@ func run(cfg config.Config, log *slog.Logger) error {
 	defer cancel()
 
 	marshaller := marshal.JSONMarshaller{}
+	verifier := auth.NewSimpleVerifier(users)
 
-	server := http.NewServer(gateway, marshaller, cfg.HTTP.Address, cfg.HTTP.Timeout, log)
+	server := http.NewServer(gateway, marshaller, cfg.HTTP.Address, cfg.HTTP.Timeout, verifier, log)
 
 	go func() {
 		<-ctx.Done()
