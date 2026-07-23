@@ -16,7 +16,7 @@ type Gateway interface {
 	CreateUser(ctx context.Context, name string) (domain.User, error)
 	ListBuckets(ctx context.Context, userID uuid.UUID, limit, offset int) ([]domain.BucketMetadata, error)
 	CreateBucket(ctx context.Context, userID uuid.UUID, name string) (domain.BucketMetadata, error)
-	ListObjects(ctx context.Context, userID uuid.UUID, bucket, prefix, delimiter string, limit, offset int) ([]domain.ObjectMetadata, error)
+	ListObjects(ctx context.Context, userID uuid.UUID, bucket, prefix, delimiter string, limit, offset int) ([]domain.ObjectMetadata, []string, error)
 	DeleteBucket(ctx context.Context, userID uuid.UUID, name string) error
 	PutObject(ctx context.Context, userID uuid.UUID, bucket string, key string, data []byte, contentType string, systemMetadata, userMetadata map[string]string) error
 	GetObject(ctx context.Context, userID uuid.UUID, bucket, key string) (domain.ObjectMetadata, []byte, error)
@@ -25,7 +25,7 @@ type Gateway interface {
 
 type Marshaller interface {
 	ListBuckets(owner domain.User, buckets []domain.BucketMetadata) ([]byte, error)
-	ListObjectsV2(name, prefix, delimiter string, objects []domain.ObjectMetadata) ([]byte, error)
+	ListObjectsV2(name, prefix, delimiter string, limit int, objects []domain.ObjectMetadata, prefixes []string, isTruncated bool) ([]byte, error)
 	Error(err error, resource string, requestID uuid.UUID) ([]byte, int)
 }
 

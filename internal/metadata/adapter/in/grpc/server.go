@@ -282,7 +282,7 @@ func (s *Server) ListObjects(ctx context.Context, req *metadatapb.ListObjectsReq
 		return nil, status.Errorf(codes.InvalidArgument, "error parsing user id as uuid: %v", err)
 	}
 
-	objs, err := s.service.GetObjects(ctx, userID, bucket, prefix, delimiter, limit, offset)
+	objs, prefixes, err := s.service.GetObjects(ctx, userID, bucket, prefix, delimiter, limit, offset)
 	if err != nil {
 		if errors.Is(err, domain.ErrAccessDenied) {
 			return nil, status.Errorf(codes.PermissionDenied, "error getting objects: %v", err)
@@ -313,7 +313,8 @@ func (s *Server) ListObjects(ctx context.Context, req *metadatapb.ListObjectsReq
 	}
 
 	return &metadatapb.ListObjectsResponse{
-		Objects: pbobjects,
+		Objects:        pbobjects,
+		CommonPrefixes: prefixes,
 	}, nil
 }
 

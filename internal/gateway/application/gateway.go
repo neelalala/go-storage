@@ -44,7 +44,7 @@ func (g *Gateway) ListObjects(
 	userID uuid.UUID,
 	bucket, prefix, delimiter string,
 	limit, offset int,
-) ([]domain.ObjectMetadata, error) {
+) ([]domain.ObjectMetadata, []string, error) {
 	return g.metadata.ListObjects(ctx, userID, bucket, prefix, delimiter, limit, offset)
 }
 

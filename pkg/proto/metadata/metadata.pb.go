@@ -552,10 +552,11 @@ func (x *ListObjectsRequest) GetUserId() string {
 }
 
 type ListObjectsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Objects       []*ObjectMetadata      `protobuf:"bytes,1,rep,name=objects,proto3" json:"objects,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Objects        []*ObjectMetadata      `protobuf:"bytes,1,rep,name=objects,proto3" json:"objects,omitempty"`
+	CommonPrefixes []string               `protobuf:"bytes,2,rep,name=common_prefixes,json=commonPrefixes,proto3" json:"common_prefixes,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *ListObjectsResponse) Reset() {
@@ -591,6 +592,13 @@ func (*ListObjectsResponse) Descriptor() ([]byte, []int) {
 func (x *ListObjectsResponse) GetObjects() []*ObjectMetadata {
 	if x != nil {
 		return x.Objects
+	}
+	return nil
+}
+
+func (x *ListObjectsResponse) GetCommonPrefixes() []string {
+	if x != nil {
+		return x.CommonPrefixes
 	}
 	return nil
 }
@@ -1144,9 +1152,10 @@ const file_pkg_proto_metadata_metadata_proto_rawDesc = "" +
 	"\tdelimiter\x18\x03 \x01(\tR\tdelimiter\x12\x14\n" +
 	"\x05limit\x18\x04 \x01(\x05R\x05limit\x12\x16\n" +
 	"\x06offset\x18\x05 \x01(\x05R\x06offset\x12\x17\n" +
-	"\auser_id\x18\x06 \x01(\tR\x06userId\"I\n" +
+	"\auser_id\x18\x06 \x01(\tR\x06userId\"r\n" +
 	"\x13ListObjectsResponse\x122\n" +
-	"\aobjects\x18\x01 \x03(\v2\x18.metadata.ObjectMetadataR\aobjects\"B\n" +
+	"\aobjects\x18\x01 \x03(\v2\x18.metadata.ObjectMetadataR\aobjects\x12'\n" +
+	"\x0fcommon_prefixes\x18\x02 \x03(\tR\x0ecommonPrefixes\"B\n" +
 	"\x13DeleteBucketRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\"\xbf\x03\n" +

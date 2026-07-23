@@ -269,7 +269,7 @@ func (c *Client) GetObject(ctx context.Context, userID uuid.UUID, bucket, key st
 	return meta, node, nil
 }
 
-func (c *Client) ListObjects(ctx context.Context, userID uuid.UUID, bucket, prefix, delimiter string, limit, offset int) ([]domain.ObjectMetadata, error) {
+func (c *Client) ListObjects(ctx context.Context, userID uuid.UUID, bucket, prefix, delimiter string, limit, offset int) ([]domain.ObjectMetadata, []string, error) {
 	req := &metadatapb.ListObjectsRequest{
 		Bucket:    bucket,
 		Prefix:    prefix,
@@ -282,27 +282,28 @@ func (c *Client) ListObjects(ctx context.Context, userID uuid.UUID, bucket, pref
 	resp, err := c.client.ListObjects(ctx, req)
 	if err != nil {
 		if status.Code(err) == codes.PermissionDenied {
-			return nil, fmt.Errorf("%w: %v", domain.ErrAccessDenied, err)
+			return nil, nil, fmt.Errorf("%w: %v", domain.ErrAccessDenied, err)
 		}
 		if status.Code(err) == codes.NotFound {
-			return nil, fmt.Errorf("%w: %v", domain.ErrBucketNotExists, err)
+			return nil, nil, fmt.Errorf("%w: %v", domain.ErrBucketNotExists, err)
 		}
-		return nil, err
+		return nil, nil, err
 	}
 
 	objspb := resp.GetObjects()
+	prefixes := resp.GetCommonPrefixes()
 
 	objs := make([]domain.ObjectMetadata, 0, len(objspb))
 
 	for _, objpb := range objspb {
 		nodeID, err := uuid.Parse(objpb.GetStorageNodeId())
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		ownerID, err := uuid.Parse(objpb.GetOwnerId())
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		obj := domain.ObjectMetadata{
@@ -323,7 +324,7 @@ func (c *Client) ListObjects(ctx context.Context, userID uuid.UUID, bucket, pref
 		objs = append(objs, obj)
 	}
 
-	return objs, nil
+	return objs, prefixes, nil
 }
 
 func (c *Client) DeleteObject(ctx context.Context, userID uuid.UUID, bucket, key string) error {

@@ -96,6 +96,7 @@ message ListObjectsRequest {
 
 message ListObjectsResponse {
   repeated ObjectMetadata objects = 1;
+  repeated string common_prefixes = 2;
 }
 
 message DeleteBucketRequest {

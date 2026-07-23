@@ -15,7 +15,7 @@ type MetadataService interface {
 	CommitUpload(ctx context.Context, userID uuid.UUID, uploadID uuid.UUID, hash string) error
 	AbortUpload(ctx context.Context, userID uuid.UUID, uploadID uuid.UUID) error
 	GetObject(ctx context.Context, userID uuid.UUID, bucket, key string) (ObjectMetadata, StorageNode, error)
-	ListObjects(ctx context.Context, userID uuid.UUID, bucket, prefix, delimiter string, limit, offset int) ([]ObjectMetadata, error)
+	ListObjects(ctx context.Context, userID uuid.UUID, bucket, prefix, delimiter string, limit, offset int) ([]ObjectMetadata, []string, error)
 	DeleteObject(ctx context.Context, userID uuid.UUID, bucket, key string) error
 }
 

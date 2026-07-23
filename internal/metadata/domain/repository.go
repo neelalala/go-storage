@@ -38,8 +38,10 @@ type ObjectRepository interface {
 	GetObject(ctx context.Context, userID uuid.UUID, bucket, key string) (Object, error)
 	// SoftDeleteObject may return next domain errors: ErrBucketNotExists, ErrBucketNotEmpty
 	SoftDeleteObject(ctx context.Context, bucket, key string) error
-	// GetObjects may return next domain errors: ErrBucketNotExists
-	GetObjects(ctx context.Context, bucket, path, delimiter string, limit, offset int) ([]Object, error)
+	// GetObjects returns slices with summarized len at maximum equal limit.
+	// Slice of Object - objects with key that satisfy prefix and has no delimiter (except in prefix)
+	// Slice of string - grouped objects that have prefix but also delimiter in their key
+	GetObjects(ctx context.Context, bucket, path, delimiter string, limit, offset int) ([]Object, []string, error)
 }
 
 type GCRepository interface {

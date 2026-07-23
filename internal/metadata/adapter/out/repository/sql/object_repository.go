@@ -53,51 +53,104 @@ func (r *ObjectRepository) GetObject(ctx context.Context, bucket, key string) (d
 	return object, nil
 }
 
-func (r *ObjectRepository) GetObjects(ctx context.Context, bucket, path, delimiter string, limit, offset int) ([]domain.Object, error) {
-	// TODO: use delimiter
+func (r *ObjectRepository) GetObjects(ctx context.Context, bucket, prefix, delimiter string, limit, offset int) ([]domain.Object, []string, error) {
 	query := `
-		SELECT bucket, key, object_path, size, checksum, storage_node_id, created_at, updated_at
-		FROM objects
-		WHERE bucket = $1 AND key LIKE $2 || '/%'
-		ORDER BY key
-		LIMIT $3 OFFSET $4;
-	`
+       SELECT 
+           key AS item_name,
+           false AS is_prefix,
+           object_path, size, hash, storage_node_id, created_at, updated_at,
+           content_type, system_metadata, user_metadata, owner_id
+       FROM objects
+       WHERE bucket = $1 
+         AND key LIKE $2 || '%'
+         AND ($3::text = '' OR strpos(substring(key from length($2::text) + 1), $3::text) = 0)
+
+       UNION ALL
+
+       SELECT DISTINCT 
+           substring(key from 1 for length($2::text) + strpos(substring(key from length($2::text) + 1), $3::text) + length($3::text) - 1) AS item_name,
+           true AS is_prefix,
+           NULL::text, NULL::bigint, NULL::text, NULL::uuid, NULL::timestamp, NULL::timestamp,
+           NULL::text, NULL::jsonb, NULL::jsonb, NULL::uuid
+       FROM objects
+       WHERE bucket = $1 
+         AND $3::text != ''
+         AND key LIKE $2 || '%'
+         AND strpos(substring(key from length($2::text) + 1), $3::text) > 0
+
+       ORDER BY item_name
+       LIMIT $4 OFFSET $5;
+    `
 
 	db := GetDB(ctx, r.pool)
 
-	rows, err := db.Query(ctx, query, bucket, path, limit, offset)
+	rows, err := db.Query(ctx, query, bucket, prefix, delimiter, limit, offset)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer rows.Close()
 
-	objects := make([]domain.Object, 0, limit)
+	objects := make([]domain.Object, 0)
+	commonPrefixes := make([]string, 0)
 
 	for rows.Next() {
-		var object domain.Object
-
-		err := rows.Scan(
-			&object.Bucket,
-			&object.Key,
-			&object.ObjectPath,
-			&object.Size,
-			&object.Checksum,
-			&object.StorageNodeID,
-			&object.CreatedAt,
-			&object.UpdatedAt,
+		var (
+			itemName       string
+			isPrefix       bool
+			objectPath     *string
+			size           *uint64
+			hash           *string
+			storageNodeID  *uuid.UUID
+			createdAt      *time.Time
+			updatedAt      *time.Time
+			contentType    *string
+			systemMetadata map[string]string
+			userMetadata   map[string]string
+			ownerID        *uuid.UUID
 		)
-		if err != nil {
-			return nil, err
+
+		if err := rows.Scan(
+			&itemName,
+			&isPrefix,
+			&objectPath,
+			&size,
+			&hash,
+			&storageNodeID,
+			&createdAt,
+			&updatedAt,
+			&contentType,
+			&systemMetadata,
+			&userMetadata,
+			&ownerID,
+		); err != nil {
+			return nil, nil, err
 		}
 
-		objects = append(objects, object)
+		if isPrefix {
+			commonPrefixes = append(commonPrefixes, itemName)
+		} else {
+			objects = append(objects, domain.Object{
+				Bucket:         bucket,
+				Key:            itemName,
+				ObjectPath:     *objectPath,
+				Size:           *size,
+				StorageNodeID:  *storageNodeID,
+				CreatedAt:      *createdAt,
+				UpdatedAt:      *updatedAt,
+				ContentType:    *contentType,
+				Hash:           *hash,
+				SystemMetadata: systemMetadata,
+				UserMetadata:   userMetadata,
+				OwnerID:        *ownerID,
+			})
+		}
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return objects, nil
+	return objects, commonPrefixes, nil
 }
 
 func (r *ObjectRepository) SoftDeleteObject(ctx context.Context, bucket, key string) error {
