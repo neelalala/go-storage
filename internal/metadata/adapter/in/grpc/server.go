@@ -8,16 +8,18 @@ import (
 	"net"
 
 	"github.com/google/uuid"
-	"github.com/neelalala/go-storage/internal/metadata/application"
-	"github.com/neelalala/go-storage/internal/metadata/domain"
-	metadatapb "github.com/neelalala/go-storage/pkg/proto/metadata"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	"github.com/neelalala/go-storage/internal/metadata/application"
+	"github.com/neelalala/go-storage/internal/metadata/domain"
+	metadatapb "github.com/neelalala/go-storage/pkg/proto/metadata"
 )
 
+// TODO: logging
 type Server struct {
 	metadatapb.UnimplementedMetadataServer
 	addr       string
@@ -75,12 +77,17 @@ func (s *Server) Stop(ctx context.Context) error {
 }
 
 func (s *Server) ListBuckets(ctx context.Context, req *metadatapb.ListBucketsRequest) (*metadatapb.ListBucketsResponse, error) {
-	s.log.Debug("list buckets request")
-
 	limit, offset := int(req.GetLimit()), int(req.GetOffset())
-
-	buckets, err := s.service.ListBuckets(ctx, limit, offset)
+	ownerID, err := uuid.Parse(req.GetOwnerId())
 	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "error parsing owner id as uuid: %v", err)
+	}
+
+	buckets, err := s.service.ListBuckets(ctx, ownerID, limit, offset)
+	if err != nil {
+		if errors.Is(err, domain.ErrAccessDenied) {
+			return nil, status.Errorf(codes.PermissionDenied, "error getting buckets: %v", err)
+		}
 		return nil, status.Errorf(codes.Internal, "error getting buckets: %v", err)
 	}
 
@@ -99,14 +106,16 @@ func (s *Server) ListBuckets(ctx context.Context, req *metadatapb.ListBucketsReq
 }
 
 func (s *Server) CreateBucket(ctx context.Context, req *metadatapb.CreateBucketRequest) (*metadatapb.CreateBucketResponse, error) {
-	s.log.Debug("create bucket request")
-
 	name := req.GetName()
-
-	bucket, err := s.service.CreateBucket(ctx, name)
+	userID, err := uuid.Parse(req.GetUserId())
 	if err != nil {
-		if errors.Is(err, domain.ErrBucketExists) {
-			return nil, status.Errorf(codes.InvalidArgument, "error creating bucket: %v", err)
+		return nil, status.Errorf(codes.InvalidArgument, "error parsing user id as uuid: %v", err)
+	}
+
+	bucket, err := s.service.CreateBucket(ctx, userID, name)
+	if err != nil {
+		if errors.Is(err, domain.ErrBucketAlreadyExists) {
+			return nil, status.Errorf(codes.AlreadyExists, "error creating bucket: %v", err)
 		}
 		return nil, status.Errorf(codes.Internal, "error creating bucket: %v", err)
 	}
@@ -119,48 +128,23 @@ func (s *Server) CreateBucket(ctx context.Context, req *metadatapb.CreateBucketR
 	}, nil
 }
 
-func (s *Server) ListObjects(ctx context.Context, req *metadatapb.ListObjectsRequest) (*metadatapb.ListObjectsResponse, error) {
-	s.log.Debug("get objects request")
-
-	bucket, prefix, delimiter := req.GetBucket(), req.GetPrefix(), req.GetDelimiter()
-	limit, offset := int(req.GetLimit()), int(req.GetOffset())
-
-	objs, err := s.service.GetObjects(ctx, bucket, prefix, delimiter, limit, offset)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error getting objects: %v", err)
-	}
-
-	pbobjects := make([]*metadatapb.ObjectMetadata, 0, len(objs))
-	for _, obj := range objs {
-		pbobject := &metadatapb.ObjectMetadata{
-			Bucket:        obj.Bucket,
-			Key:           obj.Key,
-			Size:          obj.Size,
-			Checksum:      obj.Checksum,
-			CreatedAt:     timestamppb.New(obj.CreatedAt),
-			UpdatedAt:     timestamppb.New(obj.UpdatedAt),
-			StorageNodeId: obj.StorageNodeID.String(),
-		}
-		pbobjects = append(pbobjects, pbobject)
-	}
-
-	return &metadatapb.ListObjectsResponse{
-		Objects: pbobjects,
-	}, nil
-}
-
 func (s *Server) DeleteBucket(ctx context.Context, req *metadatapb.DeleteBucketRequest) (*emptypb.Empty, error) {
-	s.log.Debug("delete bucket request")
-
 	name := req.GetName()
-
-	err := s.service.DeleteBucket(ctx, name)
+	userID, err := uuid.Parse(req.GetUserId())
 	if err != nil {
-		if errors.Is(err, domain.ErrBucketNotExists) {
-			return nil, status.Errorf(codes.NotFound, "error deleting bucket: %v", err)
+		return nil, status.Errorf(codes.InvalidArgument, "error parsing user id as uuid: %v", err)
+	}
+
+	err = s.service.DeleteBucket(ctx, userID, name)
+	if err != nil {
+		if errors.Is(err, domain.ErrAccessDenied) {
+			return nil, status.Errorf(codes.PermissionDenied, "error deleting bucket: %v", err)
 		}
 		if errors.Is(err, domain.ErrBucketNotEmpty) {
-			return nil, status.Errorf(codes.InvalidArgument, "error deleting bucket: %v", err)
+			return nil, status.Errorf(codes.FailedPrecondition, "error deleting bucket: %v", err)
+		}
+		if errors.Is(err, domain.ErrBucketNotExists) {
+			return nil, status.Errorf(codes.NotFound, "error deleting bucket: %v", err)
 		}
 		return nil, status.Errorf(codes.Internal, "error deleting bucket: %v", err)
 	}
@@ -169,13 +153,23 @@ func (s *Server) DeleteBucket(ctx context.Context, req *metadatapb.DeleteBucketR
 }
 
 func (s *Server) InitUpload(ctx context.Context, req *metadatapb.InitUploadRequest) (*metadatapb.InitUploadResponse, error) {
-	s.log.Debug("init upload request")
-
 	bucket, key, size := req.GetBucket(), req.GetKey(), req.GetSize()
-
-	upload, node, err := s.service.InitUpload(ctx, bucket, key, size)
+	contentType := req.GetContentType()
+	systemMetadata, userMetadata := req.GetSystemMetadata(), req.GetUserMetadata()
+	userID, err := uuid.Parse(req.GetUserId())
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error initing upload: %v", err)
+		return nil, status.Errorf(codes.InvalidArgument, "error parsing user id as uuid: %v", err)
+	}
+
+	upload, node, err := s.service.InitUpload(ctx, userID, bucket, key, size, contentType, systemMetadata, userMetadata)
+	if err != nil {
+		if errors.Is(err, domain.ErrAccessDenied) {
+			return nil, status.Errorf(codes.PermissionDenied, "error initializing upload: %v", err)
+		}
+		if errors.Is(err, domain.ErrBucketNotExists) {
+			return nil, status.Errorf(codes.NotFound, "error initializing upload: %v", err)
+		}
+		return nil, status.Errorf(codes.Internal, "error initializing upload: %v", err)
 	}
 
 	return &metadatapb.InitUploadResponse{
@@ -189,17 +183,22 @@ func (s *Server) InitUpload(ctx context.Context, req *metadatapb.InitUploadReque
 }
 
 func (s *Server) CommitUpload(ctx context.Context, req *metadatapb.CommitUploadRequest) (*emptypb.Empty, error) {
-	s.log.Debug("commit upload request")
-
-	id, checksum := req.GetUploadId(), req.GetChecksum()
-	uuid, err := uuid.Parse(id)
+	uploadID, err := uuid.Parse(req.GetUploadId())
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "error commiting upload: invalid uploadID: %v", err)
+		return nil, status.Errorf(codes.InvalidArgument, "error parsing upload id as uuid: %v", err)
 	}
-
-	err = s.service.CommitUpload(ctx, uuid, checksum)
+	userID, err := uuid.Parse(req.GetUserId())
 	if err != nil {
-		if errors.Is(err, domain.ErrUploadNotFound) {
+		return nil, status.Errorf(codes.InvalidArgument, "error parsing user id as uuid: %v", err)
+	}
+	etag := req.GetEtag()
+
+	err = s.service.CommitUpload(ctx, userID, uploadID, etag)
+	if err != nil {
+		if errors.Is(err, domain.ErrAccessDenied) {
+			return nil, status.Errorf(codes.PermissionDenied, "error committing upload: %v", err)
+		}
+		if errors.Is(err, domain.ErrUploadNotExists) {
 			return nil, status.Errorf(codes.NotFound, "error commiting upload: %v", err)
 		}
 		return nil, status.Errorf(codes.Internal, "error commiting upload: %v", err)
@@ -209,17 +208,21 @@ func (s *Server) CommitUpload(ctx context.Context, req *metadatapb.CommitUploadR
 }
 
 func (s *Server) AbortUpload(ctx context.Context, req *metadatapb.AbortUploadRequest) (*emptypb.Empty, error) {
-	s.log.Debug("abort upload request")
-
-	id := req.GetUploadId()
-	uuid, err := uuid.Parse(id)
+	uploadID, err := uuid.Parse(req.GetUploadId())
 	if err != nil {
-		return nil, status.Errorf(codes.NotFound, "error aborting upload: invalid uploadID: %v", err)
+		return nil, status.Errorf(codes.InvalidArgument, "error parsing upload id as uuid: %v", err)
+	}
+	userID, err := uuid.Parse(req.GetUserId())
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "error parsing user id as uuid: %v", err)
 	}
 
-	err = s.service.AbortUpload(ctx, uuid)
+	err = s.service.AbortUpload(ctx, userID, uploadID)
 	if err != nil {
-		if errors.Is(err, domain.ErrUploadNotFound) {
+		if errors.Is(err, domain.ErrAccessDenied) {
+			return nil, status.Errorf(codes.PermissionDenied, "error aborting upload: %v", err)
+		}
+		if errors.Is(err, domain.ErrUploadNotExists) {
 			return nil, status.Errorf(codes.NotFound, "error aborting upload: %v", err)
 		}
 		return nil, status.Errorf(codes.Internal, "error aborting upload: %v", err)
@@ -229,12 +232,20 @@ func (s *Server) AbortUpload(ctx context.Context, req *metadatapb.AbortUploadReq
 }
 
 func (s *Server) GetObject(ctx context.Context, req *metadatapb.GetObjectRequest) (*metadatapb.GetObjectResponse, error) {
-	s.log.Debug("get object request")
-
 	bucket, key := req.GetBucket(), req.GetKey()
-
-	obj, node, err := s.service.GetObject(ctx, bucket, key)
+	userID, err := uuid.Parse(req.GetUserId())
 	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "error parsing user id as uuid: %v", err)
+	}
+
+	obj, node, err := s.service.GetObject(ctx, userID, bucket, key)
+	if err != nil {
+		if errors.Is(err, domain.ErrAccessDenied) {
+			return nil, status.Errorf(codes.PermissionDenied, "error getting object: %v", err)
+		}
+		if errors.Is(err, domain.ErrBucketNotExists) {
+			return nil, status.Errorf(codes.FailedPrecondition, "error getting object: %v", err)
+		}
 		if errors.Is(err, domain.ErrObjectNotFound) {
 			return nil, status.Errorf(codes.NotFound, "error getting object: %v", err)
 		}
@@ -243,14 +254,18 @@ func (s *Server) GetObject(ctx context.Context, req *metadatapb.GetObjectRequest
 
 	return &metadatapb.GetObjectResponse{
 		Metadata: &metadatapb.ObjectMetadata{
-			Bucket:        obj.Bucket,
-			Key:           obj.Key,
-			Size:          obj.Size,
-			Checksum:      obj.Checksum,
-			CreatedAt:     timestamppb.New(obj.CreatedAt),
-			UpdatedAt:     timestamppb.New(obj.UpdatedAt),
-			StorageNodeId: obj.StorageNodeID.String(),
-			ObjectPath:    obj.ObjectPath,
+			Bucket:         obj.Bucket,
+			Key:            obj.Key,
+			Size:           obj.Size,
+			CreatedAt:      timestamppb.New(obj.CreatedAt),
+			UpdatedAt:      timestamppb.New(obj.UpdatedAt),
+			StorageNodeId:  obj.StorageNodeID.String(),
+			ObjectPath:     obj.ObjectPath,
+			ContentType:    obj.ContentType,
+			Etag:           obj.ETag,
+			SystemMetadata: obj.SystemMetadata,
+			UserMetadata:   obj.UserMetadata,
+			OwnerId:        obj.OwnerID.String(),
 		},
 		StorageNode: &metadatapb.Node{
 			Id:      node.ID.String(),
@@ -259,12 +274,63 @@ func (s *Server) GetObject(ctx context.Context, req *metadatapb.GetObjectRequest
 	}, nil
 }
 
+func (s *Server) ListObjects(ctx context.Context, req *metadatapb.ListObjectsRequest) (*metadatapb.ListObjectsResponse, error) {
+	bucket, prefix, delimiter := req.GetBucket(), req.GetPrefix(), req.GetDelimiter()
+	limit, offset := int(req.GetLimit()), int(req.GetOffset())
+	userID, err := uuid.Parse(req.GetUserId())
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "error parsing user id as uuid: %v", err)
+	}
+
+	objs, err := s.service.GetObjects(ctx, userID, bucket, prefix, delimiter, limit, offset)
+	if err != nil {
+		if errors.Is(err, domain.ErrAccessDenied) {
+			return nil, status.Errorf(codes.PermissionDenied, "error getting objects: %v", err)
+		}
+		if errors.Is(err, domain.ErrBucketNotExists) {
+			return nil, status.Errorf(codes.NotFound, "error getting objects: %v", err)
+		}
+		return nil, status.Errorf(codes.Internal, "error getting objects: %v", err)
+	}
+
+	pbobjects := make([]*metadatapb.ObjectMetadata, 0, len(objs))
+	for _, obj := range objs {
+		pbobject := &metadatapb.ObjectMetadata{
+			Bucket:         obj.Bucket,
+			Key:            obj.Key,
+			Size:           obj.Size,
+			CreatedAt:      timestamppb.New(obj.CreatedAt),
+			UpdatedAt:      timestamppb.New(obj.UpdatedAt),
+			StorageNodeId:  obj.StorageNodeID.String(),
+			ObjectPath:     obj.ObjectPath,
+			ContentType:    obj.ContentType,
+			Etag:           obj.ETag,
+			SystemMetadata: obj.SystemMetadata,
+			UserMetadata:   obj.UserMetadata,
+			OwnerId:        obj.OwnerID.String(),
+		}
+		pbobjects = append(pbobjects, pbobject)
+	}
+
+	return &metadatapb.ListObjectsResponse{
+		Objects: pbobjects,
+	}, nil
+}
+
 func (s *Server) DeleteObject(ctx context.Context, req *metadatapb.DeleteObjectRequest) (*emptypb.Empty, error) {
-	s.log.Debug("delete object request")
-
 	bucket, key := req.GetBucket(), req.GetKey()
+	userID, err := uuid.Parse(req.GetUserId())
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "error parsing user id as uuid: %v", err)
+	}
 
-	if err := s.service.DeleteObject(ctx, bucket, key); err != nil {
+	if err := s.service.DeleteObject(ctx, userID, bucket, key); err != nil {
+		if errors.Is(err, domain.ErrAccessDenied) {
+			return nil, status.Errorf(codes.PermissionDenied, "error deleting object: %v", err)
+		}
+		if errors.Is(err, domain.ErrBucketNotExists) {
+			return nil, status.Errorf(codes.FailedPrecondition, "error deleting object: %v", err)
+		}
 		if errors.Is(err, domain.ErrObjectNotFound) {
 			return nil, status.Errorf(codes.NotFound, "error deleting object: %v", err)
 		}
