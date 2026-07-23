@@ -79,7 +79,7 @@ func (r *BucketRepository) CreateBucket(ctx context.Context, name string) (domai
 	if err != nil {
 		if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
 			if pgErr.Code == pgerrcode.UniqueViolation {
-				return domain.Bucket{}, fmt.Errorf("%w: %s", domain.ErrBucketExists, name)
+				return domain.Bucket{}, fmt.Errorf("%w: %s", domain.ErrBucketAlreadyExists, name)
 			}
 		}
 		return domain.Bucket{}, err

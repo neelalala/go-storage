@@ -3,9 +3,10 @@ package domain
 import "errors"
 
 var (
-	ErrBucketExists    = errors.New("error: bucket already exists")
-	ErrBucketNotExists = errors.New("error: bucket not exists")
-	ErrBucketNotEmpty  = errors.New("error: bucket bot empty")
-	ErrObjectNotFound  = errors.New("error: object not found")
-	ErrUploadNotFound  = errors.New("error: upload not found")
+	ErrAccessDenied        = errors.New("access denied")
+	ErrBucketAlreadyExists = errors.New("bucket already exists")
+	ErrBucketNotExists     = errors.New("bucket not exists")
+	ErrBucketNotEmpty      = errors.New("bucket bot empty")
+	ErrObjectNotFound      = errors.New("object not found")
+	ErrUploadNotExists     = errors.New("upload not exists")
 )
