@@ -143,7 +143,7 @@ func (r *UploadRepository) CommitUpload(ctx context.Context, uploadID uuid.UUID,
 			storage_node_id = EXCLUDED.storage_node_id,
 			content_type = EXCLUDED.content_type,
 			system_metadata = EXCLUDED.system_metadata,
-			user_metadata = EXCLUDED.user_metadata, 
+			user_metadata = EXCLUDED.user_metadata
 	`
 
 	db := GetDB(ctx, r.pool)
