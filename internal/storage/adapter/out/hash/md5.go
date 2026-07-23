@@ -17,5 +17,5 @@ func NewMD5() MD5 {
 }
 
 func (_ MD5) Hash(b []byte) string {
-	return fmt.Sprintf("%x", md5.New().Sum(b))
+	return fmt.Sprintf("%x", md5.Sum(b))
 }
