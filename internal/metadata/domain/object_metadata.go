@@ -7,24 +7,32 @@ import (
 )
 
 type Object struct {
-	Bucket        string
-	Key           string
-	ObjectPath    string
-	Size          uint64
-	Checksum      uint32
-	StorageNodeID uuid.UUID
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	Bucket         string
+	Key            string
+	ObjectPath     string
+	Size           uint64
+	StorageNodeID  uuid.UUID
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+	ContentType    string
+	ETag           string
+	SystemMetadata map[string]string
+	UserMetadata   map[string]string
+	OwnerID        uuid.UUID
 }
 
 type Upload struct {
-	UploadID      uuid.UUID
-	Bucket        string
-	Key           string
-	ObjectPath    string
-	Size          uint64
-	StorageNodeID uuid.UUID
-	CreatedAt     time.Time
+	UploadID       uuid.UUID
+	Bucket         string
+	Key            string
+	ObjectPath     string
+	Size           uint64
+	StorageNodeID  uuid.UUID
+	CreatedAt      time.Time
+	ContentType    string
+	SystemMetadata map[string]string
+	UserMetadata   map[string]string
+	OwnerID        uuid.UUID
 }
 
 type Status string

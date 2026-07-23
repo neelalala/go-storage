@@ -11,20 +11,21 @@ type Transactor interface {
 }
 
 type BucketRepository interface {
-	GetBuckets(ctx context.Context, limit, offset int) ([]Bucket, error)
-	CreateBucket(ctx context.Context, name string) (Bucket, error)
+	GetBuckets(ctx context.Context, userID uuid.UUID, limit, offset int) ([]Bucket, error)
+	CreateBucket(ctx context.Context, userID uuid.UUID, name string) (Bucket, error)
 	DeleteBucket(ctx context.Context, name string) error
 	GetBucket(ctx context.Context, name string) (Bucket, error)
 }
 
 type UploadRepository interface {
+	GetUpload(ctx context.Context, uploadID uuid.UUID) (Upload, error)
 	CreateUpload(ctx context.Context, upload Upload) (Upload, error)
 	DeleteUpload(ctx context.Context, uploadID uuid.UUID) error
 	CommitUpload(ctx context.Context, uploadID uuid.UUID, checksum uint32) error
 }
 
 type ObjectRepository interface {
-	GetObject(ctx context.Context, bucket, key string) (Object, error)
+	GetObject(ctx context.Context, userID uuid.UUID, bucket, key string) (Object, error)
 	SoftDeleteObject(ctx context.Context, bucket, key string) error
 	GetObjects(ctx context.Context, bucket, path, delimiter string, limit, offset int) ([]Object, error)
 }
