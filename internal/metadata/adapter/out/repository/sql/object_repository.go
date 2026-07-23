@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -23,31 +25,73 @@ func NewObjectRepository(pool *pgxpool.Pool) *ObjectRepository {
 	}
 }
 
-func (r *ObjectRepository) GetObject(ctx context.Context, bucket, key string) (domain.Object, error) {
+func (r *ObjectRepository) GetObject(ctx context.Context, userID uuid.UUID, bucket, key string) (domain.Object, error) {
 	query := `
-		SELECT bucket, key, object_path, size, checksum, storage_node_id, created_at, updated_at
-		FROM objects
-		WHERE bucket = $1 AND key = $2;
-	`
+       SELECT b.owner_id,
+              o.object_path, o.size, o.hash, o.storage_node_id, 
+              o.created_at, o.updated_at, o.content_type, 
+              o.system_metadata, o.user_metadata
+       FROM buckets b
+       LEFT JOIN objects o ON o.bucket = b.name AND o.key = $2
+       WHERE b.name = $1;
+    `
 
 	db := GetDB(ctx, r.pool)
 
-	var object domain.Object
-	err := db.QueryRow(ctx, query, bucket, key).Scan(
-		&object.Bucket,
-		&object.Key,
-		&object.ObjectPath,
-		&object.Size,
-		&object.Checksum,
-		&object.StorageNodeID,
-		&object.CreatedAt,
-		&object.UpdatedAt,
+	var (
+		bucketOwnerID  uuid.UUID
+		objectPath     *string
+		size           *uint64
+		hash           *string
+		storageNodeID  *uuid.UUID
+		createdAt      *time.Time
+		updatedAt      *time.Time
+		contentType    *string
+		systemMetadata map[string]string
+		userMetadata   map[string]string
 	)
+
+	err := db.QueryRow(ctx, query, bucket, key).Scan(
+		&bucketOwnerID,
+		&objectPath,
+		&size,
+		&hash,
+		&storageNodeID,
+		&createdAt,
+		&updatedAt,
+		&contentType,
+		&systemMetadata,
+		&userMetadata,
+	)
+
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return domain.Object{}, fmt.Errorf("%w: %s/%s", domain.ErrObjectNotFound, bucket, key)
+			return domain.Object{}, fmt.Errorf("error getting object: %w", domain.ErrBucketNotExists)
 		}
 		return domain.Object{}, err
+	}
+
+	if bucketOwnerID != userID {
+		return domain.Object{}, fmt.Errorf("error getting object: %w", domain.ErrAccessDenied)
+	}
+
+	if objectPath == nil {
+		return domain.Object{}, fmt.Errorf("error getting object: %w", domain.ErrObjectNotFound)
+	}
+
+	object := domain.Object{
+		Bucket:         bucket,
+		Key:            key,
+		OwnerID:        userID,
+		ObjectPath:     *objectPath,
+		Size:           *size,
+		Hash:           *hash,
+		StorageNodeID:  *storageNodeID,
+		CreatedAt:      *createdAt,
+		UpdatedAt:      *updatedAt,
+		ContentType:    *contentType,
+		SystemMetadata: systemMetadata,
+		UserMetadata:   userMetadata,
 	}
 
 	return object, nil
