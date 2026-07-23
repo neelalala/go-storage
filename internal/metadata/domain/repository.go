@@ -28,7 +28,8 @@ type UploadRepository interface {
 	CreateUpload(ctx context.Context, upload Upload) (Upload, error)
 	// DeleteUpload may return next domain errors: ErrUploadNotExists
 	DeleteUpload(ctx context.Context, uploadID uuid.UUID) error
-	// CommitUpload may return next domain errors: ErrUploadNotExists
+	// CommitUpload may return next domain errors: ErrUploadNotExists.
+	// Deletes the entry in the uploads table and creates an entry in objects, atomically
 	CommitUpload(ctx context.Context, uploadID uuid.UUID, hash string) error
 }
 
