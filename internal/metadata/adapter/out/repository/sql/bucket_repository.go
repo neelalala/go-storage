@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
+
 	"github.com/neelalala/go-storage/internal/metadata/domain"
 )
 
@@ -24,17 +26,18 @@ func NewBucketRepository(pool *pgxpool.Pool) *BucketRepository {
 	}
 }
 
-func (r *BucketRepository) GetBuckets(ctx context.Context, limit, offset int) ([]domain.Bucket, error) {
+func (r *BucketRepository) GetBuckets(ctx context.Context, userID uuid.UUID, limit, offset int) ([]domain.Bucket, error) {
 	query := `
 		SELECT name, created_at
 		FROM buckets
+		WHERE owner_id = $1
 		ORDER BY name, created_at
-		LIMIT $1 OFFSET $2
+		LIMIT $2 OFFSET $3
 	`
 
 	db := GetDB(ctx, r.pool)
 
-	rows, err := db.Query(ctx, query, limit, offset)
+	rows, err := db.Query(ctx, query, userID, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +46,6 @@ func (r *BucketRepository) GetBuckets(ctx context.Context, limit, offset int) ([
 	buckets := make([]domain.Bucket, 0, limit)
 	for rows.Next() {
 		var bucket domain.Bucket
-
 		err := rows.Scan(
 			&bucket.Name,
 			&bucket.CreatedAt,
@@ -51,6 +53,7 @@ func (r *BucketRepository) GetBuckets(ctx context.Context, limit, offset int) ([
 		if err != nil {
 			return nil, err
 		}
+		bucket.OwnerID = userID
 
 		buckets = append(buckets, bucket)
 	}
@@ -62,18 +65,17 @@ func (r *BucketRepository) GetBuckets(ctx context.Context, limit, offset int) ([
 	return buckets, nil
 }
 
-func (r *BucketRepository) CreateBucket(ctx context.Context, name string) (domain.Bucket, error) {
+func (r *BucketRepository) CreateBucket(ctx context.Context, userID uuid.UUID, name string) (domain.Bucket, error) {
 	query := `
-		INSERT INTO buckets (name)
-		VALUES ($1)
-		RETURNING name, created_at
+		INSERT INTO buckets (name, owner_id)
+		VALUES ($1, $2)
+		RETURNING created_at
 	`
 
 	db := GetDB(ctx, r.pool)
 
 	var bucket domain.Bucket
-	err := db.QueryRow(ctx, query, name).Scan(
-		&bucket.Name,
+	err := db.QueryRow(ctx, query, name, userID).Scan(
 		&bucket.CreatedAt,
 	)
 	if err != nil {
@@ -84,6 +86,8 @@ func (r *BucketRepository) CreateBucket(ctx context.Context, name string) (domai
 		}
 		return domain.Bucket{}, err
 	}
+	bucket.Name = name
+	bucket.OwnerID = userID
 
 	return bucket, nil
 }
@@ -115,7 +119,7 @@ func (r *BucketRepository) DeleteBucket(ctx context.Context, name string) error 
 
 func (r *BucketRepository) GetBucket(ctx context.Context, name string) (domain.Bucket, error) {
 	query := `
-		SELECT name, created_at
+		SELECT created_at, owner_id
 		FROM buckets
 		WHERE name = $1
 	`
@@ -124,8 +128,8 @@ func (r *BucketRepository) GetBucket(ctx context.Context, name string) (domain.B
 
 	var bucket domain.Bucket
 	err := db.QueryRow(ctx, query, name).Scan(
-		&bucket.Name,
 		&bucket.CreatedAt,
+		&bucket.OwnerID,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -133,6 +137,7 @@ func (r *BucketRepository) GetBucket(ctx context.Context, name string) (domain.B
 		}
 		return domain.Bucket{}, err
 	}
+	bucket.Name = name
 
 	return bucket, nil
 }

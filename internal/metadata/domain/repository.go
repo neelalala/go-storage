@@ -15,7 +15,7 @@ type BucketRepository interface {
 	GetBuckets(ctx context.Context, userID uuid.UUID, limit, offset int) ([]Bucket, error)
 	// CreateBucket may return next domain errors: ErrBucketAlreadyExists
 	CreateBucket(ctx context.Context, userID uuid.UUID, name string) (Bucket, error)
-	// DeleteBucket may return next domain errors: ErrBucketNotEmpty
+	// DeleteBucket may return next domain errors: ErrBucketNotEmpty, ErrBucketNotExists
 	DeleteBucket(ctx context.Context, name string) error
 	// GetBucket may return next domain errors: ErrBucketNotExists
 	GetBucket(ctx context.Context, name string) (Bucket, error)
