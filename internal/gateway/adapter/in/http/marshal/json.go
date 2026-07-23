@@ -50,7 +50,13 @@ func (_ JSONMarshaller) ListBuckets(owner domain.User, buckets []domain.BucketMe
 	return json.MarshalIndent(resp, "", " ")
 }
 
-func (_ JSONMarshaller) ListObjectsV2(name, prefix, delimiter string, objects []domain.ObjectMetadata) ([]byte, error) {
+func (_ JSONMarshaller) ListObjectsV2(
+	name, prefix, delimiter string,
+	limit int,
+	objects []domain.ObjectMetadata,
+	prefixes []string,
+	isTruncated bool,
+) ([]byte, error) {
 	type Content struct {
 		Key          string `json:"key"`
 		LastModified string `json:"lastModified"`
@@ -68,13 +74,13 @@ func (_ JSONMarshaller) ListObjectsV2(name, prefix, delimiter string, objects []
 			Name        string `json:"name"`
 			Prefix      string `json:"prefix"`
 			KeyCount    int    `json:"keyCount"`
-			MaxKeys     int    `json:"maxKeys"` // TODO:
+			MaxKeys     int    `json:"maxKeys"`
 			Delimiter   string `json:"delimiter"`
-			IsTruncated bool   `json:"isTruncated"` // TODO:
+			IsTruncated bool   `json:"isTruncated"`
 
 			Contents []Content `json:"contents"`
 
-			CommonPrefixes []CommonPrefix `json:"commonPrefixes"` // TODO:
+			CommonPrefixes []CommonPrefix `json:"commonPrefixes"`
 		} `json:"listBucketResult"`
 	}
 
@@ -83,9 +89,9 @@ func (_ JSONMarshaller) ListObjectsV2(name, prefix, delimiter string, objects []
 	resp.ListBucketResult.Name = name
 	resp.ListBucketResult.Prefix = prefix
 	resp.ListBucketResult.KeyCount = len(objects)
-	resp.ListBucketResult.MaxKeys = len(objects)
+	resp.ListBucketResult.MaxKeys = limit
 	resp.ListBucketResult.Delimiter = delimiter
-	resp.ListBucketResult.IsTruncated = false
+	resp.ListBucketResult.IsTruncated = isTruncated
 
 	resp.ListBucketResult.Contents = make([]Content, 0, len(objects))
 
@@ -100,6 +106,12 @@ func (_ JSONMarshaller) ListObjectsV2(name, prefix, delimiter string, objects []
 	}
 
 	resp.ListBucketResult.CommonPrefixes = make([]CommonPrefix, 0)
+
+	for _, pref := range prefixes {
+		resp.ListBucketResult.CommonPrefixes = append(resp.ListBucketResult.CommonPrefixes, CommonPrefix{
+			Prefix: pref,
+		})
+	}
 
 	return json.MarshalIndent(resp, "", " ")
 }

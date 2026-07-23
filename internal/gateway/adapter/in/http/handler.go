@@ -175,7 +175,6 @@ func (h *Handler) CreateBucket(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) ListObjects(w http.ResponseWriter, req *http.Request) {
-	// TODO: should list all objects when prefix=""?
 	requestID, err := middleware.GetRequestID(req.Context())
 	if err != nil {
 		h.log.Error("error getting request id", "error", err)
@@ -223,7 +222,7 @@ func (h *Handler) ListObjects(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	objs, err := h.gateway.ListObjects(req.Context(), user.ID, bucket, prefix, delimiter, limit, offset)
+	objs, prefixes, err := h.gateway.ListObjects(req.Context(), user.ID, bucket, prefix, delimiter, limit+1, offset)
 	if err != nil {
 		if !errors.Is(err, domain.ErrAccessDenied) && !errors.Is(err, domain.ErrBucketNotExists) {
 			h.log.Error("error listing objects", "request_id", requestID, "error", err)
@@ -236,7 +235,24 @@ func (h *Handler) ListObjects(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	resp, err := h.marshaller.ListObjectsV2(bucket, prefix, delimiter, objs)
+	var isTruncated bool
+	if len(objs)+len(prefixes) > limit {
+		isTruncated = true
+
+		if len(objs) == 0 {
+			prefixes = prefixes[:len(prefixes)-1]
+		} else if len(prefixes) == 0 {
+			objs = objs[:len(objs)-1]
+		} else {
+			if objs[len(objs)-1].Key < prefixes[len(prefixes)-1] {
+				prefixes = prefixes[:len(prefixes)-1]
+			} else {
+				objs = objs[:len(objs)-1]
+			}
+		}
+	}
+
+	resp, err := h.marshaller.ListObjectsV2(bucket, prefix, delimiter, limit, objs, prefixes, isTruncated)
 	if err != nil {
 		h.log.Error("error marshalling response",
 			"method", "list objects v2",
