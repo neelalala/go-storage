@@ -13,6 +13,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+
 	"github.com/neelalala/go-storage/internal/metadata/adapter/in/grpc"
 	"github.com/neelalala/go-storage/internal/metadata/adapter/out/grpc/storage"
 	"github.com/neelalala/go-storage/internal/metadata/adapter/out/hasher"
@@ -57,6 +58,7 @@ func run(cfg config.Config, log *slog.Logger) error {
 		return err
 	}
 
+	transactor := sql.NewTransactor(pool)
 	bucketRepo := sql.NewBucketRepository(pool)
 	uploadRepo := sql.NewUploadRepository(pool)
 	objRepo := sql.NewObjectRepository(pool)
@@ -69,6 +71,7 @@ func run(cfg config.Config, log *slog.Logger) error {
 	hasher := hasher.NewSHA256()
 
 	metadata := application.NewMetadataService(
+		transactor,
 		bucketRepo,
 		uploadRepo,
 		objRepo,
