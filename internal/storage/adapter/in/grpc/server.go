@@ -86,13 +86,13 @@ func (s *Server) SaveObject(ctx context.Context, req *storagepb.SaveRequest) (*s
 		Data: req.GetObject().GetData(),
 	}
 
-	etag, err := s.storage.SaveObject(ctx, obj)
+	hash, err := s.storage.SaveObject(ctx, obj)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error saving object: %v", err)
 	}
 
 	return &storagepb.SaveResponse{
-		Etag: etag,
+		Hash: hash,
 	}, nil
 }
 
