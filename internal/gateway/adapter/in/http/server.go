@@ -41,12 +41,13 @@ func NewServer(
 	mux.HandleFunc("PUT /users/{username}", middleware.RequestID(handler.CreateUser))
 
 	mux.HandleFunc("GET /storage/", middleware.RequestID(middleware.Auth(handler.ListBuckets, verifier)))
-
 	mux.HandleFunc("PUT /storage/{bucket}", middleware.RequestID(middleware.Auth(handler.CreateBucket, verifier)))
-	mux.HandleFunc("GET /storage/{bucket}", middleware.RequestID(middleware.Auth(handler.ListObjects, verifier)))
+	mux.HandleFunc("HEAD /storage/{bucket}", middleware.RequestID(middleware.Auth(handler.HeadBucket, verifier)))
 	mux.HandleFunc("DELETE /storage/{bucket}", middleware.RequestID(middleware.Auth(handler.DeleteBucket, verifier)))
 
+	mux.HandleFunc("GET /storage/{bucket}", middleware.RequestID(middleware.Auth(handler.ListObjects, verifier)))
 	mux.HandleFunc("PUT /storage/{bucket}/{key...}", middleware.RequestID(middleware.Auth(handler.PutObject, verifier)))
+	mux.HandleFunc("HEAD /storage/{bucket}/{key...}", middleware.RequestID(middleware.Auth(handler.HeadObject, verifier)))
 	mux.HandleFunc("GET /storage/{bucket}/{key...}", middleware.RequestID(middleware.Auth(handler.GetObject, verifier)))
 	mux.HandleFunc("DELETE /storage/{bucket}/{key...}", middleware.RequestID(middleware.Auth(handler.DeleteObject, verifier)))
 

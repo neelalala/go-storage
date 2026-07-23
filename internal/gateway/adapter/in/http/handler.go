@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -83,17 +84,59 @@ func (h *Handler) CreateBucket(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	name, ok := h.extractPathValue(w, req, "bucket")
+	bucket, ok := h.extractPathValue(w, req, "bucket")
 	if !ok {
 		return
 	}
 
-	if _, err := h.gateway.CreateBucket(req.Context(), user.ID, name); err != nil {
-		h.handleError(w, req, err, "/"+name)
+	if _, err := h.gateway.CreateBucket(req.Context(), user.ID, bucket); err != nil {
+		h.handleError(w, req, err, "/"+bucket)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Handler) HeadBucket(w http.ResponseWriter, req *http.Request) {
+	user, ok := h.getUserFromContext(w, req)
+	if !ok {
+		return
+	}
+
+	bucket, ok := h.extractPathValue(w, req, "bucket")
+	if !ok {
+		return
+	}
+
+	meta, err := h.gateway.HeadBucket(req.Context(), user.ID, bucket)
+	if err != nil {
+		h.handleError(w, req, err, "/"+bucket)
+		return
+	}
+
+	w.Header().Set("X-Go-Bucket-Name", meta.Name)
+	w.Header().Set("X-Go-Owner-Id", meta.OwnerID.String())
+	w.Header().Set("X-Go-Creation-Date", meta.CreatedAt.Format(time.RFC3339))
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Handler) DeleteBucket(w http.ResponseWriter, req *http.Request) {
+	user, ok := h.getUserFromContext(w, req)
+	if !ok {
+		return
+	}
+
+	bucket, ok := h.extractPathValue(w, req, "bucket")
+	if !ok {
+		return
+	}
+
+	if err := h.gateway.DeleteBucket(req.Context(), user.ID, bucket); err != nil {
+		h.handleError(w, req, err, fmt.Sprintf("/%s", bucket))
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *Handler) ListObjects(w http.ResponseWriter, req *http.Request) {
@@ -150,25 +193,6 @@ func (h *Handler) ListObjects(w http.ResponseWriter, req *http.Request) {
 	w.Write(resp)
 }
 
-func (h *Handler) DeleteBucket(w http.ResponseWriter, req *http.Request) {
-	user, ok := h.getUserFromContext(w, req)
-	if !ok {
-		return
-	}
-
-	bucket, ok := h.extractPathValue(w, req, "bucket")
-	if !ok {
-		return
-	}
-
-	if err := h.gateway.DeleteBucket(req.Context(), user.ID, bucket); err != nil {
-		h.handleError(w, req, err, fmt.Sprintf("/%s", bucket))
-		return
-	}
-
-	w.WriteHeader(http.StatusNoContent)
-}
-
 func (h *Handler) PutObject(w http.ResponseWriter, req *http.Request) {
 	user, ok := h.getUserFromContext(w, req)
 	if !ok {
@@ -198,6 +222,47 @@ func (h *Handler) PutObject(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		h.handleError(w, req, err, fmt.Sprintf("/%s/%s", bucket, key))
 		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Handler) HeadObject(w http.ResponseWriter, req *http.Request) {
+	user, ok := h.getUserFromContext(w, req)
+	if !ok {
+		return
+	}
+
+	bucket, ok := h.extractPathValue(w, req, "bucket")
+	if !ok {
+		return
+	}
+
+	key, ok := h.extractPathValue(w, req, "key")
+	if !ok {
+		return
+	}
+
+	meta, err := h.gateway.HeadObject(req.Context(), user.ID, bucket, key)
+	if err != nil {
+		h.handleError(w, req, err, fmt.Sprintf("/%s/%s", bucket, key))
+		return
+	}
+
+	w.Header().Set("Content-Type", meta.ContentType)
+	w.Header().Set("Content-Length", strconv.FormatInt(int64(meta.Size), 10))
+	w.Header().Set("ETag", fmt.Sprintf("\"%s\"", meta.Hash))
+	w.Header().Set("X-Go-Owner-Id", meta.OwnerID.String())
+	w.Header().Set("X-Go-Storage-Node-Id", meta.StorageNodeID.String())
+	w.Header().Set("X-Go-Created-At", meta.CreatedAt.Format(time.RFC3339))
+	w.Header().Set("X-Go-Updated-At", meta.UpdatedAt.Format(time.RFC3339))
+
+	for header, value := range meta.SystemMetadata {
+		w.Header().Set(header, value)
+	}
+
+	for header, value := range meta.UserMetadata {
+		w.Header().Set(header, value)
 	}
 
 	w.WriteHeader(http.StatusOK)

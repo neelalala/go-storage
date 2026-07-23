@@ -39,6 +39,14 @@ func (g *Gateway) CreateBucket(ctx context.Context, userID uuid.UUID, name strin
 	return g.metadata.CreateBucket(ctx, userID, name)
 }
 
+func (g *Gateway) HeadBucket(ctx context.Context, userID uuid.UUID, bucket string) (domain.BucketMetadata, error) {
+	return g.metadata.HeadBucket(ctx, userID, bucket)
+}
+
+func (g *Gateway) DeleteBucket(ctx context.Context, userID uuid.UUID, name string) error {
+	return g.metadata.DeleteBucket(ctx, userID, name)
+}
+
 func (g *Gateway) ListObjects(
 	ctx context.Context,
 	userID uuid.UUID,
@@ -46,10 +54,6 @@ func (g *Gateway) ListObjects(
 	limit, offset int,
 ) ([]domain.ObjectMetadata, []string, error) {
 	return g.metadata.ListObjects(ctx, userID, bucket, prefix, delimiter, limit, offset)
-}
-
-func (g *Gateway) DeleteBucket(ctx context.Context, userID uuid.UUID, name string) error {
-	return g.metadata.DeleteBucket(ctx, userID, name)
 }
 
 func (g *Gateway) PutObject(
@@ -89,6 +93,10 @@ func (g *Gateway) PutObject(
 	}
 
 	return g.metadata.CommitUpload(ctx, userID, upload.UploadID, hash)
+}
+
+func (g *Gateway) HeadObject(ctx context.Context, userID uuid.UUID, bucket, key string) (domain.ObjectMetadata, error) {
+	return g.metadata.HeadObject(ctx, userID, bucket, key)
 }
 
 func (g *Gateway) GetObject(ctx context.Context, userID uuid.UUID, bucket, key string) (domain.ObjectMetadata, []byte, error) {
