@@ -15,7 +15,7 @@ type Object struct {
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	ContentType    string
-	ETag           string
+	Hash           string
 	SystemMetadata map[string]string
 	UserMetadata   map[string]string
 	OwnerID        uuid.UUID

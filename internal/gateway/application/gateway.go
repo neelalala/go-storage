@@ -80,7 +80,7 @@ func (g *Gateway) PutObject(
 		return err
 	}
 
-	etag, err := storage.SaveObject(ctx, obj)
+	hash, err := storage.SaveObject(ctx, obj)
 	if err != nil {
 		if err := g.metadata.AbortUpload(ctx, userID, upload.UploadID); err != nil {
 			g.log.Error("Failed to abort upload", "error", err, "upload_id", upload.UploadID)
@@ -88,7 +88,7 @@ func (g *Gateway) PutObject(
 		return err
 	}
 
-	return g.metadata.CommitUpload(ctx, userID, upload.UploadID, etag)
+	return g.metadata.CommitUpload(ctx, userID, upload.UploadID, hash)
 }
 
 func (g *Gateway) GetObject(ctx context.Context, userID uuid.UUID, bucket, key string) (domain.ObjectMetadata, []byte, error) {

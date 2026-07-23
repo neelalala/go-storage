@@ -47,7 +47,7 @@ func (c *Client) SaveObject(ctx context.Context, obj domain.Object) (string, err
 		return "", fmt.Errorf("error saving object: %w", err)
 	}
 
-	return resp.GetEtag(), nil
+	return resp.GetHash(), nil
 }
 
 func (c *Client) GetObject(ctx context.Context, name string) (domain.Object, error) {

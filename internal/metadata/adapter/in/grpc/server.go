@@ -191,9 +191,9 @@ func (s *Server) CommitUpload(ctx context.Context, req *metadatapb.CommitUploadR
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "error parsing user id as uuid: %v", err)
 	}
-	etag := req.GetEtag()
+	hash := req.GetHash()
 
-	err = s.service.CommitUpload(ctx, userID, uploadID, etag)
+	err = s.service.CommitUpload(ctx, userID, uploadID, hash)
 	if err != nil {
 		if errors.Is(err, domain.ErrAccessDenied) {
 			return nil, status.Errorf(codes.PermissionDenied, "error committing upload: %v", err)
@@ -262,7 +262,7 @@ func (s *Server) GetObject(ctx context.Context, req *metadatapb.GetObjectRequest
 			StorageNodeId:  obj.StorageNodeID.String(),
 			ObjectPath:     obj.ObjectPath,
 			ContentType:    obj.ContentType,
-			Etag:           obj.ETag,
+			Hash:           obj.Hash,
 			SystemMetadata: obj.SystemMetadata,
 			UserMetadata:   obj.UserMetadata,
 			OwnerId:        obj.OwnerID.String(),
@@ -304,7 +304,7 @@ func (s *Server) ListObjects(ctx context.Context, req *metadatapb.ListObjectsReq
 			StorageNodeId:  obj.StorageNodeID.String(),
 			ObjectPath:     obj.ObjectPath,
 			ContentType:    obj.ContentType,
-			Etag:           obj.ETag,
+			Hash:           obj.Hash,
 			SystemMetadata: obj.SystemMetadata,
 			UserMetadata:   obj.UserMetadata,
 			OwnerId:        obj.OwnerID.String(),

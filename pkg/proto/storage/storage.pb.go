@@ -120,7 +120,7 @@ func (x *SaveRequest) GetObject() *Object {
 
 type SaveResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Etag          string                 `protobuf:"bytes,2,opt,name=etag,proto3" json:"etag,omitempty"`
+	Hash          string                 `protobuf:"bytes,2,opt,name=hash,proto3" json:"hash,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -155,9 +155,9 @@ func (*SaveResponse) Descriptor() ([]byte, []int) {
 	return file_pkg_proto_storage_storage_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *SaveResponse) GetEtag() string {
+func (x *SaveResponse) GetHash() string {
 	if x != nil {
-		return x.Etag
+		return x.Hash
 	}
 	return ""
 }
@@ -305,7 +305,7 @@ const file_pkg_proto_storage_storage_proto_rawDesc = "" +
 	"\vSaveRequest\x12'\n" +
 	"\x06object\x18\x01 \x01(\v2\x0f.storage.ObjectR\x06object\"\"\n" +
 	"\fSaveResponse\x12\x12\n" +
-	"\x04etag\x18\x02 \x01(\tR\x04etag\" \n" +
+	"\x04hash\x18\x02 \x01(\tR\x04hash\" \n" +
 	"\n" +
 	"GetRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\"!\n" +

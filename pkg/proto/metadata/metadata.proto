@@ -53,7 +53,7 @@ message ObjectMetadata {
   string storage_node_id = 7;
   string object_path = 8;
   string content_type = 9;
-  string etag = 10;
+  string hash = 10;
   map<string, string> system_metadata = 11;
   map<string, string> user_metadata = 12;
   string owner_id = 13;
@@ -123,7 +123,7 @@ message InitUploadResponse {
 message CommitUploadRequest {
   string upload_id = 1;
   string user_id = 3;
-  string etag = 4;
+  string hash = 4;
 }
 
 message AbortUploadRequest {

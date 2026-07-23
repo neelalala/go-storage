@@ -93,7 +93,7 @@ func (_ JSONMarshaller) ListObjectsV2(name, prefix, delimiter string, objects []
 		resp.ListBucketResult.Contents = append(resp.ListBucketResult.Contents, Content{
 			Key:          object.Key,
 			LastModified: object.UpdatedAt.Format(time.RFC3339),
-			ETag:         fmt.Sprintf("\"%s\"", object.ETag),
+			ETag:         fmt.Sprintf("\"%s\"", object.Hash),
 			Size:         int64(object.Size),
 			StorageClass: "STANDARD",
 		})

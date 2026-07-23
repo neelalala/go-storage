@@ -46,7 +46,7 @@ func (c *Client) ListBuckets(ctx context.Context, userID uuid.UUID, limit, offse
 
 	resp, err := c.client.ListBuckets(ctx, req)
 	if err != nil {
-		if status.Code(err) == codes.PermissionDenied {
+		if status.Code(err) == codes.PermissionDenied { // why can user get this error?
 			return nil, fmt.Errorf("%w: %v", domain.ErrAccessDenied, err)
 		}
 		return nil, err
@@ -174,11 +174,11 @@ func (c *Client) InitUpload(
 	return upload, storage, nil
 }
 
-func (c *Client) CommitUpload(ctx context.Context, userID, uploadID uuid.UUID, etag string) error {
+func (c *Client) CommitUpload(ctx context.Context, userID, uploadID uuid.UUID, hash string) error {
 	req := &metadatapb.CommitUploadRequest{
 		UploadId: uploadID.String(),
 		UserId:   userID.String(),
-		Etag:     etag,
+		Hash:     hash,
 	}
 
 	_, err := c.client.CommitUpload(ctx, req)
@@ -255,7 +255,7 @@ func (c *Client) GetObject(ctx context.Context, userID uuid.UUID, bucket, key st
 		CreatedAt:      resp.GetMetadata().GetCreatedAt().AsTime(),
 		UpdatedAt:      resp.GetMetadata().GetUpdatedAt().AsTime(),
 		ContentType:    resp.GetMetadata().GetContentType(),
-		ETag:           resp.GetMetadata().GetEtag(),
+		Hash:           resp.GetMetadata().GetHash(),
 		SystemMetadata: resp.GetMetadata().GetSystemMetadata(),
 		UserMetadata:   resp.GetMetadata().GetUserMetadata(),
 		OwnerID:        ownerID,
@@ -314,7 +314,7 @@ func (c *Client) ListObjects(ctx context.Context, userID uuid.UUID, bucket, pref
 			CreatedAt:      objpb.GetCreatedAt().AsTime(),
 			UpdatedAt:      objpb.GetUpdatedAt().AsTime(),
 			ContentType:    objpb.GetContentType(),
-			ETag:           objpb.GetEtag(),
+			Hash:           objpb.GetHash(),
 			SystemMetadata: objpb.GetSystemMetadata(),
 			UserMetadata:   objpb.GetUserMetadata(),
 			OwnerID:        ownerID,

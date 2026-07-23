@@ -93,7 +93,7 @@ type ObjectMetadata struct {
 	StorageNodeId  string                 `protobuf:"bytes,7,opt,name=storage_node_id,json=storageNodeId,proto3" json:"storage_node_id,omitempty"`
 	ObjectPath     string                 `protobuf:"bytes,8,opt,name=object_path,json=objectPath,proto3" json:"object_path,omitempty"`
 	ContentType    string                 `protobuf:"bytes,9,opt,name=content_type,json=contentType,proto3" json:"content_type,omitempty"`
-	Etag           string                 `protobuf:"bytes,10,opt,name=etag,proto3" json:"etag,omitempty"`
+	Hash           string                 `protobuf:"bytes,10,opt,name=hash,proto3" json:"hash,omitempty"`
 	SystemMetadata map[string]string      `protobuf:"bytes,11,rep,name=system_metadata,json=systemMetadata,proto3" json:"system_metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	UserMetadata   map[string]string      `protobuf:"bytes,12,rep,name=user_metadata,json=userMetadata,proto3" json:"user_metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	OwnerId        string                 `protobuf:"bytes,13,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
@@ -187,9 +187,9 @@ func (x *ObjectMetadata) GetContentType() string {
 	return ""
 }
 
-func (x *ObjectMetadata) GetEtag() string {
+func (x *ObjectMetadata) GetHash() string {
 	if x != nil {
-		return x.Etag
+		return x.Hash
 	}
 	return ""
 }
@@ -811,7 +811,7 @@ type CommitUploadRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UploadId      string                 `protobuf:"bytes,1,opt,name=upload_id,json=uploadId,proto3" json:"upload_id,omitempty"`
 	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Etag          string                 `protobuf:"bytes,4,opt,name=etag,proto3" json:"etag,omitempty"`
+	Hash          string                 `protobuf:"bytes,4,opt,name=hash,proto3" json:"hash,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -860,9 +860,9 @@ func (x *CommitUploadRequest) GetUserId() string {
 	return ""
 }
 
-func (x *CommitUploadRequest) GetEtag() string {
+func (x *CommitUploadRequest) GetHash() string {
 	if x != nil {
-		return x.Etag
+		return x.Hash
 	}
 	return ""
 }
@@ -1113,8 +1113,8 @@ const file_pkg_proto_metadata_metadata_proto_rawDesc = "" +
 	"\vobject_path\x18\b \x01(\tR\n" +
 	"objectPath\x12!\n" +
 	"\fcontent_type\x18\t \x01(\tR\vcontentType\x12\x12\n" +
-	"\x04etag\x18\n" +
-	" \x01(\tR\x04etag\x12U\n" +
+	"\x04hash\x18\n" +
+	" \x01(\tR\x04hash\x12U\n" +
 	"\x0fsystem_metadata\x18\v \x03(\v2,.metadata.ObjectMetadata.SystemMetadataEntryR\x0esystemMetadata\x12O\n" +
 	"\ruser_metadata\x18\f \x03(\v2*.metadata.ObjectMetadata.UserMetadataEntryR\fuserMetadata\x12\x19\n" +
 	"\bowner_id\x18\r \x01(\tR\aownerId\x1aA\n" +
@@ -1174,7 +1174,7 @@ const file_pkg_proto_metadata_metadata_proto_rawDesc = "" +
 	"\x13CommitUploadRequest\x12\x1b\n" +
 	"\tupload_id\x18\x01 \x01(\tR\buploadId\x12\x17\n" +
 	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x12\n" +
-	"\x04etag\x18\x04 \x01(\tR\x04etag\"J\n" +
+	"\x04hash\x18\x04 \x01(\tR\x04hash\"J\n" +
 	"\x12AbortUploadRequest\x12\x1b\n" +
 	"\tupload_id\x18\x01 \x01(\tR\buploadId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\"U\n" +

@@ -433,8 +433,8 @@ func (h *Handler) GetObject(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Content-Type", meta.ContentType)
 	}
 
-	if meta.ETag != "" {
-		w.Header().Set("ETag", fmt.Sprintf("\"%s\"", meta.ETag))
+	if meta.Hash != "" {
+		w.Header().Set("ETag", fmt.Sprintf("\"%s\"", meta.Hash))
 	}
 
 	for header, value := range meta.SystemMetadata {

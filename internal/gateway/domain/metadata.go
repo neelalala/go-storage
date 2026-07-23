@@ -12,7 +12,7 @@ type MetadataService interface {
 	CreateBucket(ctx context.Context, userID uuid.UUID, name string) (BucketMetadata, error)
 	DeleteBucket(ctx context.Context, userID uuid.UUID, name string) error
 	InitUpload(ctx context.Context, userID uuid.UUID, bucket, key string, size uint64, contentType string, systemMetadata, userMetadata map[string]string) (Upload, StorageNode, error)
-	CommitUpload(ctx context.Context, userID uuid.UUID, uploadID uuid.UUID, etag string) error
+	CommitUpload(ctx context.Context, userID uuid.UUID, uploadID uuid.UUID, hash string) error
 	AbortUpload(ctx context.Context, userID uuid.UUID, uploadID uuid.UUID) error
 	GetObject(ctx context.Context, userID uuid.UUID, bucket, key string) (ObjectMetadata, StorageNode, error)
 	ListObjects(ctx context.Context, userID uuid.UUID, bucket, prefix, delimiter string, limit, offset int) ([]ObjectMetadata, error)
@@ -34,7 +34,7 @@ type ObjectMetadata struct {
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	ContentType    string
-	ETag           string
+	Hash           string
 	SystemMetadata map[string]string
 	UserMetadata   map[string]string
 	OwnerID        uuid.UUID

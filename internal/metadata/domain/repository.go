@@ -21,7 +21,8 @@ type UploadRepository interface {
 	GetUpload(ctx context.Context, uploadID uuid.UUID) (Upload, error)
 	CreateUpload(ctx context.Context, upload Upload) (Upload, error)
 	DeleteUpload(ctx context.Context, uploadID uuid.UUID) error
-	CommitUpload(ctx context.Context, uploadID uuid.UUID, checksum uint32) error
+	// CommitUpload may return next domain errors: ErrUploadNotExists
+	CommitUpload(ctx context.Context, uploadID uuid.UUID, hash string) error
 }
 
 type ObjectRepository interface {

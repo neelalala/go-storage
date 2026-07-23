@@ -24,7 +24,7 @@ message SaveRequest {
 }
 
 message SaveResponse {
-  string etag = 2;
+  string hash = 2;
 }
 
 message GetRequest {
