@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/neelalala/go-storage/internal/gateway/adapter/in/http/middleware"
+	"github.com/neelalala/go-storage/internal/gateway/application"
 	"github.com/neelalala/go-storage/internal/gateway/domain"
 )
 
@@ -22,13 +23,13 @@ const (
 )
 
 type Handler struct {
-	gateway    Gateway
+	gateway    *application.Gateway
 	marshaller Marshaller
 
 	log *slog.Logger
 }
 
-func NewHandler(gateway Gateway, marshaller Marshaller, log *slog.Logger) *Handler {
+func NewHandler(gateway *application.Gateway, marshaller Marshaller, log *slog.Logger) *Handler {
 	return &Handler{
 		gateway:    gateway,
 		marshaller: marshaller,

@@ -10,19 +10,9 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/neelalala/go-storage/internal/gateway/adapter/in/http/middleware"
+	"github.com/neelalala/go-storage/internal/gateway/application"
 	"github.com/neelalala/go-storage/internal/gateway/domain"
 )
-
-type Gateway interface {
-	CreateUser(ctx context.Context, name string) (domain.User, error)
-	ListBuckets(ctx context.Context, userID uuid.UUID, limit, offset int) ([]domain.BucketMetadata, error)
-	CreateBucket(ctx context.Context, userID uuid.UUID, name string) (domain.BucketMetadata, error)
-	ListObjects(ctx context.Context, userID uuid.UUID, bucket, prefix, delimiter string, limit, offset int) ([]domain.ObjectMetadata, []string, error)
-	DeleteBucket(ctx context.Context, userID uuid.UUID, name string) error
-	PutObject(ctx context.Context, userID uuid.UUID, bucket string, key string, data []byte, contentType string, systemMetadata, userMetadata map[string]string) error
-	GetObject(ctx context.Context, userID uuid.UUID, bucket, key string) (domain.ObjectMetadata, []byte, error)
-	DeleteObject(ctx context.Context, userID uuid.UUID, bucket, key string) error
-}
 
 type Marshaller interface {
 	ListBuckets(owner domain.User, buckets []domain.BucketMetadata) ([]byte, error)
@@ -31,14 +21,14 @@ type Marshaller interface {
 }
 
 type Server struct {
-	gateway Gateway
+	gateway *application.Gateway
 	server  *http.Server
 
 	log *slog.Logger
 }
 
 func NewServer(
-	gateway Gateway,
+	gateway *application.Gateway,
 	marshaller Marshaller,
 	addr string,
 	timeout time.Duration,
