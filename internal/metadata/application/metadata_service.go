@@ -2,15 +2,16 @@ package application
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log/slog"
 
 	"github.com/google/uuid"
+
 	"github.com/neelalala/go-storage/internal/metadata/domain"
 )
 
 type MetadataService struct {
+	transactor domain.Transactor
 	bucketRepo domain.BucketRepository
 	uploadRepo domain.UploadRepository
 	objRepo    domain.ObjectRepository
@@ -21,6 +22,7 @@ type MetadataService struct {
 }
 
 func NewMetadataService(
+	transactor domain.Transactor,
 	bucketRepo domain.BucketRepository,
 	uploadRepo domain.UploadRepository,
 	objRepo domain.ObjectRepository,
@@ -29,6 +31,7 @@ func NewMetadataService(
 	log *slog.Logger,
 ) *MetadataService {
 	return &MetadataService{
+		transactor: transactor,
 		bucketRepo: bucketRepo,
 		uploadRepo: uploadRepo,
 		objRepo:    objRepo,
@@ -38,221 +41,156 @@ func NewMetadataService(
 	}
 }
 
-func (s *MetadataService) ListBuckets(ctx context.Context, limit, offset int) ([]domain.Bucket, error) {
-	s.log.Debug("metadata service",
-		"method", "list buckets",
-		"limit", limit,
-		"offset", offset,
-	)
-
-	return s.bucketRepo.GetBuckets(ctx, limit, offset)
+func (s *MetadataService) ListBuckets(ctx context.Context, userID uuid.UUID, limit, offset int) ([]domain.Bucket, error) {
+	return s.bucketRepo.GetBuckets(ctx, userID, limit, offset)
 }
 
-func (s *MetadataService) CreateBucket(ctx context.Context, name string) (domain.Bucket, error) {
-	s.log.Debug("metadata service",
-		"method", "create bucket",
-		"name", name,
-	)
-
-	return s.bucketRepo.CreateBucket(ctx, name)
+func (s *MetadataService) CreateBucket(ctx context.Context, userID uuid.UUID, name string) (domain.Bucket, error) {
+	return s.bucketRepo.CreateBucket(ctx, userID, name)
 }
 
-func (s *MetadataService) GetBucket(ctx context.Context, name string) (domain.Bucket, error) {
-	s.log.Debug("metadata service",
-		"method", "get bucket",
-		"name", name,
-	)
-
-	return s.bucketRepo.GetBucket(ctx, name)
+func (s *MetadataService) DeleteBucket(ctx context.Context, userID uuid.UUID, name string) error {
+	return s.transactor.WithinTransaction(ctx, func(ctx context.Context) error {
+		bucket, err := s.bucketRepo.GetBucket(ctx, name)
+		if err != nil {
+			return err
+		}
+		if bucket.OwnerID != userID {
+			return domain.ErrAccessDenied
+		}
+		return s.bucketRepo.DeleteBucket(ctx, name)
+	})
 }
 
-func (s *MetadataService) DeleteBucket(ctx context.Context, name string) error {
-	s.log.Debug("metadata service",
-		"method", "delete bucket",
-		"name", name,
-	)
+func (s *MetadataService) InitUpload(
+	ctx context.Context,
+	userID uuid.UUID,
+	bucket, key string,
+	size uint64,
+	contentType string,
+	systemMetadata map[string]string,
+	userMetadata map[string]string,
+) (domain.Upload, domain.Storage, error) {
+	var saved domain.Upload
+	err := s.transactor.WithinTransaction(ctx, func(ctx context.Context) error {
+		bucketMeta, err := s.bucketRepo.GetBucket(ctx, bucket)
+		if err != nil {
+			return err
+		}
+		if bucketMeta.OwnerID != userID {
+			return domain.ErrAccessDenied
+		}
 
-	return s.bucketRepo.DeleteBucket(ctx, name)
-}
+		objPath := fmt.Sprintf("%X", s.hasher.Hash([]byte(bucket+key)))
 
-func (s *MetadataService) InitUpload(ctx context.Context, bucket, key string, size uint64) (domain.Upload, domain.Storage, error) {
-	s.log.Debug("metadata service",
-		"method", "init upload",
-		"bucket", bucket,
-		"key", key,
-		"size", size,
-	)
+		upload := domain.Upload{
+			Bucket:         bucket,
+			Key:            key,
+			ObjectPath:     objPath,
+			Size:           size,
+			StorageNodeID:  s.storage.ID,
+			ContentType:    contentType,
+			SystemMetadata: systemMetadata,
+			UserMetadata:   userMetadata,
+			OwnerID:        userID,
+		}
 
-	// TODO: what if bucket = "bucket/"? it has to be the same as "bucket"
-	objPath := fmt.Sprintf("%X", s.hasher.Hash([]byte(bucket+key)))
-
-	upload := domain.Upload{
-		Bucket:        bucket,
-		Key:           key,
-		ObjectPath:    objPath,
-		Size:          size,
-		StorageNodeID: s.storage.ID,
-	}
-
-	saved, err := s.uploadRepo.CreateUpload(ctx, upload)
+		saved, err = s.uploadRepo.CreateUpload(ctx, upload)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
 	if err != nil {
-		s.log.Error("metadata service",
-			"method", "init upload",
-			"context", "UploadRepository.CreateUpload",
-			"upload", fmt.Sprintf("%+v", upload),
-			"error", err,
-		)
-
-		return domain.Upload{}, domain.Storage{}, fmt.Errorf("error starting upload transaction")
+		return domain.Upload{}, domain.Storage{}, err
 	}
-
-	s.log.Debug("metadata service",
-		"method", "init upload",
-		"bucket", bucket,
-		"key", key,
-		"object_path", saved.ObjectPath,
-		"message", "successful",
-	)
 
 	return saved, s.storage, nil
 }
 
-func (s *MetadataService) CommitUpload(ctx context.Context, uploadID uuid.UUID, checksum uint32) error {
-	s.log.Debug("metadata service",
-		"method", "commit upload",
-		"upload_id", uploadID,
-		"checksum", checksum,
-	)
-
-	err := s.uploadRepo.CommitUpload(ctx, uploadID, checksum)
-	if err != nil {
-		if !errors.Is(err, domain.ErrUploadNotFound) {
-			s.log.Error("metadata service",
-				"method", "commit upload",
-				"context", "UploadRepository.CommitUpload",
-				"error", err,
-			)
+func (s *MetadataService) CommitUpload(ctx context.Context, userID, uploadID uuid.UUID, hash string) error {
+	return s.transactor.WithinTransaction(ctx, func(ctx context.Context) error {
+		upload, err := s.uploadRepo.GetUpload(ctx, uploadID)
+		if err != nil {
+			return err
+		}
+		if upload.OwnerID != userID {
+			return domain.ErrAccessDenied
+		}
+		err = s.uploadRepo.CommitUpload(ctx, uploadID, hash)
+		if err != nil {
+			return err
 		}
 
-		return err
-	}
-
-	s.log.Debug("metadata service",
-		"method", "commit upload",
-		"upload_id", uploadID,
-		"message", "successful",
-	)
-
-	return nil
+		return nil
+	})
 }
 
-func (s *MetadataService) AbortUpload(ctx context.Context, uploadID uuid.UUID) error {
-	s.log.Debug("metedata service",
-		"method", "abort upload",
-		"upload_id", uploadID,
-	)
-
-	err := s.uploadRepo.DeleteUpload(ctx, uploadID)
-	if err != nil {
-		if !errors.Is(err, domain.ErrUploadNotFound) {
-			s.log.Error("metadata service",
-				"method", "abort upload",
-				"context", "UploadRepository.DeleteUpload",
-				"error", err,
-			)
+func (s *MetadataService) AbortUpload(ctx context.Context, userID, uploadID uuid.UUID) error {
+	return s.transactor.WithinTransaction(ctx, func(ctx context.Context) error {
+		upload, err := s.uploadRepo.GetUpload(ctx, uploadID)
+		if err != nil {
+			return err
+		}
+		if upload.OwnerID != userID {
+			return domain.ErrAccessDenied
+		}
+		err = s.uploadRepo.DeleteUpload(ctx, uploadID)
+		if err != nil {
+			return err
 		}
 
-		return err
-	}
-
-	s.log.Debug("metadata service",
-		"method", "abort upload",
-		"upload_id", uploadID,
-		"message", "successful",
-	)
-
-	return nil
+		return nil
+	})
 }
 
-func (s *MetadataService) GetObject(ctx context.Context, bucket, key string) (domain.Object, domain.Storage, error) {
-	s.log.Debug("metadata service",
-		"method", "get object",
-		"bucket", bucket,
-		"key", key,
-	)
-
-	obj, err := s.objRepo.GetObject(ctx, bucket, key)
+func (s *MetadataService) GetObject(ctx context.Context, userID uuid.UUID, bucket, key string) (domain.Object, domain.Storage, error) {
+	obj, err := s.objRepo.GetObject(ctx, userID, bucket, key)
 	if err != nil {
-		if !errors.Is(err, domain.ErrObjectNotFound) {
-			s.log.Error("metadata service",
-				"method", "get object",
-				"context", "ObjectRepository.GetObject",
-				"error", err,
-			)
-		}
-
 		return domain.Object{}, domain.Storage{}, err
 	}
-
-	s.log.Debug("metadata service",
-		"method", "get object",
-		"bucket", bucket,
-		"key", key,
-		"message", "successful",
-	)
-
 	return obj, s.storage, nil
 }
 
-func (s *MetadataService) GetObjects(ctx context.Context, bucket, prefix, delimiter string, limit, offset int) ([]domain.Object, error) {
-	s.log.Debug("metadata service",
-		"method", "get objects",
-		"bucket", bucket,
-		"prefix", prefix,
-		"delimiter", delimiter,
-		"limit", limit,
-		"offset", offset,
-	)
-
-	return s.objRepo.GetObjects(ctx, bucket, prefix, delimiter, limit, offset)
-}
-
-func (s *MetadataService) DeleteObject(ctx context.Context, bucket, key string) error {
-	s.log.Debug("metadata service",
-		"method", "delete object",
-		"bucket", bucket,
-		"key", key,
-	)
-
-	err := s.objRepo.SoftDeleteObject(ctx, bucket, key)
+func (s *MetadataService) GetObjects(ctx context.Context, userID uuid.UUID, bucket, prefix, delimiter string, limit, offset int) ([]domain.Object, []string, error) {
+	bucketMeta, err := s.bucketRepo.GetBucket(ctx, bucket)
 	if err != nil {
-		if !errors.Is(err, domain.ErrObjectNotFound) {
-			s.log.Error("metadata service",
-				"method", "delete object",
-				"context", "ObjectRepository.DeleteObject",
-				"error", err,
-			)
-		}
-
-		return err
+		return nil, nil, err
 	}
-
-	s.log.Debug("metadata service",
-		"method", "delete object",
-		"bucket", bucket,
-		"key", key,
-		"message", "successful",
-	)
-
-	return nil
+	if bucketMeta.OwnerID != userID {
+		return nil, nil, domain.ErrAccessDenied
+	}
+	objs, commonPrefixes, err := s.objRepo.GetObjects(ctx, bucket, prefix, delimiter, limit, offset)
+	if err != nil {
+		return nil, nil, err
+	}
+	return objs, commonPrefixes, nil
 }
 
-func (s *MetadataService) HeadObject(ctx context.Context, bucket, key string) (domain.Object, error) {
-	s.log.Debug("metadata service",
-		"method", "head object",
-		"bucket", bucket,
-		"key", key,
-	)
+func (s *MetadataService) DeleteObject(ctx context.Context, userID uuid.UUID, bucket, key string) error {
+	return s.transactor.WithinTransaction(ctx, func(ctx context.Context) error {
+		bucketMeta, err := s.bucketRepo.GetBucket(ctx, bucket)
+		if err != nil {
+			return err
+		}
+		if bucketMeta.OwnerID != userID {
+			return domain.ErrAccessDenied
+		}
+		return s.objRepo.SoftDeleteObject(ctx, bucket, key)
+	})
+}
 
-	return s.objRepo.GetObject(ctx, bucket, key)
+func (s *MetadataService) HeadBucket(ctx context.Context, userID uuid.UUID, bucket string) (domain.Bucket, error) {
+	meta, err := s.bucketRepo.GetBucket(ctx, bucket)
+	if err != nil {
+		return domain.Bucket{}, err
+	}
+	if meta.OwnerID != userID {
+		return domain.Bucket{}, domain.ErrAccessDenied
+	}
+	return meta, nil
+}
+
+func (s *MetadataService) HeadObject(ctx context.Context, userID uuid.UUID, bucket, key string) (domain.Object, error) {
+	return s.objRepo.GetObject(ctx, userID, bucket, key)
 }
