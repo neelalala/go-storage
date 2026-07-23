@@ -173,7 +173,7 @@ func (s *Server) InitUpload(ctx context.Context, req *metadatapb.InitUploadReque
 	}
 
 	return &metadatapb.InitUploadResponse{
-		UploadId: upload.UploadID.String(),
+		UploadId: upload.ID.String(),
 		StorageNode: &metadatapb.Node{
 			Id:      node.ID.String(),
 			Address: node.Address,

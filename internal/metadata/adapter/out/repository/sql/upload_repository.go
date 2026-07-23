@@ -42,7 +42,7 @@ func (r *UploadRepository) CreateUpload(ctx context.Context, upload domain.Uploa
 		return domain.Upload{}, err
 	}
 
-	upload.UploadID = uploadID
+	upload.ID = uploadID
 
 	return upload, nil
 }
@@ -86,7 +86,7 @@ func (r *UploadRepository) CommitUpload(ctx context.Context, uploadID uuid.UUID,
 
 	db := GetDB(ctx, r.pool)
 
-	tag, err := db.Exec(ctx, query, uploadID, checksum)
+	tag, err := db.Exec(ctx, query, uploadID, hash)
 	if err != nil {
 		return err
 	}

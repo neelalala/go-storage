@@ -22,7 +22,7 @@ type Object struct {
 }
 
 type Upload struct {
-	UploadID       uuid.UUID
+	ID             uuid.UUID
 	Bucket         string
 	Key            string
 	ObjectPath     string
