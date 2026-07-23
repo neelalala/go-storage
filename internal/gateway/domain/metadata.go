@@ -10,12 +10,14 @@ import (
 type MetadataService interface {
 	ListBuckets(ctx context.Context, userID uuid.UUID, limit, offset int) ([]BucketMetadata, error)
 	CreateBucket(ctx context.Context, userID uuid.UUID, name string) (BucketMetadata, error)
+	HeadBucket(ctx context.Context, userID uuid.UUID, bucket string) (BucketMetadata, error)
 	DeleteBucket(ctx context.Context, userID uuid.UUID, name string) error
+	ListObjects(ctx context.Context, userID uuid.UUID, bucket, prefix, delimiter string, limit, offset int) ([]ObjectMetadata, []string, error)
 	InitUpload(ctx context.Context, userID uuid.UUID, bucket, key string, size uint64, contentType string, systemMetadata, userMetadata map[string]string) (Upload, StorageNode, error)
 	CommitUpload(ctx context.Context, userID uuid.UUID, uploadID uuid.UUID, hash string) error
 	AbortUpload(ctx context.Context, userID uuid.UUID, uploadID uuid.UUID) error
+	HeadObject(ctx context.Context, userID uuid.UUID, bucket, key string) (ObjectMetadata, error)
 	GetObject(ctx context.Context, userID uuid.UUID, bucket, key string) (ObjectMetadata, StorageNode, error)
-	ListObjects(ctx context.Context, userID uuid.UUID, bucket, prefix, delimiter string, limit, offset int) ([]ObjectMetadata, []string, error)
 	DeleteObject(ctx context.Context, userID uuid.UUID, bucket, key string) error
 }
 

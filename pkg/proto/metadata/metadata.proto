@@ -8,17 +8,20 @@ import "google/protobuf/timestamp.proto";
 option go_package = "github.com/neelalala/go-storage/pkg/proto/metadata";
 
 service Metadata {
-  // Metadata возвращает все доаступные бакеты
+  // Metadata возвращает все доступные бакеты
   rpc ListBuckets(ListBucketsRequest) returns (ListBucketsResponse) {}
 
   // Metadata создает бакет
   rpc CreateBucket(CreateBucketRequest) returns (CreateBucketResponse) {}
 
-  // Metadata возвращает все объекты с указанным префиксом и группирует объекты по переданному разделителю
-  rpc ListObjects(ListObjectsRequest) returns (ListObjectsResponse) {}
+  // Metadata возвращает информацию о бакете
+  rpc HeadBucket(HeadBucketRequest) returns (HeadBucketResponse) {}
 
   // Metadata удаляет бакет. Бакет обязан быть пустым
   rpc DeleteBucket(DeleteBucketRequest) returns (google.protobuf.Empty) {}
+
+  // Metadata возвращает все объекты с указанным префиксом и группирует объекты по переданному разделителю
+  rpc ListObjects(ListObjectsRequest) returns (ListObjectsResponse) {}
 
   // Metadata выбирает Storage Node, куда сохранить файл, сохраняет текущее состояние загрузки
   rpc InitUpload(InitUploadRequest) returns (InitUploadResponse) {}
@@ -28,6 +31,9 @@ service Metadata {
 
   // Metadata удаляет запись о текущей загрузке
   rpc AbortUpload(AbortUploadRequest) returns (google.protobuf.Empty) {}
+
+  // Metadata возвращает информацию об объекте
+  rpc HeadObject(HeadObjectRequest) returns (HeadObjectResponse) {}
 
   // Metadata возвращает метаданные объекта и узел, с которого его нужно загрузить 
   rpc GetObject(GetObjectRequest) returns (GetObjectResponse) {}
@@ -85,6 +91,20 @@ message CreateBucketResponse {
   BucketMetadata bucket = 1;
 }
 
+message HeadBucketRequest {
+  string bucket = 1;
+  string user_id = 2;
+}
+
+message HeadBucketResponse {
+  BucketMetadata metadata = 1;
+}
+
+message DeleteBucketRequest {
+  string name = 1;
+  string user_id = 2;
+}
+
 message ListObjectsRequest {
   string bucket = 1;
   string prefix = 2;
@@ -97,11 +117,6 @@ message ListObjectsRequest {
 message ListObjectsResponse {
   repeated ObjectMetadata objects = 1;
   repeated string common_prefixes = 2;
-}
-
-message DeleteBucketRequest {
-  string name = 1;
-  string user_id = 2;
 }
 
 message InitUploadRequest {
@@ -130,6 +145,16 @@ message CommitUploadRequest {
 message AbortUploadRequest {
   string upload_id = 1;
   string user_id = 2;
+}
+
+message HeadObjectRequest {
+  string bucket = 1;
+  string key = 2;
+  string user_id = 3;
+}
+
+message HeadObjectResponse {
+  ObjectMetadata metadata = 1;
 }
 
 message GetObjectRequest {

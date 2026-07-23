@@ -89,6 +89,37 @@ func (c *Client) CreateBucket(ctx context.Context, userID uuid.UUID, name string
 	return bucket, nil
 }
 
+func (c *Client) HeadBucket(ctx context.Context, userID uuid.UUID, bucket string) (domain.BucketMetadata, error) {
+	req := &metadatapb.HeadBucketRequest{
+		Bucket: bucket,
+		UserId: userID.String(),
+	}
+
+	resp, err := c.client.HeadBucket(ctx, req)
+	if err != nil {
+		if status.Code(err) == codes.PermissionDenied {
+			return domain.BucketMetadata{}, fmt.Errorf("%w: %v", domain.ErrAccessDenied, err)
+		}
+		if status.Code(err) == codes.NotFound {
+			return domain.BucketMetadata{}, fmt.Errorf("%w: %v", domain.ErrBucketNotExists, err)
+		}
+		return domain.BucketMetadata{}, err
+	}
+
+	ownerID, err := uuid.Parse(resp.GetMetadata().GetOwnerId())
+	if err != nil {
+		return domain.BucketMetadata{}, err
+	}
+
+	meta := domain.BucketMetadata{
+		Name:      resp.GetMetadata().Name,
+		OwnerID:   ownerID,
+		CreatedAt: resp.GetMetadata().CreatedAt.AsTime(),
+	}
+
+	return meta, nil
+}
+
 func (c *Client) DeleteBucket(ctx context.Context, userID uuid.UUID, name string) error {
 	req := &metadatapb.DeleteBucketRequest{
 		Name:   name,
@@ -110,6 +141,64 @@ func (c *Client) DeleteBucket(ctx context.Context, userID uuid.UUID, name string
 	}
 
 	return nil
+}
+
+func (c *Client) ListObjects(ctx context.Context, userID uuid.UUID, bucket, prefix, delimiter string, limit, offset int) ([]domain.ObjectMetadata, []string, error) {
+	req := &metadatapb.ListObjectsRequest{
+		Bucket:    bucket,
+		Prefix:    prefix,
+		Delimiter: delimiter,
+		Limit:     int32(limit),
+		Offset:    int32(offset),
+		UserId:    userID.String(),
+	}
+
+	resp, err := c.client.ListObjects(ctx, req)
+	if err != nil {
+		if status.Code(err) == codes.PermissionDenied {
+			return nil, nil, fmt.Errorf("%w: %v", domain.ErrAccessDenied, err)
+		}
+		if status.Code(err) == codes.NotFound {
+			return nil, nil, fmt.Errorf("%w: %v", domain.ErrBucketNotExists, err)
+		}
+		return nil, nil, err
+	}
+
+	objspb := resp.GetObjects()
+	prefixes := resp.GetCommonPrefixes()
+
+	objs := make([]domain.ObjectMetadata, 0, len(objspb))
+
+	for _, objpb := range objspb {
+		nodeID, err := uuid.Parse(objpb.GetStorageNodeId())
+		if err != nil {
+			return nil, nil, err
+		}
+
+		ownerID, err := uuid.Parse(objpb.GetOwnerId())
+		if err != nil {
+			return nil, nil, err
+		}
+
+		obj := domain.ObjectMetadata{
+			Bucket:         objpb.GetBucket(),
+			Key:            objpb.GetKey(),
+			ObjectPath:     objpb.GetObjectPath(),
+			Size:           objpb.GetSize(),
+			StorageNodeID:  nodeID,
+			CreatedAt:      objpb.GetCreatedAt().AsTime(),
+			UpdatedAt:      objpb.GetUpdatedAt().AsTime(),
+			ContentType:    objpb.GetContentType(),
+			Hash:           objpb.GetHash(),
+			SystemMetadata: objpb.GetSystemMetadata(),
+			UserMetadata:   objpb.GetUserMetadata(),
+			OwnerID:        ownerID,
+		}
+
+		objs = append(objs, obj)
+	}
+
+	return objs, prefixes, nil
 }
 
 func (c *Client) InitUpload(
@@ -215,6 +304,55 @@ func (c *Client) AbortUpload(ctx context.Context, userID, uploadID uuid.UUID) er
 	return nil
 }
 
+func (c *Client) HeadObject(ctx context.Context, userID uuid.UUID, bucket, key string) (domain.ObjectMetadata, error) {
+	req := &metadatapb.HeadObjectRequest{
+		Bucket: bucket,
+		Key:    key,
+		UserId: userID.String(),
+	}
+
+	resp, err := c.client.HeadObject(ctx, req)
+	if err != nil {
+		if status.Code(err) == codes.PermissionDenied {
+			return domain.ObjectMetadata{}, fmt.Errorf("%w: %v", domain.ErrAccessDenied, err)
+		}
+		if status.Code(err) == codes.FailedPrecondition {
+			return domain.ObjectMetadata{}, fmt.Errorf("%w: %v", domain.ErrBucketNotExists, err)
+		}
+		if status.Code(err) == codes.NotFound {
+			return domain.ObjectMetadata{}, fmt.Errorf("%w: %v", domain.ErrKeyNotExists, err)
+		}
+		return domain.ObjectMetadata{}, err
+	}
+
+	storageNodeID, err := uuid.Parse(resp.GetMetadata().GetStorageNodeId())
+	if err != nil {
+		return domain.ObjectMetadata{}, err
+	}
+
+	ownerID, err := uuid.Parse(resp.GetMetadata().GetOwnerId())
+	if err != nil {
+		return domain.ObjectMetadata{}, err
+	}
+
+	meta := domain.ObjectMetadata{
+		Bucket:         resp.GetMetadata().GetBucket(),
+		Key:            resp.GetMetadata().GetKey(),
+		ObjectPath:     resp.GetMetadata().GetObjectPath(),
+		Size:           resp.GetMetadata().GetSize(),
+		StorageNodeID:  storageNodeID,
+		CreatedAt:      resp.GetMetadata().GetCreatedAt().AsTime(),
+		UpdatedAt:      resp.GetMetadata().GetUpdatedAt().AsTime(),
+		ContentType:    resp.GetMetadata().GetContentType(),
+		Hash:           resp.GetMetadata().GetHash(),
+		SystemMetadata: resp.GetMetadata().GetSystemMetadata(),
+		UserMetadata:   resp.GetMetadata().GetUserMetadata(),
+		OwnerID:        ownerID,
+	}
+
+	return meta, nil
+}
+
 func (c *Client) GetObject(ctx context.Context, userID uuid.UUID, bucket, key string) (domain.ObjectMetadata, domain.StorageNode, error) {
 	req := &metadatapb.GetObjectRequest{
 		Bucket: bucket,
@@ -267,64 +405,6 @@ func (c *Client) GetObject(ctx context.Context, userID uuid.UUID, bucket, key st
 	}
 
 	return meta, node, nil
-}
-
-func (c *Client) ListObjects(ctx context.Context, userID uuid.UUID, bucket, prefix, delimiter string, limit, offset int) ([]domain.ObjectMetadata, []string, error) {
-	req := &metadatapb.ListObjectsRequest{
-		Bucket:    bucket,
-		Prefix:    prefix,
-		Delimiter: delimiter,
-		Limit:     int32(limit),
-		Offset:    int32(offset),
-		UserId:    userID.String(),
-	}
-
-	resp, err := c.client.ListObjects(ctx, req)
-	if err != nil {
-		if status.Code(err) == codes.PermissionDenied {
-			return nil, nil, fmt.Errorf("%w: %v", domain.ErrAccessDenied, err)
-		}
-		if status.Code(err) == codes.NotFound {
-			return nil, nil, fmt.Errorf("%w: %v", domain.ErrBucketNotExists, err)
-		}
-		return nil, nil, err
-	}
-
-	objspb := resp.GetObjects()
-	prefixes := resp.GetCommonPrefixes()
-
-	objs := make([]domain.ObjectMetadata, 0, len(objspb))
-
-	for _, objpb := range objspb {
-		nodeID, err := uuid.Parse(objpb.GetStorageNodeId())
-		if err != nil {
-			return nil, nil, err
-		}
-
-		ownerID, err := uuid.Parse(objpb.GetOwnerId())
-		if err != nil {
-			return nil, nil, err
-		}
-
-		obj := domain.ObjectMetadata{
-			Bucket:         objpb.GetBucket(),
-			Key:            objpb.GetKey(),
-			ObjectPath:     objpb.GetObjectPath(),
-			Size:           objpb.GetSize(),
-			StorageNodeID:  nodeID,
-			CreatedAt:      objpb.GetCreatedAt().AsTime(),
-			UpdatedAt:      objpb.GetUpdatedAt().AsTime(),
-			ContentType:    objpb.GetContentType(),
-			Hash:           objpb.GetHash(),
-			SystemMetadata: objpb.GetSystemMetadata(),
-			UserMetadata:   objpb.GetUserMetadata(),
-			OwnerID:        ownerID,
-		}
-
-		objs = append(objs, obj)
-	}
-
-	return objs, prefixes, nil
 }
 
 func (c *Client) DeleteObject(ctx context.Context, userID uuid.UUID, bucket, key string) error {
