@@ -44,16 +44,12 @@ func (h *Handler) CreateUser(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	name := req.URL.Query().Get("name") // TODO: change from query to path
-	if name == "" {
-		h.log.Debug("name is required", "name", name, "request_id", requestID)
-		resp, status := h.marshaller.Error(errors.New("name is required"), "", requestID)
-		w.WriteHeader(status)
-		w.Write(resp)
+	username, ok := h.extractPathValue(w, req, "username")
+	if !ok {
 		return
 	}
 
-	_, err = h.gateway.CreateUser(req.Context(), name)
+	_, err := h.gateway.CreateUser(req.Context(), username)
 	if err != nil {
 		h.handleError(w, req, err, "")
 		return

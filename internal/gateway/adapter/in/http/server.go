@@ -38,7 +38,7 @@ func NewServer(
 	handler := NewHandler(gateway, marshaller, log)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("PUT /users", middleware.RequestID(handler.CreateUser))
+	mux.HandleFunc("PUT /users/{username}", middleware.RequestID(handler.CreateUser))
 
 	mux.HandleFunc("GET /storage/", middleware.RequestID(middleware.Auth(handler.ListBuckets, verifier)))
 
