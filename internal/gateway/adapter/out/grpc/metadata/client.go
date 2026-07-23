@@ -75,9 +75,6 @@ func (c *Client) CreateBucket(ctx context.Context, userID uuid.UUID, name string
 
 	resp, err := c.client.CreateBucket(ctx, req)
 	if err != nil {
-		if status.Code(err) == codes.PermissionDenied {
-			return domain.BucketMetadata{}, fmt.Errorf("%w: %v", domain.ErrAccessDenied, err)
-		}
 		if status.Code(err) == codes.AlreadyExists {
 			return domain.BucketMetadata{}, fmt.Errorf("%w: %v", domain.ErrBucketAlreadyExists, err)
 		}
@@ -230,7 +227,7 @@ func (c *Client) GetObject(ctx context.Context, userID uuid.UUID, bucket, key st
 		if status.Code(err) == codes.PermissionDenied {
 			return domain.ObjectMetadata{}, domain.StorageNode{}, fmt.Errorf("%w: %v", domain.ErrAccessDenied, err)
 		}
-		if status.Code(err) == codes.OutOfRange {
+		if status.Code(err) == codes.FailedPrecondition {
 			return domain.ObjectMetadata{}, domain.StorageNode{}, fmt.Errorf("%w: %v", domain.ErrBucketNotExists, err)
 		}
 		if status.Code(err) == codes.NotFound {
@@ -341,7 +338,7 @@ func (c *Client) DeleteObject(ctx context.Context, userID uuid.UUID, bucket, key
 		if status.Code(err) == codes.PermissionDenied {
 			return fmt.Errorf("%w: %v", domain.ErrAccessDenied, err)
 		}
-		if status.Code(err) == codes.OutOfRange {
+		if status.Code(err) == codes.FailedPrecondition {
 			return fmt.Errorf("%w: %v", domain.ErrBucketNotExists, err)
 		}
 		if status.Code(err) == codes.NotFound {
