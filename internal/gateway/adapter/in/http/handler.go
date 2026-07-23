@@ -38,12 +38,6 @@ func NewHandler(gateway *application.Gateway, marshaller Marshaller, log *slog.L
 }
 
 func (h *Handler) CreateUser(w http.ResponseWriter, req *http.Request) {
-	requestID, err := middleware.GetRequestID(req.Context())
-	if err != nil {
-		h.handleError(w, req, err, "/")
-		return
-	}
-
 	username, ok := h.extractPathValue(w, req, "username")
 	if !ok {
 		return
@@ -59,7 +53,7 @@ func (h *Handler) CreateUser(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) ListBuckets(w http.ResponseWriter, req *http.Request) {
-	_, user, ok := h.extractContextInfo(w, req)
+	user, ok := h.getUserFromContext(w, req)
 	if !ok {
 		return
 	}
@@ -84,7 +78,7 @@ func (h *Handler) ListBuckets(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) CreateBucket(w http.ResponseWriter, req *http.Request) {
-	_, user, ok := h.extractContextInfo(w, req)
+	user, ok := h.getUserFromContext(w, req)
 	if !ok {
 		return
 	}
@@ -103,7 +97,7 @@ func (h *Handler) CreateBucket(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) ListObjects(w http.ResponseWriter, req *http.Request) {
-	_, user, ok := h.extractContextInfo(w, req)
+	user, ok := h.getUserFromContext(w, req)
 	if !ok {
 		return
 	}
@@ -157,7 +151,7 @@ func (h *Handler) ListObjects(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) DeleteBucket(w http.ResponseWriter, req *http.Request) {
-	_, user, ok := h.extractContextInfo(w, req)
+	user, ok := h.getUserFromContext(w, req)
 	if !ok {
 		return
 	}
@@ -176,7 +170,7 @@ func (h *Handler) DeleteBucket(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) PutObject(w http.ResponseWriter, req *http.Request) {
-	_, user, ok := h.extractContextInfo(w, req)
+	user, ok := h.getUserFromContext(w, req)
 	if !ok {
 		return
 	}
@@ -210,7 +204,7 @@ func (h *Handler) PutObject(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) GetObject(w http.ResponseWriter, req *http.Request) {
-	_, user, ok := h.extractContextInfo(w, req)
+	user, ok := h.getUserFromContext(w, req)
 	if !ok {
 		return
 	}
@@ -254,7 +248,7 @@ func (h *Handler) GetObject(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) DeleteObject(w http.ResponseWriter, req *http.Request) {
-	_, user, ok := h.extractContextInfo(w, req)
+	user, ok := h.getUserFromContext(w, req)
 	if !ok {
 		return
 	}
@@ -278,14 +272,14 @@ func (h *Handler) DeleteObject(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (h *Handler) extractContextInfo(w http.ResponseWriter, req *http.Request) (uuid.UUID, domain.User, bool) {
+func (h *Handler) getUserFromContext(w http.ResponseWriter, req *http.Request) (domain.User, bool) {
 	reqID, err := middleware.GetRequestID(req.Context())
 	if err != nil {
 		h.log.Error("missing request id", "error", err)
 		resp, status := h.marshaller.Error(errors.New("internal server error"), "", uuid.Nil)
 		w.WriteHeader(status)
 		w.Write(resp)
-		return uuid.Nil, domain.User{}, false
+		return domain.User{}, false
 	}
 
 	user, err := middleware.GetUser(req.Context())
@@ -294,10 +288,10 @@ func (h *Handler) extractContextInfo(w http.ResponseWriter, req *http.Request) (
 		resp, status := h.marshaller.Error(domain.ErrAccessDenied, "", reqID)
 		w.WriteHeader(status)
 		w.Write(resp)
-		return reqID, domain.User{}, false
+		return domain.User{}, false
 	}
 
-	return reqID, user, true
+	return user, true
 }
 
 func (h *Handler) extractPathValue(w http.ResponseWriter, req *http.Request, name string) (string, bool) {
