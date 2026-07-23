@@ -12,6 +12,6 @@ storage:
   address: "storage:50051"
 
 garbage_collector:
-  interval: 1m
+  interval: 10m
   task_limit: 100
   task_timeout: 5s
