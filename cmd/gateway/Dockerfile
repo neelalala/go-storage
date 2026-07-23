@@ -14,14 +14,14 @@ COPY cmd/gateway ./cmd/gateway
 COPY internal/gateway ./internal/gateway
 COPY pkg/proto/storage/storage.proto ./pkg/proto/storage/
 COPY pkg/proto/metadata/metadata.proto ./pkg/proto/metadata/
-COPY Makefile ./Makefile
+COPY pkg/proto/users/users.proto ./pkg/proto/users/
 
 RUN protoc --go_out=. --go_opt=paths=source_relative \
   --go-grpc_out=. --go-grpc_opt=paths=source_relative \
   pkg/proto/storage/storage.proto
 RUN protoc --go_out=. --go_opt=paths=source_relative \
   --go-grpc_out=. --go-grpc_opt=paths=source_relative \
-  pkg/proto/metadata/metadata.proto \
+  pkg/proto/metadata/metadata.proto
 RUN protoc --go_out=. --go_opt=paths=source_relative \
   --go-grpc_out=. --go-grpc_opt=paths=source_relative \
   pkg/proto/users/users.proto
