@@ -2,6 +2,7 @@ package sql
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -75,6 +76,15 @@ func (r *UploadRepository) CreateUpload(ctx context.Context, upload domain.Uploa
 		return domain.Upload{}, fmt.Errorf("error creating new upload_id: %v", err)
 	}
 
+	systemMeta, err := json.Marshal(upload.SystemMetadata)
+	if err != nil {
+		return domain.Upload{}, fmt.Errorf("error marshaling system metadata: %v", err)
+	}
+	userMeta, err := json.Marshal(upload.UserMetadata)
+	if err != nil {
+		return domain.Upload{}, fmt.Errorf("error marshaling user metadata: %v", err)
+	}
+
 	if err := db.QueryRow(ctx, query,
 		uploadID,
 		upload.Bucket,
@@ -83,8 +93,8 @@ func (r *UploadRepository) CreateUpload(ctx context.Context, upload domain.Uploa
 		upload.Size,
 		upload.StorageNodeID,
 		upload.ContentType,
-		upload.SystemMetadata,
-		upload.UserMetadata,
+		systemMeta,
+		userMeta,
 		upload.OwnerID,
 	).Scan(
 		&upload.CreatedAt,
