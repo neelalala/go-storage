@@ -15,7 +15,7 @@ type MetadataService struct {
 	bucketRepo domain.BucketRepository
 	uploadRepo domain.UploadRepository
 	objRepo    domain.ObjectRepository
-	storage    domain.Storage
+	nodes      domain.NodeManager
 	hasher     domain.Hasher
 
 	log *slog.Logger
@@ -26,7 +26,7 @@ func NewMetadataService(
 	bucketRepo domain.BucketRepository,
 	uploadRepo domain.UploadRepository,
 	objRepo domain.ObjectRepository,
-	storage domain.Storage,
+	nodes domain.NodeManager,
 	hasher domain.Hasher,
 	log *slog.Logger,
 ) *MetadataService {
@@ -35,7 +35,7 @@ func NewMetadataService(
 		bucketRepo: bucketRepo,
 		uploadRepo: uploadRepo,
 		objRepo:    objRepo,
-		storage:    storage,
+		nodes:      nodes,
 		hasher:     hasher,
 		log:        log,
 	}
@@ -70,8 +70,9 @@ func (s *MetadataService) InitUpload(
 	contentType string,
 	systemMetadata map[string]string,
 	userMetadata map[string]string,
-) (domain.Upload, domain.Storage, error) {
+) (domain.Upload, domain.StorageNode, error) {
 	var saved domain.Upload
+	var node domain.StorageNode
 	err := s.transactor.WithinTransaction(ctx, func(ctx context.Context) error {
 		bucketMeta, err := s.bucketRepo.GetBucket(ctx, bucket)
 		if err != nil {
@@ -88,12 +89,17 @@ func (s *MetadataService) InitUpload(
 
 		objPath := fmt.Sprintf("%X-%s", s.hasher.Hash([]byte(bucket+key)), objUUID)
 
+		node, err = s.nodes.NextNode(ctx)
+		if err != nil {
+			return err
+		}
+
 		upload := domain.Upload{
 			Bucket:         bucket,
 			Key:            key,
 			ObjectPath:     objPath,
 			Size:           size,
-			StorageNodeID:  s.storage.ID,
+			StorageNodeID:  node.ID,
 			ContentType:    contentType,
 			SystemMetadata: systemMetadata,
 			UserMetadata:   userMetadata,
@@ -107,10 +113,10 @@ func (s *MetadataService) InitUpload(
 		return nil
 	})
 	if err != nil {
-		return domain.Upload{}, domain.Storage{}, err
+		return domain.Upload{}, domain.StorageNode{}, err
 	}
 
-	return saved, s.storage, nil
+	return saved, node, nil
 }
 
 func (s *MetadataService) CommitUpload(ctx context.Context, userID, uploadID uuid.UUID, hash string) error {
@@ -149,12 +155,18 @@ func (s *MetadataService) AbortUpload(ctx context.Context, userID, uploadID uuid
 	})
 }
 
-func (s *MetadataService) GetObject(ctx context.Context, userID uuid.UUID, bucket, key string) (domain.Object, domain.Storage, error) {
+func (s *MetadataService) GetObject(ctx context.Context, userID uuid.UUID, bucket, key string) (domain.Object, domain.StorageNode, error) {
 	obj, err := s.objRepo.GetObject(ctx, userID, bucket, key)
 	if err != nil {
-		return domain.Object{}, domain.Storage{}, err
+		return domain.Object{}, domain.StorageNode{}, err
 	}
-	return obj, s.storage, nil
+
+	node, err := s.nodes.GetNode(ctx, obj.StorageNodeID)
+	if err != nil {
+		return domain.Object{}, domain.StorageNode{}, err
+	}
+
+	return obj, node, nil
 }
 
 func (s *MetadataService) GetObjects(ctx context.Context, userID uuid.UUID, bucket, prefix, delimiter string, limit, offset int) ([]domain.Object, []string, error) {
