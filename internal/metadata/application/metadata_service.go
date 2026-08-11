@@ -81,7 +81,12 @@ func (s *MetadataService) InitUpload(
 			return domain.ErrAccessDenied
 		}
 
-		objPath := fmt.Sprintf("%X", s.hasher.Hash([]byte(bucket+key)))
+		objUUID, err := uuid.NewV7()
+		if err != nil {
+			return err
+		}
+
+		objPath := fmt.Sprintf("%X-%s", s.hasher.Hash([]byte(bucket+key)), objUUID)
 
 		upload := domain.Upload{
 			Bucket:         bucket,
