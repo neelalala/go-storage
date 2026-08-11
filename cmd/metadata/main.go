@@ -18,6 +18,7 @@ import (
 	"github.com/neelalala/go-storage/internal/metadata/adapter/out/grpc/storage"
 	"github.com/neelalala/go-storage/internal/metadata/adapter/out/hasher"
 	"github.com/neelalala/go-storage/internal/metadata/adapter/out/migrations"
+	"github.com/neelalala/go-storage/internal/metadata/adapter/out/nodes"
 	"github.com/neelalala/go-storage/internal/metadata/adapter/out/repository/sql"
 	"github.com/neelalala/go-storage/internal/metadata/application"
 	"github.com/neelalala/go-storage/internal/metadata/config"
@@ -63,10 +64,20 @@ func run(cfg config.Config, log *slog.Logger) error {
 	uploadRepo := sql.NewUploadRepository(pool)
 	objRepo := sql.NewObjectRepository(pool)
 
-	storageUUID, err := uuid.Parse(cfg.Storage.ID)
-	if err != nil {
-		return err
+	storageNodes := make([]domain.StorageNode, 0, len(cfg.Storage.Nodes))
+	for _, node := range cfg.Storage.Nodes {
+		storageUUID, err := uuid.Parse(node.ID)
+		if err != nil {
+			return err
+		}
+
+		storageNodes = append(storageNodes, domain.StorageNode{
+			ID:      storageUUID,
+			Address: node.Address,
+		})
 	}
+
+	nodes := nodes.NewRoundRobinNodeManager(storageNodes)
 
 	hasher := hasher.NewSHA256()
 
@@ -75,10 +86,7 @@ func run(cfg config.Config, log *slog.Logger) error {
 		bucketRepo,
 		uploadRepo,
 		objRepo,
-		domain.Storage{
-			ID:      storageUUID,
-			Address: cfg.Storage.Address,
-		},
+		nodes,
 		hasher,
 		log,
 	)
@@ -110,7 +118,6 @@ func run(cfg config.Config, log *slog.Logger) error {
 		log.Info("starting garbage collector")
 
 		garbageCollector.Start(ctx, cfg.GarbageCollector.Interval, cfg.GarbageCollector.TaskLimit, cfg.GarbageCollector.TaskTimeout)
-
 	}()
 
 	if err := server.Start(); err != nil {
