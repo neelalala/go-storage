@@ -8,10 +8,15 @@ grpc:
   address: ":50051"
 
 storage:
-  id: "78463b59-79ee-44c6-b610-18b4549d60f6"
-  address: "storage:50051"
+  nodes:
+    - id: "78463b59-79ee-44c6-b610-18b4549d60f6"
+      address: "storage-1:50051"
+    - id: "203faea7-1211-4234-8733-05cc840e348f"
+      address: "storage-2:50051"
+    - id: "111ebee6-29c7-46fe-ac62-85489820eec9"
+      address: "storage-3:50051"
 
 garbage_collector:
-  interval: 10m
+  interval: 5m
   task_limit: 100
   task_timeout: 5s
