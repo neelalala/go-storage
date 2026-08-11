@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/neelalala/go-storage/internal/storage/adapter/in/grpc"
+	"github.com/neelalala/go-storage/internal/storage/adapter/out/hash"
 	"github.com/neelalala/go-storage/internal/storage/adapter/out/store"
 	"github.com/neelalala/go-storage/internal/storage/application"
 	"github.com/neelalala/go-storage/internal/storage/config"
@@ -22,7 +23,7 @@ func main() {
 
 	cfg := config.MustLoad(configPath)
 
-	log := mustMakeLogger(cfg.LogLevel)
+	log := mustMakeLogger(cfg.Logger.LogLevel)
 
 	if err := run(cfg, log); err != nil {
 		log.Error("server failed", "error", err)
@@ -36,14 +37,19 @@ func run(cfg config.Config, log *slog.Logger) error {
 
 	log.Debug("config", fmt.Sprintf("%+v", cfg))
 
-	store := store.New(cfg.UploadRoot)
+	hasher := hash.NewMD5()
 
-	storage := application.NewStorage(store, log)
+	store, err := store.New(cfg.UploadRoot, hasher)
+	if err != nil {
+		return fmt.Errorf("could not create store: %w", err)
+	}
+
+	storage := application.NewStorage(store, cfg.NodeName, log)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
-	server := grpc.NewServer(cfg.GRPCConfig.Address, storage, log)
+	server := grpc.NewServer(cfg.GRPC.Address, storage, log)
 
 	go func() {
 		<-ctx.Done()

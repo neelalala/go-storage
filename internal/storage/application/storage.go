@@ -9,18 +9,20 @@ import (
 
 type Storage struct {
 	store domain.Store
+	name  string
 
 	log *slog.Logger
 }
 
-func NewStorage(store domain.Store, log *slog.Logger) *Storage {
+func NewStorage(store domain.Store, name string, log *slog.Logger) *Storage {
 	return &Storage{
 		store: store,
+		name:  name,
 		log:   log,
 	}
 }
 
-func (s *Storage) SaveObject(ctx context.Context, obj domain.Object) error {
+func (s *Storage) SaveObject(ctx context.Context, obj domain.Object) (string, error) {
 	s.log.Debug("save object",
 		"name", obj.Name,
 		"data_size", len(obj.Data),
@@ -29,7 +31,7 @@ func (s *Storage) SaveObject(ctx context.Context, obj domain.Object) error {
 	return s.store.Save(ctx, obj)
 }
 
-func (s *Storage) GetObject(ctx context.Context, name string) (domain.Object, error) {
+func (s *Storage) GetObject(ctx context.Context, name string) ([]byte, error) {
 	s.log.Debug("get object",
 		"name", name,
 	)

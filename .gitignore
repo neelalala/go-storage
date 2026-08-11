@@ -1,3 +1,8 @@
 .DS_Store
 bin/
-docs/architecture.jpg 
+docs/architecture.jpg
+pgdata/
+uploads/
+.env
+.idea/
+docs/TODO.md

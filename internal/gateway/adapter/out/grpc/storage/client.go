@@ -4,18 +4,21 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/neelalala/go-storage/internal/gateway/domain"
-	storagepb "github.com/neelalala/go-storage/pkg/proto/storage"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	"github.com/neelalala/go-storage/internal/gateway/domain"
+	storagepb "github.com/neelalala/go-storage/pkg/proto/storage"
 )
+
+var _ domain.Storage = (*Client)(nil)
 
 type Client struct {
 	client storagepb.StorageClient
 	conn   *grpc.ClientConn
 }
 
-func New(addr string) (*Client, error) {
+func NewClient(addr string) (*Client, error) {
 	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
@@ -31,7 +34,7 @@ func (c *Client) Close() error {
 	return c.conn.Close()
 }
 
-func (c *Client) SaveObject(ctx context.Context, obj domain.Object) error {
+func (c *Client) SaveObject(ctx context.Context, obj domain.Object) (string, error) {
 	req := &storagepb.SaveRequest{
 		Object: &storagepb.Object{
 			Name: obj.Name,
@@ -39,12 +42,12 @@ func (c *Client) SaveObject(ctx context.Context, obj domain.Object) error {
 		},
 	}
 
-	_, err := c.client.SaveObject(ctx, req)
+	resp, err := c.client.SaveObject(ctx, req)
 	if err != nil {
-		return fmt.Errorf("error saving object: %w", err)
+		return "", fmt.Errorf("error saving object: %w", err)
 	}
 
-	return nil
+	return resp.GetHash(), nil
 }
 
 func (c *Client) GetObject(ctx context.Context, name string) (domain.Object, error) {
@@ -58,8 +61,8 @@ func (c *Client) GetObject(ctx context.Context, name string) (domain.Object, err
 	}
 
 	obj := domain.Object{
-		Name: resp.GetObject().GetName(),
-		Data: resp.GetObject().GetData(),
+		Name: name,
+		Data: resp.GetData(),
 	}
 
 	return obj, nil
