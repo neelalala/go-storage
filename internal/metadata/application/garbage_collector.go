@@ -6,11 +6,12 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/neelalala/go-storage/internal/metadata/domain"
 )
 
 type StorageDeleter interface {
-	DeleteObject(ctx context.Context, path string) error
+	DeleteObjectOn(ctx context.Context, nodeID uuid.UUID, path string) error
 }
 
 type GarbageCollector struct {
@@ -39,7 +40,8 @@ func (gc *GarbageCollector) Start(ctx context.Context, interval time.Duration, t
 			return
 		case <-ticker.C:
 			if err := gc.deleteObjects(taskLimit, taskTimeout); err != nil {
-				gc.log.Error("garbage collector",
+				gc.log.Error(
+					"garbage collector",
 					"method", "start",
 					"context", "deleteObjects",
 					"error", err,
@@ -56,7 +58,8 @@ func (gc *GarbageCollector) deleteObjects(limit int, timeout time.Duration) erro
 	tasks, err := gc.gcRepo.GetPendingGCTasks(ctx, limit)
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
-			gc.log.Error("garbage collector",
+			gc.log.Error(
+				"garbage collector",
 				"method", "delete objects",
 				"context", "GarbageCollector.GetPendingGCTasks",
 				"message", "deadline exceeded",
@@ -67,23 +70,26 @@ func (gc *GarbageCollector) deleteObjects(limit int, timeout time.Duration) erro
 		return err
 	}
 
-	gc.log.Debug("garbage collector",
+	gc.log.Debug(
+		"garbage collector",
 		"method", "delete objects",
 		"message", "got tasks",
 		"count", len(tasks),
 	)
 
 	for _, task := range tasks {
-		err := gc.storage.DeleteObject(ctx, task.ObjectPath)
+		err := gc.storage.DeleteObjectOn(ctx, task.StorageNodeID, task.ObjectPath)
 		if err != nil {
 			if err := gc.gcRepo.IncrementGCTaskAttempts(ctx, task.DeletionID); err != nil {
-				gc.log.Error("garbage collector",
+				gc.log.Error(
+					"garbage collector",
 					"method", "delete objects",
 					"context", "GarbageCollector.IncrementGCTaskAttempts",
 					"error", err,
 				)
 			}
-			gc.log.Error("garbage collector",
+			gc.log.Error(
+				"garbage collector",
 				"method", "delete objects",
 				"context", "StorageDeleter.DeleteObject",
 				"error", err,
@@ -91,7 +97,8 @@ func (gc *GarbageCollector) deleteObjects(limit int, timeout time.Duration) erro
 		}
 
 		if err := gc.gcRepo.CompleteGCTask(ctx, task.DeletionID); err != nil {
-			gc.log.Error("garbage collector",
+			gc.log.Error(
+				"garbage collector",
 				"method", "delete objects",
 				"context", "GCRepository.CompleteGCTask",
 				"error", err,
