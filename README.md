@@ -52,7 +52,7 @@ Metadata Service хранит:
 - system metadata (map string -> string)
 - user metadata (map string -> string)
 
-## 03 - Несколько Storage Node
+## 03 - [Несколько Storage Node](/docs/03-stage.md) ✅
 
 Данные сохраняются на один из нескольких узлов. Metadata Service выбирает, на какой из узлов попадет объект
 
