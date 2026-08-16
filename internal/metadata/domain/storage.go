@@ -11,7 +11,7 @@ type StorageNode struct {
 	Address string
 }
 
-type NodeManager interface {
+type NodeRegistry interface {
 	NextNode(ctx context.Context) (StorageNode, error)
 	GetNode(ctx context.Context, id uuid.UUID) (StorageNode, error)
 }

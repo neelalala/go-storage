@@ -15,7 +15,7 @@ type MetadataService struct {
 	bucketRepo domain.BucketRepository
 	uploadRepo domain.UploadRepository
 	objRepo    domain.ObjectRepository
-	nodes      domain.NodeManager
+	nodes      domain.NodeRegistry
 	hasher     domain.Hasher
 
 	log *slog.Logger
@@ -26,7 +26,7 @@ func NewMetadataService(
 	bucketRepo domain.BucketRepository,
 	uploadRepo domain.UploadRepository,
 	objRepo domain.ObjectRepository,
-	nodes domain.NodeManager,
+	nodes domain.NodeRegistry,
 	hasher domain.Hasher,
 	log *slog.Logger,
 ) *MetadataService {

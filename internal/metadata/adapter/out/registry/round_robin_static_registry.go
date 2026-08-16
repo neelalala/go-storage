@@ -1,4 +1,4 @@
-package nodes
+package registry
 
 import (
 	"context"
@@ -10,29 +10,29 @@ import (
 	"github.com/neelalala/go-storage/internal/metadata/domain"
 )
 
-var _ domain.NodeManager = (*RoundRobinNodeManager)(nil)
+var _ domain.NodeRegistry = (*RoundRobinStaticNodeRegistry)(nil)
 
-type RoundRobinNodeManager struct {
+type RoundRobinStaticNodeRegistry struct {
 	nodes   []domain.StorageNode
 	nodeMap map[uuid.UUID]domain.StorageNode
 
 	counter atomic.Uint64
 }
 
-func NewRoundRobinNodeManager(nodes []domain.StorageNode) *RoundRobinNodeManager {
+func NewRoundRobinStaticNodeRegistry(nodes []domain.StorageNode) *RoundRobinStaticNodeRegistry {
 	nodeMap := make(map[uuid.UUID]domain.StorageNode, len(nodes))
 
 	for _, n := range nodes {
 		nodeMap[n.ID] = n
 	}
 
-	return &RoundRobinNodeManager{
+	return &RoundRobinStaticNodeRegistry{
 		nodes:   nodes,
 		nodeMap: nodeMap,
 	}
 }
 
-func (m *RoundRobinNodeManager) NextNode(ctx context.Context) (domain.StorageNode, error) {
+func (m *RoundRobinStaticNodeRegistry) NextNode(ctx context.Context) (domain.StorageNode, error) {
 	if len(m.nodes) == 0 {
 		return domain.StorageNode{}, errors.New("no storage nodes available")
 	}
@@ -44,7 +44,7 @@ func (m *RoundRobinNodeManager) NextNode(ctx context.Context) (domain.StorageNod
 	return node, nil
 }
 
-func (m *RoundRobinNodeManager) GetNode(ctx context.Context, id uuid.UUID) (domain.StorageNode, error) {
+func (m *RoundRobinStaticNodeRegistry) GetNode(ctx context.Context, id uuid.UUID) (domain.StorageNode, error) {
 	node, ok := m.nodeMap[id]
 	if !ok {
 		return domain.StorageNode{}, fmt.Errorf("no node with id %s", id)
