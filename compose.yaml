@@ -7,7 +7,11 @@ services:
     depends_on:
       metadata:
         condition: service_started
-      storage:
+      storage-1:
+        condition: service_started
+      storage-2:
+        condition: service_started
+      storage-3:
         condition: service_started
     ports:
       - "8080:80"
@@ -36,14 +40,37 @@ services:
     env_file:
       - .env
 
-  storage:
+  storage-1:
     build:
       context: .
       dockerfile: cmd/storage/Dockerfile
     volumes:
-      - ./uploads:/uploads/ver1
+      - ./uploads/node1:/uploads/ver1
     restart: unless-stopped
     environment:
+      - NODE_NAME=node1
+      - NO_PROXY=postgres,localhost,127.0.0.1
+
+  storage-2:
+    build:
+      context: .
+      dockerfile: cmd/storage/Dockerfile
+    volumes:
+      - ./uploads/node2:/uploads/ver1
+    restart: unless-stopped
+    environment:
+      - NODE_NAME=node2
+      - NO_PROXY=postgres,localhost,127.0.0.1
+
+  storage-3:
+    build:
+      context: .
+      dockerfile: cmd/storage/Dockerfile
+    volumes:
+      - ./uploads/node3:/uploads/ver1
+    restart: unless-stopped
+    environment:
+      - NODE_NAME=node3
       - NO_PROXY=postgres,localhost,127.0.0.1
 
   postgres:

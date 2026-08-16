@@ -25,7 +25,7 @@ Client -> Gateway -> Node
 - `DELETE bucket/object`
 - `GET bucket` (решено сделать этот эндпоинт на следующем этапе)
 
-## [02 - Metadata Service](/docs/02-stage.md)
+## [02 - Metadata Service](/docs/02-stage.md) ✅
 
 Сервис, знающий о файлах. Промежуточный этап для хранения данных на нескольких узлах. Освобождает Gateway от будущей логики распределения между узлами
 
@@ -52,9 +52,9 @@ Metadata Service хранит:
 - system metadata (map string -> string)
 - user metadata (map string -> string)
 
-## 03 - Несколько Storage Node
+## 03 - [Несколько Storage Node](/docs/03-stage.md) ✅
 
-Данные сохраняются на один из нескольких узлов. Metadata Service выбирает, на какой их узлов попадет объект
+Данные сохраняются на один из нескольких узлов. Metadata Service выбирает, на какой из узлов попадет объект
 
 ### Архитектура
 

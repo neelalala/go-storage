@@ -1,8 +1,17 @@
 package domain
 
-import "github.com/google/uuid"
+import (
+	"context"
 
-type Storage struct {
+	"github.com/google/uuid"
+)
+
+type StorageNode struct {
 	ID      uuid.UUID
 	Address string
+}
+
+type NodeRegistry interface {
+	NextNode(ctx context.Context) (StorageNode, error)
+	GetNode(ctx context.Context, id uuid.UUID) (StorageNode, error)
 }
