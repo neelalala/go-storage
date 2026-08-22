@@ -1299,6 +1299,58 @@ func (x *DeleteObjectRequest) GetUserId() string {
 	return ""
 }
 
+type HeartbeatRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	NodeId         string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	FreeSpaceBytes uint64                 `protobuf:"varint,2,opt,name=free_space_bytes,json=freeSpaceBytes,proto3" json:"free_space_bytes,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *HeartbeatRequest) Reset() {
+	*x = HeartbeatRequest{}
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HeartbeatRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HeartbeatRequest) ProtoMessage() {}
+
+func (x *HeartbeatRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_metadata_metadata_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HeartbeatRequest.ProtoReflect.Descriptor instead.
+func (*HeartbeatRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_metadata_metadata_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *HeartbeatRequest) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *HeartbeatRequest) GetFreeSpaceBytes() uint64 {
+	if x != nil {
+		return x.FreeSpaceBytes
+	}
+	return 0
+}
+
 var File_pkg_proto_metadata_metadata_proto protoreflect.FileDescriptor
 
 const file_pkg_proto_metadata_metadata_proto_rawDesc = "" +
@@ -1408,7 +1460,10 @@ const file_pkg_proto_metadata_metadata_proto_rawDesc = "" +
 	"\x13DeleteObjectRequest\x12\x16\n" +
 	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x10\n" +
 	"\x03key\x18\x02 \x01(\tR\x03key\x12\x17\n" +
-	"\auser_id\x18\x03 \x01(\tR\x06userId2\xc2\x06\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\"U\n" +
+	"\x10HeartbeatRequest\x12\x17\n" +
+	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12(\n" +
+	"\x10free_space_bytes\x18\x02 \x01(\x04R\x0efreeSpaceBytes2\xc2\x06\n" +
 	"\bMetadata\x12L\n" +
 	"\vListBuckets\x12\x1c.metadata.ListBucketsRequest\x1a\x1d.metadata.ListBucketsResponse\"\x00\x12O\n" +
 	"\fCreateBucket\x12\x1d.metadata.CreateBucketRequest\x1a\x1e.metadata.CreateBucketResponse\"\x00\x12I\n" +
@@ -1423,7 +1478,9 @@ const file_pkg_proto_metadata_metadata_proto_rawDesc = "" +
 	"\n" +
 	"HeadObject\x12\x1b.metadata.HeadObjectRequest\x1a\x1c.metadata.HeadObjectResponse\"\x00\x12F\n" +
 	"\tGetObject\x12\x1a.metadata.GetObjectRequest\x1a\x1b.metadata.GetObjectResponse\"\x00\x12G\n" +
-	"\fDeleteObject\x12\x1d.metadata.DeleteObjectRequest\x1a\x16.google.protobuf.Empty\"\x00B4Z2github.com/neelalala/go-storage/pkg/proto/metadatab\x06proto3"
+	"\fDeleteObject\x12\x1d.metadata.DeleteObjectRequest\x1a\x16.google.protobuf.Empty\"\x002R\n" +
+	"\rNodeDiscovery\x12A\n" +
+	"\tHeartbeat\x12\x1a.metadata.HeartbeatRequest\x1a\x16.google.protobuf.Empty\"\x00B4Z2github.com/neelalala/go-storage/pkg/proto/metadatab\x06proto3"
 
 var (
 	file_pkg_proto_metadata_metadata_proto_rawDescOnce sync.Once
@@ -1437,7 +1494,7 @@ func file_pkg_proto_metadata_metadata_proto_rawDescGZIP() []byte {
 	return file_pkg_proto_metadata_metadata_proto_rawDescData
 }
 
-var file_pkg_proto_metadata_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
+var file_pkg_proto_metadata_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
 var file_pkg_proto_metadata_metadata_proto_goTypes = []any{
 	(*BucketMetadata)(nil),        // 0: metadata.BucketMetadata
 	(*ObjectMetadata)(nil),        // 1: metadata.ObjectMetadata
@@ -1460,27 +1517,28 @@ var file_pkg_proto_metadata_metadata_proto_goTypes = []any{
 	(*GetObjectRequest)(nil),      // 18: metadata.GetObjectRequest
 	(*GetObjectResponse)(nil),     // 19: metadata.GetObjectResponse
 	(*DeleteObjectRequest)(nil),   // 20: metadata.DeleteObjectRequest
-	nil,                           // 21: metadata.ObjectMetadata.SystemMetadataEntry
-	nil,                           // 22: metadata.ObjectMetadata.UserMetadataEntry
-	nil,                           // 23: metadata.InitUploadRequest.SystemMetadataEntry
-	nil,                           // 24: metadata.InitUploadRequest.UserMetadataEntry
-	(*timestamppb.Timestamp)(nil), // 25: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),         // 26: google.protobuf.Empty
+	(*HeartbeatRequest)(nil),      // 21: metadata.HeartbeatRequest
+	nil,                           // 22: metadata.ObjectMetadata.SystemMetadataEntry
+	nil,                           // 23: metadata.ObjectMetadata.UserMetadataEntry
+	nil,                           // 24: metadata.InitUploadRequest.SystemMetadataEntry
+	nil,                           // 25: metadata.InitUploadRequest.UserMetadataEntry
+	(*timestamppb.Timestamp)(nil), // 26: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),         // 27: google.protobuf.Empty
 }
 var file_pkg_proto_metadata_metadata_proto_depIdxs = []int32{
-	25, // 0: metadata.BucketMetadata.created_at:type_name -> google.protobuf.Timestamp
-	25, // 1: metadata.ObjectMetadata.created_at:type_name -> google.protobuf.Timestamp
-	25, // 2: metadata.ObjectMetadata.updated_at:type_name -> google.protobuf.Timestamp
-	21, // 3: metadata.ObjectMetadata.system_metadata:type_name -> metadata.ObjectMetadata.SystemMetadataEntry
-	22, // 4: metadata.ObjectMetadata.user_metadata:type_name -> metadata.ObjectMetadata.UserMetadataEntry
+	26, // 0: metadata.BucketMetadata.created_at:type_name -> google.protobuf.Timestamp
+	26, // 1: metadata.ObjectMetadata.created_at:type_name -> google.protobuf.Timestamp
+	26, // 2: metadata.ObjectMetadata.updated_at:type_name -> google.protobuf.Timestamp
+	22, // 3: metadata.ObjectMetadata.system_metadata:type_name -> metadata.ObjectMetadata.SystemMetadataEntry
+	23, // 4: metadata.ObjectMetadata.user_metadata:type_name -> metadata.ObjectMetadata.UserMetadataEntry
 	0,  // 5: metadata.ListBucketsResponse.buckets:type_name -> metadata.BucketMetadata
 	0,  // 6: metadata.CreateBucketResponse.bucket:type_name -> metadata.BucketMetadata
 	0,  // 7: metadata.HeadBucketResponse.metadata:type_name -> metadata.BucketMetadata
 	1,  // 8: metadata.ListObjectsResponse.objects:type_name -> metadata.ObjectMetadata
-	23, // 9: metadata.InitUploadRequest.system_metadata:type_name -> metadata.InitUploadRequest.SystemMetadataEntry
-	24, // 10: metadata.InitUploadRequest.user_metadata:type_name -> metadata.InitUploadRequest.UserMetadataEntry
+	24, // 9: metadata.InitUploadRequest.system_metadata:type_name -> metadata.InitUploadRequest.SystemMetadataEntry
+	25, // 10: metadata.InitUploadRequest.user_metadata:type_name -> metadata.InitUploadRequest.UserMetadataEntry
 	2,  // 11: metadata.InitUploadResponse.storage_node:type_name -> metadata.Node
-	25, // 12: metadata.InitUploadResponse.created_at:type_name -> google.protobuf.Timestamp
+	26, // 12: metadata.InitUploadResponse.created_at:type_name -> google.protobuf.Timestamp
 	1,  // 13: metadata.HeadObjectResponse.metadata:type_name -> metadata.ObjectMetadata
 	1,  // 14: metadata.GetObjectResponse.metadata:type_name -> metadata.ObjectMetadata
 	2,  // 15: metadata.GetObjectResponse.storage_node:type_name -> metadata.Node
@@ -1495,19 +1553,21 @@ var file_pkg_proto_metadata_metadata_proto_depIdxs = []int32{
 	16, // 24: metadata.Metadata.HeadObject:input_type -> metadata.HeadObjectRequest
 	18, // 25: metadata.Metadata.GetObject:input_type -> metadata.GetObjectRequest
 	20, // 26: metadata.Metadata.DeleteObject:input_type -> metadata.DeleteObjectRequest
-	4,  // 27: metadata.Metadata.ListBuckets:output_type -> metadata.ListBucketsResponse
-	6,  // 28: metadata.Metadata.CreateBucket:output_type -> metadata.CreateBucketResponse
-	8,  // 29: metadata.Metadata.HeadBucket:output_type -> metadata.HeadBucketResponse
-	26, // 30: metadata.Metadata.DeleteBucket:output_type -> google.protobuf.Empty
-	11, // 31: metadata.Metadata.ListObjects:output_type -> metadata.ListObjectsResponse
-	13, // 32: metadata.Metadata.InitUpload:output_type -> metadata.InitUploadResponse
-	26, // 33: metadata.Metadata.CommitUpload:output_type -> google.protobuf.Empty
-	26, // 34: metadata.Metadata.AbortUpload:output_type -> google.protobuf.Empty
-	17, // 35: metadata.Metadata.HeadObject:output_type -> metadata.HeadObjectResponse
-	19, // 36: metadata.Metadata.GetObject:output_type -> metadata.GetObjectResponse
-	26, // 37: metadata.Metadata.DeleteObject:output_type -> google.protobuf.Empty
-	27, // [27:38] is the sub-list for method output_type
-	16, // [16:27] is the sub-list for method input_type
+	21, // 27: metadata.NodeDiscovery.Heartbeat:input_type -> metadata.HeartbeatRequest
+	4,  // 28: metadata.Metadata.ListBuckets:output_type -> metadata.ListBucketsResponse
+	6,  // 29: metadata.Metadata.CreateBucket:output_type -> metadata.CreateBucketResponse
+	8,  // 30: metadata.Metadata.HeadBucket:output_type -> metadata.HeadBucketResponse
+	27, // 31: metadata.Metadata.DeleteBucket:output_type -> google.protobuf.Empty
+	11, // 32: metadata.Metadata.ListObjects:output_type -> metadata.ListObjectsResponse
+	13, // 33: metadata.Metadata.InitUpload:output_type -> metadata.InitUploadResponse
+	27, // 34: metadata.Metadata.CommitUpload:output_type -> google.protobuf.Empty
+	27, // 35: metadata.Metadata.AbortUpload:output_type -> google.protobuf.Empty
+	17, // 36: metadata.Metadata.HeadObject:output_type -> metadata.HeadObjectResponse
+	19, // 37: metadata.Metadata.GetObject:output_type -> metadata.GetObjectResponse
+	27, // 38: metadata.Metadata.DeleteObject:output_type -> google.protobuf.Empty
+	27, // 39: metadata.NodeDiscovery.Heartbeat:output_type -> google.protobuf.Empty
+	28, // [28:40] is the sub-list for method output_type
+	16, // [16:28] is the sub-list for method input_type
 	16, // [16:16] is the sub-list for extension type_name
 	16, // [16:16] is the sub-list for extension extendee
 	0,  // [0:16] is the sub-list for field type_name
@@ -1524,9 +1584,9 @@ func file_pkg_proto_metadata_metadata_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_proto_metadata_metadata_proto_rawDesc), len(file_pkg_proto_metadata_metadata_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   25,
+			NumMessages:   26,
 			NumExtensions: 0,
-			NumServices:   1,
+			NumServices:   2,
 		},
 		GoTypes:           file_pkg_proto_metadata_metadata_proto_goTypes,
 		DependencyIndexes: file_pkg_proto_metadata_metadata_proto_depIdxs,
