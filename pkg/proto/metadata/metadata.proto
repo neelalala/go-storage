@@ -180,5 +180,4 @@ message DeleteObjectRequest {
 
 message HeartbeatRequest {
   string node_id = 1;
-  uint64 free_space_bytes = 2;
 }
