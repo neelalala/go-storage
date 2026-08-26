@@ -15,8 +15,11 @@ type Hasher interface {
 }
 
 type NodeRegistry interface {
-	NextNode(context.Context) (domain.StorageNode, error)
 	GetNode(context.Context, uuid.UUID) (domain.StorageNode, error)
+}
+
+type NodeManager interface {
+	NextNode(context.Context) (domain.StorageNode, error)
 }
 
 type MetadataService struct {
@@ -24,7 +27,8 @@ type MetadataService struct {
 	bucketRepo domain.BucketRepository
 	uploadRepo domain.UploadRepository
 	objRepo    domain.ObjectRepository
-	nodes      NodeRegistry
+	registry   NodeRegistry
+	manager    NodeManager
 	hasher     Hasher
 
 	log *slog.Logger
@@ -35,7 +39,8 @@ func NewMetadataService(
 	bucketRepo domain.BucketRepository,
 	uploadRepo domain.UploadRepository,
 	objRepo domain.ObjectRepository,
-	nodes NodeRegistry,
+	registry NodeRegistry,
+	manager NodeManager,
 	hasher Hasher,
 	log *slog.Logger,
 ) *MetadataService {
@@ -44,7 +49,8 @@ func NewMetadataService(
 		bucketRepo: bucketRepo,
 		uploadRepo: uploadRepo,
 		objRepo:    objRepo,
-		nodes:      nodes,
+		registry:   registry,
+		manager:    manager,
 		hasher:     hasher,
 		log:        log,
 	}
@@ -98,7 +104,7 @@ func (s *MetadataService) InitUpload(
 
 		objPath := fmt.Sprintf("%X-%s", s.hasher.Hash([]byte(bucket+key)), objUUID)
 
-		node, err = s.nodes.NextNode(ctx)
+		node, err = s.manager.NextNode(ctx)
 		if err != nil {
 			return err
 		}
@@ -170,7 +176,7 @@ func (s *MetadataService) GetObject(ctx context.Context, userID uuid.UUID, bucke
 		return domain.Object{}, domain.StorageNode{}, err
 	}
 
-	node, err := s.nodes.GetNode(ctx, obj.StorageNodeID)
+	node, err := s.registry.GetNode(ctx, obj.StorageNodeID)
 	if err != nil {
 		return domain.Object{}, domain.StorageNode{}, err
 	}
