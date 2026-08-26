@@ -48,6 +48,7 @@ func NewStaticNodeRegistry(nodes []domain.StorageNode, ttl time.Duration, log *s
 		nodeMap:            nodeMap,
 		SweepInterval:      SweepInterval,
 		TTLCountToMarkDead: TTLCountToMarkNodeDead,
+		log:                log,
 	}
 }
 
