@@ -9,4 +9,5 @@ var (
 	ErrBucketNotEmpty      = errors.New("bucket bot empty")
 	ErrObjectNotFound      = errors.New("object not found")
 	ErrUploadNotExists     = errors.New("upload not exists")
+	ErrNoStorageNodes      = errors.New("no available storage nodes")
 )
