@@ -13,7 +13,7 @@ import (
 
 const (
 	SweepInterval          = 1 * time.Second
-	TTLCountToMarkNodeDead = 5
+	TTLCountToMarkNodeDead = 3
 )
 
 type nodeState struct {
