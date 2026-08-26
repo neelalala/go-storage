@@ -26,7 +26,8 @@ type NodeConfig struct {
 }
 
 type StorageConfig struct {
-	Nodes []NodeConfig `yaml:"nodes"`
+	TTL   time.Duration `yaml:"ttl" env:"NODE_TTL" env-default:"1m"`
+	Nodes []NodeConfig  `yaml:"nodes"`
 }
 
 type GarbageCollectorConfig struct {
