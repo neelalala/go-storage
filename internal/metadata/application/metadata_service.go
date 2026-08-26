@@ -10,13 +10,22 @@ import (
 	"github.com/neelalala/go-storage/internal/metadata/domain"
 )
 
+type Hasher interface {
+	Hash([]byte) []byte
+}
+
+type NodeRegistry interface {
+	NextNode(context.Context) (domain.StorageNode, error)
+	GetNode(context.Context, uuid.UUID) (domain.StorageNode, error)
+}
+
 type MetadataService struct {
 	transactor domain.Transactor
 	bucketRepo domain.BucketRepository
 	uploadRepo domain.UploadRepository
 	objRepo    domain.ObjectRepository
-	nodes      domain.NodeRegistry
-	hasher     domain.Hasher
+	nodes      NodeRegistry
+	hasher     Hasher
 
 	log *slog.Logger
 }
@@ -26,8 +35,8 @@ func NewMetadataService(
 	bucketRepo domain.BucketRepository,
 	uploadRepo domain.UploadRepository,
 	objRepo domain.ObjectRepository,
-	nodes domain.NodeRegistry,
-	hasher domain.Hasher,
+	nodes NodeRegistry,
+	hasher Hasher,
 	log *slog.Logger,
 ) *MetadataService {
 	return &MetadataService{
