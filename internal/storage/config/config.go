@@ -14,11 +14,15 @@ type GRPCConfig struct {
 	Address string `yaml:"address" env:"STORAGE_ADDRESS_GRPC" env-default:":50051"`
 }
 
+type NodeConfig struct {
+	ID         string `yaml:"id" env:"NODE_ID"`
+	UploadRoot string `yaml:"upload_root" env:"STORAGE_UPLOAD_ROOT" env-default:"uploads/"`
+}
+
 type Config struct {
-	GRPC       GRPCConfig   `yaml:"grpc"`
-	Logger     LoggerConfig `yaml:"logger"`
-	NodeName   string       `yaml:"node_name" env:"NODE_NAME"`
-	UploadRoot string       `yaml:"upload_root" env:"STORAGE_UPLOAD_ROOT" env-default:"uploads/"`
+	GRPC             GRPCConfig             `yaml:"grpc"`
+	Logger           LoggerConfig           `yaml:"logger"`
+	Node             NodeConfig             `yaml:"node"`
 }
 
 func MustLoad(configPath string) Config {
