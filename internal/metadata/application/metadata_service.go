@@ -15,6 +15,7 @@ type Hasher interface {
 }
 
 type NodeRegistry interface {
+	ProcessHeartbeat(context.Context, domain.StorageNode)
 	GetNode(context.Context, uuid.UUID) (domain.StorageNode, error)
 }
 
@@ -225,4 +226,8 @@ func (s *MetadataService) HeadBucket(ctx context.Context, userID uuid.UUID, buck
 
 func (s *MetadataService) HeadObject(ctx context.Context, userID uuid.UUID, bucket, key string) (domain.Object, error) {
 	return s.objRepo.GetObject(ctx, userID, bucket, key)
+}
+
+func (s *MetadataService) Heartbeat(ctx context.Context, node domain.StorageNode) {
+	s.registry.ProcessHeartbeat(ctx, node)
 }
