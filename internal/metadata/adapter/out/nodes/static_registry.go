@@ -78,7 +78,7 @@ func (r *StaticNodeRegistry) RunSweeper(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			r.checkNodes()
+			r.checkNodes(ctx)
 		}
 	}
 }
@@ -108,7 +108,7 @@ func (r *StaticNodeRegistry) GetNode(_ context.Context, id uuid.UUID) (domain.St
 	return state.node, nil
 }
 
-func (r *StaticNodeRegistry) checkNodes() {
+func (r *StaticNodeRegistry) checkNodes(ctx context.Context) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -117,6 +117,7 @@ func (r *StaticNodeRegistry) checkNodes() {
 
 		if diff > time.Duration(r.TTLCountToMarkDead)*r.ttl {
 			delete(r.nodeMap, id)
+			r.log.InfoContext(ctx, "node died", slog.String("node id", id.String()))
 		}
 	}
 }
