@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -22,6 +23,8 @@ import (
 // TODO: logging
 type Server struct {
 	metadatapb.UnimplementedMetadataServer
+	metadatapb.UnimplementedNodeDiscoveryServer
+
 	addr       string
 	grpcServer *grpc.Server
 	service    *application.MetadataService
@@ -40,6 +43,7 @@ func NewServer(addr string, service *application.MetadataService, log *slog.Logg
 	}
 
 	metadatapb.RegisterMetadataServer(grpcServer, server)
+	metadatapb.RegisterNodeDiscoveryServer(grpcServer, server)
 
 	return server
 }
@@ -403,6 +407,25 @@ func (s *Server) DeleteObject(ctx context.Context, req *metadatapb.DeleteObjectR
 		}
 		return nil, status.Errorf(codes.Internal, "error deleting object: %v", err)
 	}
+
+	return &emptypb.Empty{}, nil
+}
+
+func (s *Server) Heartbeat(ctx context.Context, req *metadatapb.HeartbeatRequest) (*emptypb.Empty, error) {
+	id, err := uuid.Parse(req.GetNodeId())
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "error parsing node id as UUID: %v", err)
+	}
+
+	p, ok := peer.FromContext(ctx)
+	if !ok {
+		return nil, status.Errorf(codes.Internal, "error getting peer from context: %v", err)
+	}
+
+	s.service.Heartbeat(ctx, domain.StorageNode{
+		ID:      id,
+		Address: p.Addr.String(),
+	})
 
 	return &emptypb.Empty{}, nil
 }
