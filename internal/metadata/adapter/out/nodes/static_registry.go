@@ -63,7 +63,7 @@ func (r *StaticNodeRegistry) ProcessHeartbeat(ctx context.Context, node domain.S
 	}
 
 	if exists {
-		r.log.DebugContext(ctx, "node heartbeat", slog.String("node id", node.ID.String()))
+		//	r.log.DebugContext(ctx, "node heartbeat", slog.String("node id", node.ID.String()))
 	} else {
 		r.log.InfoContext(ctx, "new node", slog.String("node id", node.ID.String()))
 	}
@@ -102,7 +102,7 @@ func (r *StaticNodeRegistry) GetNode(_ context.Context, id uuid.UUID) (domain.St
 
 	state, ok := r.nodeMap[id]
 	if !ok {
-		return domain.StorageNode{}, fmt.Errorf("no node with id %s", id)
+		return domain.StorageNode{}, fmt.Errorf("%w: id %s", domain.ErrStorageNodeNotFound, id)
 	}
 
 	return state.node, nil

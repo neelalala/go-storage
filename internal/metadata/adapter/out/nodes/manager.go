@@ -2,6 +2,7 @@ package nodes
 
 import (
 	"context"
+	"errors"
 	"slices"
 	"strings"
 	"sync/atomic"
@@ -32,7 +33,7 @@ func (m *RoundRobinNodeManager) NextNode(ctx context.Context) (domain.StorageNod
 	}
 
 	if len(nodes) == 0 {
-		return domain.StorageNode{}, domain.ErrNoStorageNodes
+		return domain.StorageNode{}, errors.New("no alive storage nodes")
 	}
 
 	slices.SortFunc(nodes, func(a, b domain.StorageNode) int {
