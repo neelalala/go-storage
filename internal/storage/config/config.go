@@ -12,7 +12,7 @@ type LoggerConfig struct {
 }
 
 type GRPCConfig struct {
-	Address string `yaml:"address" env:"STORAGE_ADDRESS_GRPC" env-default:":50051"`
+	Address string `yaml:"address" env:"SERVER_ADDRESS_GRPC" env-default:":50051"`
 }
 
 type DiscoveryServiceConfig struct {
