@@ -1302,6 +1302,7 @@ func (x *DeleteObjectRequest) GetUserId() string {
 type HeartbeatRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	NodeId        string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	NodeAddress   string                 `protobuf:"bytes,2,opt,name=node_address,json=nodeAddress,proto3" json:"node_address,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1339,6 +1340,13 @@ func (*HeartbeatRequest) Descriptor() ([]byte, []int) {
 func (x *HeartbeatRequest) GetNodeId() string {
 	if x != nil {
 		return x.NodeId
+	}
+	return ""
+}
+
+func (x *HeartbeatRequest) GetNodeAddress() string {
+	if x != nil {
+		return x.NodeAddress
 	}
 	return ""
 }
@@ -1452,9 +1460,10 @@ const file_pkg_proto_metadata_metadata_proto_rawDesc = "" +
 	"\x13DeleteObjectRequest\x12\x16\n" +
 	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x10\n" +
 	"\x03key\x18\x02 \x01(\tR\x03key\x12\x17\n" +
-	"\auser_id\x18\x03 \x01(\tR\x06userId\"+\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\"N\n" +
 	"\x10HeartbeatRequest\x12\x17\n" +
-	"\anode_id\x18\x01 \x01(\tR\x06nodeId2\xc2\x06\n" +
+	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12!\n" +
+	"\fnode_address\x18\x02 \x01(\tR\vnodeAddress2\xc2\x06\n" +
 	"\bMetadata\x12L\n" +
 	"\vListBuckets\x12\x1c.metadata.ListBucketsRequest\x1a\x1d.metadata.ListBucketsResponse\"\x00\x12O\n" +
 	"\fCreateBucket\x12\x1d.metadata.CreateBucketRequest\x1a\x1e.metadata.CreateBucketResponse\"\x00\x12I\n" +

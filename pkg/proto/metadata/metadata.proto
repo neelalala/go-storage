@@ -180,4 +180,5 @@ message DeleteObjectRequest {
 
 message HeartbeatRequest {
   string node_id = 1;
+  string node_address = 2;
 }
