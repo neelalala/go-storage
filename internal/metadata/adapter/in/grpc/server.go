@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -417,15 +416,17 @@ func (s *Server) Heartbeat(ctx context.Context, req *metadatapb.HeartbeatRequest
 		return nil, status.Errorf(codes.InvalidArgument, "error parsing node id as UUID: %v", err)
 	}
 
-	p, ok := peer.FromContext(ctx)
-	if !ok {
-		return nil, status.Errorf(codes.Internal, "error getting peer from context: %v", err)
+	addr := req.GetNodeAddress()
+	if addr == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "no node address provided")
 	}
 
-	s.service.Heartbeat(ctx, domain.StorageNode{
+	node := domain.StorageNode{
 		ID:      id,
-		Address: p.Addr.String(),
-	})
+		Address: addr,
+	}
+
+	s.service.Heartbeat(ctx, node)
 
 	return &emptypb.Empty{}, nil
 }
