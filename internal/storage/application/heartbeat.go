@@ -9,10 +9,10 @@ import (
 )
 
 type DiscoveryService interface {
-	Heartbeat(context.Context, uuid.UUID) error
+	Heartbeat(context.Context, uuid.UUID, string) error
 }
 
-func RunHeartbeat(ctx context.Context, service DiscoveryService, interval time.Duration, id uuid.UUID, log *slog.Logger) {
+func RunHeartbeat(ctx context.Context, service DiscoveryService, interval time.Duration, id uuid.UUID, addr string, log *slog.Logger) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
@@ -22,7 +22,7 @@ func RunHeartbeat(ctx context.Context, service DiscoveryService, interval time.D
 			log.Info("heartbeat stopped")
 			return
 		case <-ticker.C:
-			err := service.Heartbeat(ctx, id)
+			err := service.Heartbeat(ctx, id, addr)
 			if err != nil {
 				log.Error("error heartbeat", slog.String("error", err.Error()))
 			}
