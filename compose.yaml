@@ -48,7 +48,8 @@ services:
       - ./uploads/node1:/uploads/ver1
     restart: unless-stopped
     environment:
-      - NODE_NAME=node1
+      - NODE_ID=78463b59-79ee-44c6-b610-18b4549d60f6
+      - SERVER_ADDRESS_GRPC=storage-1:50051
       - NO_PROXY=postgres,localhost,127.0.0.1
 
   storage-2:
@@ -59,7 +60,8 @@ services:
       - ./uploads/node2:/uploads/ver1
     restart: unless-stopped
     environment:
-      - NODE_NAME=node2
+      - NODE_ID=203faea7-1211-4234-8733-05cc840e348f
+      - SERVER_ADDRESS_GRPC=storage-2:50051
       - NO_PROXY=postgres,localhost,127.0.0.1
 
   storage-3:
@@ -70,7 +72,8 @@ services:
       - ./uploads/node3:/uploads/ver1
     restart: unless-stopped
     environment:
-      - NODE_NAME=node3
+      - NODE_ID=111ebee6-29c7-46fe-ac62-85489820eec9
+      - SERVER_ADDRESS_GRPC=storage-3:50051
       - NO_PROXY=postgres,localhost,127.0.0.1
 
   postgres:

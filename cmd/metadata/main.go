@@ -18,7 +18,7 @@ import (
 	"github.com/neelalala/go-storage/internal/metadata/adapter/out/grpc/storage"
 	"github.com/neelalala/go-storage/internal/metadata/adapter/out/hasher"
 	"github.com/neelalala/go-storage/internal/metadata/adapter/out/migrations"
-	"github.com/neelalala/go-storage/internal/metadata/adapter/out/registry"
+	"github.com/neelalala/go-storage/internal/metadata/adapter/out/nodes"
 	"github.com/neelalala/go-storage/internal/metadata/adapter/out/repository/sql"
 	"github.com/neelalala/go-storage/internal/metadata/application"
 	"github.com/neelalala/go-storage/internal/metadata/config"
@@ -77,7 +77,9 @@ func run(cfg config.Config, log *slog.Logger) error {
 		})
 	}
 
-	nodesRegistry := registry.NewRoundRobinStaticNodeRegistry(storageNodes)
+	registry := nodes.NewStaticNodeRegistry(storageNodes, cfg.Storage.TTL, log)
+	go registry.RunSweeper(ctx)
+	manager := nodes.NewRoundRobinNodeManager(registry)
 
 	hasher := hasher.NewSHA256()
 
@@ -86,7 +88,8 @@ func run(cfg config.Config, log *slog.Logger) error {
 		bucketRepo,
 		uploadRepo,
 		objRepo,
-		nodesRegistry,
+		registry,
+		manager,
 		hasher,
 		log,
 	)

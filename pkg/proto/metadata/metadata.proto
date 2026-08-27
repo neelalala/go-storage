@@ -42,6 +42,10 @@ service Metadata {
   rpc DeleteObject(DeleteObjectRequest) returns (google.protobuf.Empty) {}
 }
 
+service NodeDiscovery {
+  rpc Heartbeat(HeartbeatRequest) returns (google.protobuf.Empty) {}
+}
+
 // DTOs
 
 message BucketMetadata {
@@ -172,4 +176,9 @@ message DeleteObjectRequest {
   string bucket = 1;
   string key = 2;
   string user_id = 3;
+}
+
+message HeartbeatRequest {
+  string node_id = 1;
+  string node_address = 2;
 }

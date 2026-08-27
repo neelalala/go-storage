@@ -9,7 +9,9 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/neelalala/go-storage/internal/storage/adapter/in/grpc"
+	"github.com/neelalala/go-storage/internal/storage/adapter/out/discovery"
 	"github.com/neelalala/go-storage/internal/storage/adapter/out/hash"
 	"github.com/neelalala/go-storage/internal/storage/adapter/out/store"
 	"github.com/neelalala/go-storage/internal/storage/application"
@@ -39,15 +41,27 @@ func run(cfg config.Config, log *slog.Logger) error {
 
 	hasher := hash.NewMD5()
 
-	store, err := store.New(cfg.UploadRoot, hasher)
+	store, err := store.New(cfg.Node.UploadRoot, hasher)
 	if err != nil {
 		return fmt.Errorf("could not create store: %w", err)
 	}
 
-	storage := application.NewStorage(store, cfg.NodeName, log)
+	storage := application.NewStorage(store, cfg.Node.ID, log)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
+
+	discoveryService, err := discovery.New(cfg.DiscoveryService.Address)
+	if err != nil {
+		return err
+	}
+
+	nodeID, err := uuid.Parse(cfg.Node.ID)
+	if err != nil {
+		return err
+	}
+
+	go application.RunHeartbeat(ctx, discoveryService, cfg.DiscoveryService.Interval, nodeID, cfg.GRPC.Address, log)
 
 	server := grpc.NewServer(cfg.GRPC.Address, storage, log)
 

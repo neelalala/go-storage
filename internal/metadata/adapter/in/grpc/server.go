@@ -22,6 +22,8 @@ import (
 // TODO: logging
 type Server struct {
 	metadatapb.UnimplementedMetadataServer
+	metadatapb.UnimplementedNodeDiscoveryServer
+
 	addr       string
 	grpcServer *grpc.Server
 	service    *application.MetadataService
@@ -40,6 +42,7 @@ func NewServer(addr string, service *application.MetadataService, log *slog.Logg
 	}
 
 	metadatapb.RegisterMetadataServer(grpcServer, server)
+	metadatapb.RegisterNodeDiscoveryServer(grpcServer, server)
 
 	return server
 }
@@ -403,6 +406,27 @@ func (s *Server) DeleteObject(ctx context.Context, req *metadatapb.DeleteObjectR
 		}
 		return nil, status.Errorf(codes.Internal, "error deleting object: %v", err)
 	}
+
+	return &emptypb.Empty{}, nil
+}
+
+func (s *Server) Heartbeat(ctx context.Context, req *metadatapb.HeartbeatRequest) (*emptypb.Empty, error) {
+	id, err := uuid.Parse(req.GetNodeId())
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "error parsing node id as UUID: %v", err)
+	}
+
+	addr := req.GetNodeAddress()
+	if addr == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "no node address provided")
+	}
+
+	node := domain.StorageNode{
+		ID:      id,
+		Address: addr,
+	}
+
+	s.service.Heartbeat(ctx, node)
 
 	return &emptypb.Empty{}, nil
 }

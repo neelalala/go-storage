@@ -10,13 +10,27 @@ import (
 	"github.com/neelalala/go-storage/internal/metadata/domain"
 )
 
+type Hasher interface {
+	Hash([]byte) []byte
+}
+
+type NodeRegistry interface {
+	ProcessHeartbeat(context.Context, domain.StorageNode)
+	GetNode(context.Context, uuid.UUID) (domain.StorageNode, error)
+}
+
+type NodeManager interface {
+	NextNode(context.Context) (domain.StorageNode, error)
+}
+
 type MetadataService struct {
 	transactor domain.Transactor
 	bucketRepo domain.BucketRepository
 	uploadRepo domain.UploadRepository
 	objRepo    domain.ObjectRepository
-	nodes      domain.NodeRegistry
-	hasher     domain.Hasher
+	registry   NodeRegistry
+	manager    NodeManager
+	hasher     Hasher
 
 	log *slog.Logger
 }
@@ -26,8 +40,9 @@ func NewMetadataService(
 	bucketRepo domain.BucketRepository,
 	uploadRepo domain.UploadRepository,
 	objRepo domain.ObjectRepository,
-	nodes domain.NodeRegistry,
-	hasher domain.Hasher,
+	registry NodeRegistry,
+	manager NodeManager,
+	hasher Hasher,
 	log *slog.Logger,
 ) *MetadataService {
 	return &MetadataService{
@@ -35,7 +50,8 @@ func NewMetadataService(
 		bucketRepo: bucketRepo,
 		uploadRepo: uploadRepo,
 		objRepo:    objRepo,
-		nodes:      nodes,
+		registry:   registry,
+		manager:    manager,
 		hasher:     hasher,
 		log:        log,
 	}
@@ -89,7 +105,7 @@ func (s *MetadataService) InitUpload(
 
 		objPath := fmt.Sprintf("%X-%s", s.hasher.Hash([]byte(bucket+key)), objUUID)
 
-		node, err = s.nodes.NextNode(ctx)
+		node, err = s.manager.NextNode(ctx)
 		if err != nil {
 			return err
 		}
@@ -161,7 +177,7 @@ func (s *MetadataService) GetObject(ctx context.Context, userID uuid.UUID, bucke
 		return domain.Object{}, domain.StorageNode{}, err
 	}
 
-	node, err := s.nodes.GetNode(ctx, obj.StorageNodeID)
+	node, err := s.registry.GetNode(ctx, obj.StorageNodeID)
 	if err != nil {
 		return domain.Object{}, domain.StorageNode{}, err
 	}
@@ -210,4 +226,8 @@ func (s *MetadataService) HeadBucket(ctx context.Context, userID uuid.UUID, buck
 
 func (s *MetadataService) HeadObject(ctx context.Context, userID uuid.UUID, bucket, key string) (domain.Object, error) {
 	return s.objRepo.GetObject(ctx, userID, bucket, key)
+}
+
+func (s *MetadataService) Heartbeat(ctx context.Context, node domain.StorageNode) {
+	s.registry.ProcessHeartbeat(ctx, node)
 }

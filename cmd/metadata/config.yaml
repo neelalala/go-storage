@@ -8,6 +8,7 @@ grpc:
   address: ":50051"
 
 storage:
+  ttl: 10s
   nodes:
     - id: "78463b59-79ee-44c6-b610-18b4549d60f6"
       address: "storage-1:50051"

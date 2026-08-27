@@ -12,4 +12,5 @@ var (
 	ErrUploadNotExists     = errors.New("upload not exists")
 	ErrUserAlreadyExists   = errors.New("user already exists")
 	ErrUserNotFound        = errors.New("user not found")
+	ErrNoStorageNodes      = errors.New("no available storage nodes")
 )
