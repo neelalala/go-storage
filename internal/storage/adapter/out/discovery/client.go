@@ -30,9 +30,10 @@ func (c *Client) Close() error {
 	return c.conn.Close()
 }
 
-func (c *Client) Heartbeat(ctx context.Context, id uuid.UUID) error {
+func (c *Client) Heartbeat(ctx context.Context, id uuid.UUID, addr string) error {
 	req := &metadatapb.HeartbeatRequest{
-		NodeId: id.String(),
+		NodeId:      id.String(),
+		NodeAddress: addr,
 	}
 
 	_, err := c.client.Heartbeat(ctx, req)
