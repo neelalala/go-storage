@@ -81,10 +81,7 @@ func run(cfg config.Config, log *slog.Logger) error {
 
 	gcRepo := sql.NewGCRepository(pool)
 
-	storage, err := storage.NewNodeManager(storageNodes)
-	if err != nil {
-		return err
-	}
+	storage := storage.NewNodeManager(registry, log)
 
 	garbageCollector := application.NewGarbageCollector(gcRepo, storage, log)
 
