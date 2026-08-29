@@ -65,7 +65,7 @@ Client -> Gateway -> Node 2
 
 Round-Robin стратегия выбора узла
 
-## [04 - Node discovery & Heartbeat](docs/04-stage.md) ✅
+## [04 - Node Discovery & Heartbeat](docs/04-stage.md) ✅
 
 Каждый Storage Node раз в заданное время делает `heartbeat`, так что Metadata
 Service всегда знает, кто жив
@@ -139,13 +139,13 @@ Metadata Service хранит расположение всех чанков
 Система поддерживает несколько экземпляров Metadata Service, что позволяет
 продолжать работу при падании одного из них  
 
-## xx - Versioning
+## xx - Object Versioning
 
 Система поддерживает версионирование объектов. Можно получать разные весии
 одного объекта `GET bucket/object?version=3`
 
 ## xx - Compression
 
-## xx - Monitoring
+## xx - Monitoring & Metrics
 
 ## xx - AAA
