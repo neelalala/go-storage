@@ -26,7 +26,7 @@ Client -> Gateway -> Node
 
 ### Архитектура
 
-```
+```text
 Client -> Gateway -> Node
               |
           Metadata Service
@@ -54,7 +54,7 @@ Metadata Service хранит:
 
 ### Архитектура
 
-```
+```text
                   -> Node 1 
 Client -> Gateway -> Node 2 
               |   -> Node 3 
