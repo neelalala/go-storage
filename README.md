@@ -1,138 +1,167 @@
-# Go-Storage
+# Go Storage
 
-Распределенное объектное хранилище на Go, поддерживающее хранение файлов, репликацию между несколькими узлами и автоматическое восстановление после отказов
+*Go Storage* - это распределенное объектное хранилище, написанное на Go, с
+поддержкой S3-подобного API.
 
-[Архитектурные ограничения](docs/architecture.md)
+> *Статус*: активная разработка. [Этапы](ROADMAP.md) 01-04 реализованы.
 
-# План реализации
+---
 
-01-07 - MVP
+## Текущие возможности
 
-## [01 - Simple storage](/docs/01-stage.md) ✅
+На данный момент система поддерживает:
 
-Один узел, сохраняющий данные
+- Базовые операции работы с объектами: загрузка `PUT`, скачивание `GET`, удаление
+`DELETE`, получение метаинфомрации объекта `HEAD`
+- Базовые операции работы с бакетами: создание `PUT`, получение списка
+доступных бакетов `GET`, удаление `DELETE`, получение метаинфомрации бакета `HEAD`
+- Получение списка объектов в бакете (с поддержкой common prefixes, delimiter),
+- Service Discovery & Health Check: автоматическое обнаружение новых Storage Node,
+- Горизонтальное масштабирование: данные распределяются между разными Storage Node.
 
-### Архитектура
+---
 
-Client -> Gateway -> Node
+## Архитектура
 
-### Требования
+*Gateway* - принимает HTTP запросы от клиентов, валидирует их и оркестрирует
+работу.
 
-Поддерживаются операции:
+*Metadata* - хранит информацию об объектах, ведет реестр живых узлов и выбирает,
+куда загрузить новый объект.
 
-- `PUT bucket/object`
-- `GET bucket/object`
-- `DELETE bucket/object`
-- `GET bucket` (решено сделать этот эндпоинт на следующем этапе)
+*Storage Node* - непостредственно хранит данные объектов.
 
-## [02 - Metadata Service](/docs/02-stage.md) ✅
+*Users* - сервис-заглушка для хранения списка зарегистрированных пользователей.
 
-Сервис, знающий о файлах. Промежуточный этап для хранения данных на нескольких узлах. Освобождает Gateway от будущей логики распределения между узлами
+---
 
-### Архитектура
+## Quick Start
 
-```
-Client -> Gateway -> Node
-              |
-          Metadata Service
-```
+1. Запуск кластера
 
-### Требования
-
-Metadata Service хранит:
-
-- bucket
-- key
-- size
-- etag
-- created at
-- updated at
-- storage node
-- object path
-- system metadata (map string -> string)
-- user metadata (map string -> string)
-
-## [03 - Несколько Storage Node](/docs/03-stage.md) ✅
-
-Данные сохраняются на один из нескольких узлов. Metadata Service выбирает, на какой из узлов попадет объект
-
-### Архитектура
-
-```
-                  -> Node 1 
-Client -> Gateway -> Node 2 
-              |   -> Node 3 
-          Metadata Service
+```bash
+git clone https://github.com/neelalala/go-storage.git
+cd go-storage
+docker compose up -d --build
 ```
 
-### Требования
+Это поднимет 1 Gateway, 1 Metadata, 3 Storage Node, 1 PostgreSQL
 
-Round-Robin стратегия выбора узла
+1. Использование
 
-## 04 - Heartbeat
+a. Регистрация
 
-Каждый Storage Node раз в заданное время делает `POST /heartbeat`, так что Metadata Service всегда знает, кто жив
-Metadata Service дополнительно хранит:
+> Зарегистрировать пользователя `new-user` в системе:
 
-- last seen
-- free_space
+```bash
+curl -X PUT localhost:8080/users/new-user
+```
 
-## 05 - Node Discovery
+b. Работа с бакетами
 
-Storage Node может сделать `POST /register` на Metadata Service, чтобы начать получать данные
+> Создать бакет `new-bucket`:
 
-## 06 - Replication
+```bash
+curl -X PUT localhost:8080/storage/new-bucket \
+-H 'Authorization: Username new-user'
+```
 
-Данные сохраняются на несколько узлов (replication factor). Промежуточный этап для логики восстановления
-Metadata Service дополнительно хранит идентификатор узла с главной репликой
+> Получить список доступных пользователю бакетов:
 
-### Требования
+```bash
+curl localhost:8080/storage/ \
+-H 'Authorization: Username new-user'
+```
 
-Выделяется узел с Primary Replica, на который будут приходить все запросы на работу с данными
+> Получить метаинфомрацию бакета:
 
-## 07 - Recovery
+```bash
+curl -X HEAD localhost:8080/storage/new-bucket \
+-H 'Authorization: Username new-user'
+```
 
-При падении узла данные, хранящиеся на нем, копируются на другие живые узлы
+> Удалить пустой бакет:
 
-### Архитектура
+```bash
+curl -X DELETE localhost:8080/storage/new-bucket \
+-H 'Authorization: Username new-user'
+```
 
-Metadata Service обнаруживает что Node умер и инициирует восстановление
+c. Работа с объектами
 
-## 08 - Streaming
+> Сохранть файл `my-photo.jpeg` с ключом `images/my-photo.jpeg` и доавить к метаинформации описание изображения:
 
-Upload / download потоком, а не целым файлом
+```bash
+curl -T ./my-photo.jpeg localhost:8080/storage/new-bucket/images/my-photo.jpeg \
+-H 'Authorization: Username new-user' \
+-H 'Content-Type: image/jpeg' \
+-H 'X-Amz-Meta-Image-Description: My picture'
+```
 
-## 09 - Chunking
+> Скачать объект `images/my-photo.jpeg` из хранилища:
 
-Данные хранятся не целиком, а по частям - чанкам
+```bash
+curl -O localhost:8080/storage/new-bucket/images/my-photo.jpeg \
+-H 'Authorization: Username new-user'
+```
 
-### Архитектура
+> Получить список объектов в бакете `new-bucket` с префиксом `images` и
+разделителем `/` (имитация файловой системы: объекты в директории `images`):
 
-Gateway делит полученный объект на части (чанки) и сохраняет каждый чанк как отдельный объект
+```bash
+curl 'localhost:8080/storage/new-bucket?prefix=images/&delimiter=/&limit=10&offset=0' \
+-H 'Authorization: Username new-user'
+```
 
-### Требования
+> Получить метаинформацию объекта `images/my-photo.jpeg` (помимо системной,
+также пользовательскую, заголовки начинающиеся с X-Amx-Meta):
 
-Разные чанки лежат на разных узлах
-Metadata Service хранит расположение всех чанков
+```bash
+curl -X HEAD localhost:8080/storage/new-bucket/images/my-photo.jpeg \
+-H 'Authorization: Username new-user'
+```
 
-## 10 - Consistent Hashing
+> Удалить объект `images/my-photo.jpeg`:
 
-При добавлении в кластер нового узла не нужно переносить все данные
+```bash
+curl -X DELETE localhost:8080/storage/new-bucket/images/my-photo.jpeg \
+-H 'Authorization: Username new-user'
+```
 
-## 11 - Background Rebalancing
+---
 
-Перенос данных делается в фоне по частям
+## Технический стек
 
-## xx - Несколько Metadata Service
+- *Язык*: Go
+- *Внутренняя коммуникация*: gRPC и Protobuf
+- *База данных для метаинфомрации*: PostgreSQL
+- *Инфраструктура*: Docker, Docker compose
 
-Система поддерживает несколько экземпляров Metadata Service, что позволяет продолжать работу при падании одного из них  
+---
 
-## xx - Versioning
+## [Roadmap](ROADMAP.md)
 
-Система поддерживает версионирование объектов. Можно получать разные весии одного объекта `GET bucket/object?version=3`
+### MVP
 
-## xx - Compression
+- 01 - Simple Storage
+- 02 - Metadata Service
+- 03 - Несколько Storage Node
+- 04 - Node Discovery & Heartbeat
+- 05 - Storage Node disk space
+- 06 - Replication
+- 07 - Recovery
 
-## xx - Monitoring
+### Advanced
 
-## xx - AAA
+- 08 - Streaming
+- 09 - Chunking
+- 10 - Consistent Hashing
+- 11 - Background Rebalancing
+
+### Future
+
+- Несколько Metadata Service
+- Object Versioning
+- Compression
+- Monitoring & Metrics
+- AAA
