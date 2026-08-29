@@ -62,7 +62,7 @@ func run(cfg config.Config, log *slog.Logger) error {
 	uploadRepo := sql.NewUploadRepository(pool)
 	objRepo := sql.NewObjectRepository(pool)
 
-	registry := nodes.NewStaticNodeRegistry(cfg.Storage.HeartbeatInterval, log)
+	registry := nodes.NewNodeRegistry(cfg.Storage.HeartbeatInterval, log)
 	go registry.RunSweeper(ctx)
 	manager := nodes.NewRoundRobinNodeManager(registry)
 

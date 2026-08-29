@@ -21,7 +21,7 @@ type nodeState struct {
 	lastSeen time.Time
 }
 
-type StaticNodeRegistry struct {
+type DynamicNodeRegistry struct {
 	heartbeatInterval time.Duration
 
 	mu      sync.RWMutex
@@ -33,18 +33,10 @@ type StaticNodeRegistry struct {
 	log *slog.Logger
 }
 
-func NewStaticNodeRegistry(heartbeatInterval time.Duration, log *slog.Logger) *StaticNodeRegistry {
-func NewStaticNodeRegistry(nodes []domain.StorageNode, ttl time.Duration, log *slog.Logger) *StaticNodeRegistry {
-	nodeMap := make(map[uuid.UUID]nodeState, len(nodes))
+func NewNodeRegistry(heartbeatInterval time.Duration, log *slog.Logger) *DynamicNodeRegistry {
+	nodeMap := make(map[uuid.UUID]nodeState)
 
-	for _, node := range nodes {
-		nodeMap[node.ID] = nodeState{
-			node:     node,
-			lastSeen: time.Now(),
-		}
-	}
-
-	return &StaticNodeRegistry{
+	return &DynamicNodeRegistry{
 		heartbeatInterval:  heartbeatInterval,
 		nodeMap:            nodeMap,
 		SweepInterval:      SweepInterval,
@@ -53,9 +45,8 @@ func NewStaticNodeRegistry(nodes []domain.StorageNode, ttl time.Duration, log *s
 	}
 }
 
-func (r *StaticNodeRegistry) ProcessHeartbeat(ctx context.Context, node domain.StorageNode) {
+func (r *DynamicNodeRegistry) ProcessHeartbeat(ctx context.Context, node domain.StorageNode) {
 	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	_, exists := r.nodeMap[node.ID]
 	r.nodeMap[node.ID] = nodeState{
@@ -63,14 +54,21 @@ func (r *StaticNodeRegistry) ProcessHeartbeat(ctx context.Context, node domain.S
 		lastSeen: time.Now(),
 	}
 
-	if exists {
-		//	r.log.DebugContext(ctx, "node heartbeat", slog.String("node id", node.ID.String()))
-	} else {
-		r.log.InfoContext(ctx, "new node", slog.String("node id", node.ID.String()))
+	r.mu.Unlock()
+
+	if !exists {
+		r.log.InfoContext(
+			ctx, "new node",
+			slog.Group(
+				"node",
+				slog.String("id", node.ID.String()),
+				slog.String("address", node.Address),
+			),
+		)
 	}
 }
 
-func (r *StaticNodeRegistry) RunSweeper(ctx context.Context) {
+func (r *DynamicNodeRegistry) RunSweeper(ctx context.Context) {
 	ticker := time.NewTicker(r.SweepInterval)
 	defer ticker.Stop()
 
@@ -84,7 +82,7 @@ func (r *StaticNodeRegistry) RunSweeper(ctx context.Context) {
 	}
 }
 
-func (r *StaticNodeRegistry) GetAllNodes(_ context.Context) ([]domain.StorageNode, error) {
+func (r *DynamicNodeRegistry) GetAllNodes(_ context.Context) ([]domain.StorageNode, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -97,7 +95,7 @@ func (r *StaticNodeRegistry) GetAllNodes(_ context.Context) ([]domain.StorageNod
 	return nodes, nil
 }
 
-func (r *StaticNodeRegistry) GetNode(_ context.Context, id uuid.UUID) (domain.StorageNode, error) {
+func (r *DynamicNodeRegistry) GetNode(_ context.Context, id uuid.UUID) (domain.StorageNode, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -109,7 +107,7 @@ func (r *StaticNodeRegistry) GetNode(_ context.Context, id uuid.UUID) (domain.St
 	return state.node, nil
 }
 
-func (r *StaticNodeRegistry) checkNodes(ctx context.Context) {
+func (r *DynamicNodeRegistry) checkNodes(ctx context.Context) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -118,7 +116,14 @@ func (r *StaticNodeRegistry) checkNodes(ctx context.Context) {
 
 		if diff > time.Duration(r.TTLCountToMarkDead)*r.heartbeatInterval {
 			delete(r.nodeMap, id)
-			r.log.InfoContext(ctx, "node died", slog.String("node id", id.String()))
+			r.log.InfoContext(
+				ctx, "node died",
+				slog.Group(
+					"node",
+					slog.String("id", id.String()),
+					slog.String("address", state.node.Address),
+				),
+			)
 		}
 	}
 }
