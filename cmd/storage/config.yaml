@@ -2,6 +2,8 @@ logger:
   log_level: DEBUG
 grpc:
   address: ":50051"
+node:
+  upload_root: /uploads/ver1
 discovery_service:
   address: "metadata:50051"
   heartbeat_interval: 10s
