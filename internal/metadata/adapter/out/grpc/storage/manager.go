@@ -4,39 +4,78 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
+	"sync"
 
 	"github.com/google/uuid"
 	"github.com/neelalala/go-storage/internal/metadata/domain"
 )
 
-type NodeManager struct {
-	nodes map[uuid.UUID]*Client
+type NodeRegistry interface {
+	GetAllNodes(context.Context) ([]domain.StorageNode, error)
 }
 
-func NewNodeManager(nodes []domain.StorageNode) (*NodeManager, error) {
-	nodesMap := make(map[uuid.UUID]*Client, len(nodes))
+type NodeManager struct {
+	registry NodeRegistry
 
-	for _, node := range nodes {
-		client, err := New(node.Address)
-		if err != nil {
-			return nil, fmt.Errorf("error creating grcp client fot storage with address %s: %v", node.Address, err)
-		}
+	mu    sync.RWMutex
+	nodes map[uuid.UUID]*Client
 
-		nodesMap[node.ID] = client
-	}
+	log *slog.Logger
+}
 
+func NewNodeManager(registry NodeRegistry, log *slog.Logger) *NodeManager {
 	return &NodeManager{
-		nodes: nodesMap,
-	}, nil
+		registry: registry,
+		nodes:    make(map[uuid.UUID]*Client),
+		log:      log,
+	}
 }
 
 func (m *NodeManager) DeleteObjectOn(ctx context.Context, nodeID uuid.UUID, path string) error {
+	m.mu.RLock()
 	node, ok := m.nodes[nodeID]
-	if !ok {
-		return fmt.Errorf("error getting node with ID %s", nodeID)
+	m.mu.RUnlock()
+	if ok {
+		return node.DeleteObject(ctx, path)
 	}
 
-	return node.DeleteObject(ctx, path)
+	allNodes, err := m.registry.GetAllNodes(ctx)
+	if err != nil {
+		return fmt.Errorf("error updating node map: error getting all nodes: %v", err)
+	}
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	var client *Client
+	m.nodes = make(map[uuid.UUID]*Client, len(allNodes))
+	for _, node := range allNodes {
+		c, err := New(node.Address)
+		if err != nil {
+			if node.ID == nodeID {
+				return err
+			} else {
+				m.log.ErrorContext(
+					ctx, "error creating node client for alive node",
+					slog.String("error", err.Error()),
+					slog.String("node id", node.ID.String()),
+					slog.String("node address", node.Address),
+				)
+			}
+		}
+
+		m.nodes[node.ID] = c
+		if nodeID == node.ID {
+			client = c
+		}
+	}
+
+	if client == nil {
+		fmt.Errorf("error getting node with ID %s", nodeID)
+	}
+
+	return client.DeleteObject(ctx, path)
 }
 
 func (m *NodeManager) CloseAll() error {

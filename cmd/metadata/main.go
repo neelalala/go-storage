@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/neelalala/go-storage/internal/metadata/adapter/in/grpc"
@@ -22,7 +21,6 @@ import (
 	"github.com/neelalala/go-storage/internal/metadata/adapter/out/repository/sql"
 	"github.com/neelalala/go-storage/internal/metadata/application"
 	"github.com/neelalala/go-storage/internal/metadata/config"
-	"github.com/neelalala/go-storage/internal/metadata/domain"
 )
 
 func main() {
@@ -64,20 +62,7 @@ func run(cfg config.Config, log *slog.Logger) error {
 	uploadRepo := sql.NewUploadRepository(pool)
 	objRepo := sql.NewObjectRepository(pool)
 
-	storageNodes := make([]domain.StorageNode, 0, len(cfg.Storage.Nodes))
-	for _, node := range cfg.Storage.Nodes {
-		storageUUID, err := uuid.Parse(node.ID)
-		if err != nil {
-			return err
-		}
-
-		storageNodes = append(storageNodes, domain.StorageNode{
-			ID:      storageUUID,
-			Address: node.Address,
-		})
-	}
-
-	registry := nodes.NewStaticNodeRegistry(storageNodes, cfg.Storage.TTL, log)
+	registry := nodes.NewNodeRegistry(cfg.Storage.HeartbeatInterval, log)
 	go registry.RunSweeper(ctx)
 	manager := nodes.NewRoundRobinNodeManager(registry)
 
@@ -96,10 +81,7 @@ func run(cfg config.Config, log *slog.Logger) error {
 
 	gcRepo := sql.NewGCRepository(pool)
 
-	storage, err := storage.NewNodeManager(storageNodes)
-	if err != nil {
-		return err
-	}
+	storage := storage.NewNodeManager(registry, log)
 
 	garbageCollector := application.NewGarbageCollector(gcRepo, storage, log)
 
