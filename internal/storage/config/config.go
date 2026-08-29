@@ -16,8 +16,8 @@ type GRPCConfig struct {
 }
 
 type DiscoveryServiceConfig struct {
-	Address  string        `yaml:"address" env:"DISCOVERY_SERVICE_ADDRESS"`
-	Interval time.Duration `yaml:"heartbeat_interval" env:"HEARTBEAT_INTERVAL" env-default:"1m"`
+	Address           string        `yaml:"address" env:"DISCOVERY_SERVICE_ADDRESS"`
+	HeartbeatInterval time.Duration `yaml:"heartbeat_interval" env:"HEARTBEAT_INTERVAL" env-default:"1m"`
 }
 
 type NodeConfig struct {
