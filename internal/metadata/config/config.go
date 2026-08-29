@@ -20,14 +20,8 @@ type GRPCConfig struct {
 	Address string `yaml:"address" env:"METADATA_ADDRESS_GRPC" env-default:":50051"`
 }
 
-type NodeConfig struct {
-	ID      string `yaml:"id"`
-	Address string `yaml:"address"`
-}
-
 type StorageConfig struct {
 	TTL   time.Duration `yaml:"ttl" env:"NODE_TTL" env-default:"1m"`
-	Nodes []NodeConfig  `yaml:"nodes"`
 }
 
 type GarbageCollectorConfig struct {
