@@ -11,6 +11,6 @@ storage:
   heartbeat_interval: 10s
 
 garbage_collector:
-  interval: 5m
+  interval: 1m
   task_limit: 100
   task_timeout: 5s
