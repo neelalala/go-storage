@@ -109,7 +109,7 @@ curl -O localhost:8080/storage/new-bucket/images/my-photo.jpeg \
 разделителем `/` (имитация файловой системы: объекты в директории `images`):
 
 ```bash
-curl 'localhost:8080/storage/new-bucket?prefix=images&delimiter=/&limit=10&offset=0' \
+curl 'localhost:8080/storage/new-bucket?prefix=images/&delimiter=/&limit=10&offset=0' \
 -H 'Authorization: Username new-user'
 ```
 
@@ -124,7 +124,7 @@ curl -X HEAD localhost:8080/storage/new-bucket/images/my-photo.jpeg \
 > Удалить объект `images/my-photo.jpeg`:
 
 ```bash
-curl -X DELETE localhost:8080/storage/new-user/images/my-photo.jpeg \
+curl -X DELETE localhost:8080/storage/new-bucket/images/my-photo.jpeg \
 -H 'Authorization: Username new-user'
 ```
 
