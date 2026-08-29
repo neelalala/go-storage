@@ -21,7 +21,7 @@ type GRPCConfig struct {
 }
 
 type StorageConfig struct {
-	TTL   time.Duration `yaml:"ttl" env:"NODE_TTL" env-default:"1m"`
+	HeartbeatInterval time.Duration `yaml:"heartbeat_interval" env:"HEARTBEAT_INTERVAL" env-default:"1m"`
 }
 
 type GarbageCollectorConfig struct {

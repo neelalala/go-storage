@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	SweepInterval          = 1 * time.Second
-	TTLCountToMarkNodeDead = 3
+	SweepInterval                  = 1 * time.Second
+	NoHeartbeatCountToMarkNodeDead = 3
 )
 
 type nodeState struct {
@@ -22,7 +22,7 @@ type nodeState struct {
 }
 
 type StaticNodeRegistry struct {
-	ttl time.Duration
+	heartbeatInterval time.Duration
 
 	mu      sync.RWMutex
 	nodeMap map[uuid.UUID]nodeState
@@ -33,6 +33,7 @@ type StaticNodeRegistry struct {
 	log *slog.Logger
 }
 
+func NewStaticNodeRegistry(heartbeatInterval time.Duration, log *slog.Logger) *StaticNodeRegistry {
 func NewStaticNodeRegistry(nodes []domain.StorageNode, ttl time.Duration, log *slog.Logger) *StaticNodeRegistry {
 	nodeMap := make(map[uuid.UUID]nodeState, len(nodes))
 
@@ -44,10 +45,10 @@ func NewStaticNodeRegistry(nodes []domain.StorageNode, ttl time.Duration, log *s
 	}
 
 	return &StaticNodeRegistry{
-		ttl:                ttl,
+		heartbeatInterval:  heartbeatInterval,
 		nodeMap:            nodeMap,
 		SweepInterval:      SweepInterval,
-		TTLCountToMarkDead: TTLCountToMarkNodeDead,
+		TTLCountToMarkDead: NoHeartbeatCountToMarkNodeDead,
 		log:                log,
 	}
 }
@@ -115,7 +116,7 @@ func (r *StaticNodeRegistry) checkNodes(ctx context.Context) {
 	for id, state := range r.nodeMap {
 		diff := time.Since(state.lastSeen)
 
-		if diff > time.Duration(r.TTLCountToMarkDead)*r.ttl {
+		if diff > time.Duration(r.TTLCountToMarkDead)*r.heartbeatInterval {
 			delete(r.nodeMap, id)
 			r.log.InfoContext(ctx, "node died", slog.String("node id", id.String()))
 		}
