@@ -20,7 +20,7 @@ func New(root string, hasher domain.Hasher) (FileStore, error) {
 		if strings.HasSuffix(root, "/") {
 			return ""
 		}
-		return root + "/"
+		return "/"
 	}()
 	if err := os.MkdirAll(root, os.ModePerm); err != nil {
 		return FileStore{}, err
@@ -33,7 +33,7 @@ func New(root string, hasher domain.Hasher) (FileStore, error) {
 }
 
 func (s FileStore) Save(_ context.Context, obj domain.Object) (string, error) {
-	if err := os.WriteFile(s.root+obj.Name, obj.Data, 0644); err != nil {
+	if err := os.WriteFile(s.root+obj.Name, obj.Data, 0o644); err != nil {
 		return "", fmt.Errorf("error saving object: %w", err)
 	}
 
