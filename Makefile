@@ -9,14 +9,20 @@ protobuf:
                    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
                    pkg/proto/users/users.proto
 build:
-	go build -o bin/gateway cmd/gateway/main.go 
-	go build -o bin/storage cmd/storage/main.go
-	go build -o bin/metadata cmd/metadata/main.go
-	go build -o bin/users cmd/users/main.go
+	docker compose build
 
-web:
-	cd web && npm run dev
+run:
+	docker compose up -d
 
-build-web:
-	cd web && npm run build
+stop:
+	docker compose down
+
+clear:
+	docker compose down -v --remove-orphans
+	rm -rf ./pgdata
+	mkdir -p ./pgdata
+	rm -rf ./uploads/node1 ./uploads/node2 ./uploads/node3
+	mkdir -p ./uploads/node1 ./uploads/node2 ./uploads/node3
+
+.PHONY: protobuf build run stop clear
 
