@@ -1,4 +1,5 @@
 // API Client for Go Storage
+import { state } from './state.js';
 
 export class StorageApi {
   constructor() {
@@ -24,6 +25,21 @@ export class StorageApi {
     return headers;
   }
 
+  async checkGatewayHealth() {
+    const url = `${this.baseUrl}/storage/`;
+    try {
+      await fetch(url, {
+        method: 'GET',
+        headers: this.getHeaders(),
+      });
+      state.setGatewayStatus(true);
+      return true;
+    } catch (err) {
+      state.setGatewayStatus(false);
+      return false;
+    }
+  }
+
   async request(path, options = {}) {
     const url = `${this.baseUrl}${path.startsWith('/') ? path : '/' + path}`;
     const opts = {
@@ -31,7 +47,14 @@ export class StorageApi {
       headers: this.getHeaders(options.headers || {}),
     };
 
-    const response = await fetch(url, opts);
+    let response;
+    try {
+      response = await fetch(url, opts);
+      state.setGatewayStatus(true);
+    } catch (err) {
+      state.setGatewayStatus(false);
+      throw err;
+    }
 
     if (!response.ok) {
       let errorMessage = `HTTP ${response.status}: ${response.statusText}`;

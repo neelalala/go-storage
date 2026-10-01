@@ -13,6 +13,7 @@ class State {
     this.selectedItem = null;
     this.inspectorOpen = false;
     this.isLoading = false;
+    this.isGatewayOnline = null; // null = checking, true = online, false = offline
     this.listeners = new Map();
   }
 
@@ -115,6 +116,11 @@ class State {
   setLoading(loading) {
     this.isLoading = loading;
     this.emit('loading:changed', loading);
+  }
+
+  setGatewayStatus(isOnline) {
+    this.isGatewayOnline = isOnline;
+    this.emit('gateway:status', isOnline);
   }
 
   getFilteredItems() {

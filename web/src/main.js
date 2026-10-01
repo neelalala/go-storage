@@ -3,6 +3,7 @@ import { state } from './js/state.js';
 import { icons } from './js/icons.js';
 import {
   renderUser,
+  renderGatewayStatus,
   renderBuckets,
   renderBreadcrumbs,
   renderExplorer,
@@ -17,6 +18,10 @@ async function init() {
   setupEventListeners();
 
   renderUser();
+  renderGatewayStatus();
+  api.checkGatewayHealth();
+  setInterval(() => api.checkGatewayHealth(), 15000);
+
   await loadBuckets();
 }
 
@@ -116,6 +121,7 @@ function setupEventListeners() {
     renderUser();
     loadBuckets();
   });
+  state.on('gateway:status', () => renderGatewayStatus());
 
   // Global Search
   const searchInput = document.getElementById('search-input');

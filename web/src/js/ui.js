@@ -73,6 +73,29 @@ export function renderUser() {
   }
 }
 
+export function renderGatewayStatus() {
+  const dot = document.getElementById('gateway-status-dot');
+  const text = document.getElementById('gateway-status-text');
+  const sub = document.getElementById('gateway-status-sub');
+  if (!dot || !text) return;
+
+  const currentHost = api.baseUrl ? api.baseUrl.replace(/^https?:\/\//, '') : 'localhost:8080';
+
+  if (state.isGatewayOnline === true) {
+    dot.className = 'status-dot online';
+    text.textContent = 'Gateway Online';
+    if (sub) sub.textContent = currentHost;
+  } else if (state.isGatewayOnline === false) {
+    dot.className = 'status-dot offline';
+    text.textContent = 'Gateway Offline';
+    if (sub) sub.textContent = 'Connection failed';
+  } else {
+    dot.className = 'status-dot checking';
+    text.textContent = 'Connecting...';
+    if (sub) sub.textContent = currentHost;
+  }
+}
+
 export function renderBuckets() {
   const listEl = document.getElementById('bucket-list');
   if (!listEl) return;

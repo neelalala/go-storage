@@ -55,17 +55,12 @@
         </ul>
 
         <div class="sidebar-footer">
-          <div class="cluster-info">
-            <div class="cluster-info-title">
-              <span>Cluster Status</span>
+          <div class="gateway-status-card" id="gateway-status-card">
+            <div class="gateway-status-header">
+              <span class="status-dot checking" id="gateway-status-dot"></span>
+              <span class="status-label" id="gateway-status-text">Connecting...</span>
             </div>
-            <div class="cluster-nodes-pill">
-              <span class="cluster-dot"></span>
-              <span>Metadata & Gateway Active</span>
-            </div>
-            <div style="font-size: 0.7rem; color: var(--text-muted);">
-              Distributed Nodes: 3 Storage Units
-            </div>
+            <div class="gateway-status-sub" id="gateway-status-sub">localhost:8080</div>
           </div>
         </div>
       </aside>
