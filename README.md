@@ -45,19 +45,11 @@ cd go-storage
 docker compose up -d --build
 ```
 
-Это поднимет 1 Gateway, 1 Metadata, 3 Storage Node, 1 PostgreSQL
+Это поднимет 1 Gateway, 1 Metadata, 3 Storage Node, 1 PostgreSQL, 1 Web UI.
 
-2. Запуск веб-интерфейса
+Веб-клиент будет доступен в браузере по адресу: **`http://localhost:3000`**.
 
-```bash
-cd web && npm run dev
-# или
-# make web
-```
-
-Веб-клиент будет доступен по адресу `http://localhost:3000`.
-
-3. Использование через curl
+2. Использование через curl
 
 a. Регистрация
 
