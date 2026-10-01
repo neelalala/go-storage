@@ -50,26 +50,31 @@ class State {
   setUsername(user) {
     this.username = (user || '').trim();
     localStorage.setItem('gs_username', this.username);
+    this.activeBucket = '';
+    localStorage.removeItem('gs_active_bucket');
     this.emit('user:changed', this.username);
   }
 
   setBuckets(buckets) {
-    this.buckets = buckets;
-    if (this.buckets.length > 0 && (!this.activeBucket || !this.buckets.some((b) => b.name === this.activeBucket))) {
-      this.setActiveBucket(this.buckets[0].name);
-    } else if (this.buckets.length === 0) {
+    this.buckets = buckets || [];
+    // If the active bucket no longer exists in loaded buckets, reset it
+    if (this.activeBucket && !this.buckets.some((b) => b.name === this.activeBucket)) {
       this.setActiveBucket('');
     }
     this.emit('buckets:changed', this.buckets);
   }
 
   setActiveBucket(bucketName) {
-    this.activeBucket = bucketName;
+    this.activeBucket = bucketName || '';
     this.currentPrefix = '';
     this.selectedItem = null;
     this.inspectorOpen = false;
-    localStorage.setItem('gs_active_bucket', bucketName);
-    this.emit('bucket:selected', bucketName);
+    if (this.activeBucket) {
+      localStorage.setItem('gs_active_bucket', this.activeBucket);
+    } else {
+      localStorage.removeItem('gs_active_bucket');
+    }
+    this.emit('bucket:selected', this.activeBucket);
   }
 
   setCurrentPrefix(prefix) {

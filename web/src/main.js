@@ -151,12 +151,24 @@ async function loadObjects() {
 
 function setupEventListeners() {
   // State change reactions
-  state.on('buckets:changed', () => renderBuckets());
+  state.on('buckets:changed', () => {
+    renderBuckets();
+    renderBreadcrumbs();
+    if (state.activeBucket) {
+      loadObjects();
+    } else {
+      renderExplorer();
+    }
+  });
   state.on('buckets:reload', () => loadBuckets());
   state.on('bucket:selected', () => {
     renderBuckets();
     renderBreadcrumbs();
-    loadObjects();
+    if (state.activeBucket) {
+      loadObjects();
+    } else {
+      renderExplorer();
+    }
   });
   state.on('prefix:changed', () => {
     renderBreadcrumbs();
@@ -187,6 +199,10 @@ function setupEventListeners() {
 
   // Refresh
   document.getElementById('btn-refresh')?.addEventListener('click', () => {
+    if (!state.activeBucket) {
+      showToast('Select a bucket first', 'info', 1500);
+      return;
+    }
     loadObjects();
     showToast('Refreshed contents', 'info', 1500);
   });

@@ -168,7 +168,12 @@ export function renderBuckets() {
   listEl.querySelectorAll('.bucket-item').forEach((item) => {
     item.addEventListener('click', () => {
       const bucket = item.dataset.bucket;
-      state.setActiveBucket(bucket);
+      // Toggle off if already selected, otherwise select
+      if (state.activeBucket === bucket) {
+        state.setActiveBucket('');
+      } else {
+        state.setActiveBucket(bucket);
+      }
     });
   });
 }
