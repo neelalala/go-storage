@@ -406,7 +406,11 @@ function openUploadModal(file = null) {
   if (metaContainer) metaContainer.innerHTML = '';
 
   if (pathPrefixSpan) {
-    pathPrefixSpan.textContent = state.currentPrefix ? `${state.currentPrefix}` : '/';
+    let prefixText = state.currentPrefix ? `${state.currentPrefix}` : '/';
+    try {
+      prefixText = decodeURIComponent(prefixText);
+    } catch { }
+    pathPrefixSpan.textContent = prefixText;
   }
 
   if (file) {

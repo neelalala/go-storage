@@ -1,5 +1,46 @@
-// API Client for Go Storage
 import { state } from './state.js';
+
+// Helper to safely encode metadata key for HTTP header compliance
+export function encodeMetaKey(k) {
+  let clean = (k || '').trim().toLowerCase();
+  if (clean.startsWith('x-amz-meta-')) {
+    clean = clean.slice(11);
+  }
+  if (/[^\x20-\x7E]/.test(clean) || /[^a-z0-9_.-]/.test(clean)) {
+    clean = encodeURIComponent(clean).toLowerCase();
+  }
+  return `x-amz-meta-${clean}`;
+}
+
+// Helper to encode metadata values to safe ASCII for fetch headers
+export function encodeMetaValue(v) {
+  const str = String(v ?? '');
+  // Non-ASCII (Cyrillic, Unicode > 127) must be percent-encoded to prevent fetch ByteString TypeError
+  if (/[^\x20-\x7E]/.test(str)) {
+    return encodeURIComponent(str);
+  }
+  return str;
+}
+
+// Helper to decode header values (supports percent-encoding & UTF-8 Latin-1 mojibake)
+export function decodeHeaderValue(val) {
+  if (!val) return '';
+
+  if (val.includes('%')) {
+    try {
+      return decodeURIComponent(val);
+    } catch { }
+  }
+
+  if (/[\u0080-\u00ff]/.test(val)) {
+    try {
+      const bytes = Uint8Array.from(val, (c) => c.charCodeAt(0));
+      return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    } catch { }
+  }
+
+  return val;
+}
 
 export class StorageApi {
   constructor() {
@@ -162,10 +203,8 @@ export class StorageApi {
     if (userMetadata && typeof userMetadata === 'object') {
       for (const [k, v] of Object.entries(userMetadata)) {
         if (!v) continue;
-        const normKey = k.toLowerCase().startsWith('x-amz-meta-')
-          ? k.toLowerCase()
-          : `x-amz-meta-${k.toLowerCase().replace(/[^a-z0-9_-]/g, '-')}`;
-        headers[normKey] = String(v);
+        const normKey = encodeMetaKey(k);
+        headers[normKey] = encodeMetaValue(v);
       }
     }
 
@@ -198,10 +237,11 @@ export class StorageApi {
     resp.headers.forEach((val, name) => {
       const lower = name.toLowerCase();
       if (lower.startsWith('x-amz-meta-')) {
-        const metaKey = lower.replace('x-amz-meta-', '');
-        userMetadata[metaKey] = val;
+        const rawMetaKey = lower.slice(11);
+        const metaKey = decodeHeaderValue(rawMetaKey);
+        userMetadata[metaKey] = decodeHeaderValue(val);
       } else if (['content-disposition', 'cache-control', 'content-encoding', 'content-language'].includes(lower)) {
-        systemMetadata[lower] = val;
+        systemMetadata[lower] = decodeHeaderValue(val);
       }
     });
 

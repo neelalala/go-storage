@@ -129,12 +129,18 @@ class State {
 
     if (this.searchQuery) {
       folders = folders.filter((p) => {
-        const name = p.replace(this.currentPrefix, '').replace(/\/$/, '');
-        return name.toLowerCase().includes(this.searchQuery);
+        let name = p.replace(this.currentPrefix, '').replace(/\/$/, '');
+        try {
+          name = decodeURIComponent(name);
+        } catch { }
+        return name.toLowerCase().includes(this.searchQuery) || p.toLowerCase().includes(this.searchQuery);
       });
       files = files.filter((f) => {
-        const name = f.key.replace(this.currentPrefix, '');
-        return name.toLowerCase().includes(this.searchQuery);
+        let name = f.key.replace(this.currentPrefix, '');
+        try {
+          name = decodeURIComponent(name);
+        } catch { }
+        return name.toLowerCase().includes(this.searchQuery) || f.key.toLowerCase().includes(this.searchQuery);
       });
     }
 

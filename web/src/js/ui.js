@@ -63,6 +63,16 @@ export function escapeHtml(str = '') {
     .replace(/'/g, '&#039;');
 }
 
+export function decodeSafe(str = '') {
+  if (!str) return '';
+  if (str.includes('%')) {
+    try {
+      return decodeURIComponent(str);
+    } catch { }
+  }
+  return str;
+}
+
 export function renderUser() {
   const nameEl = document.getElementById('current-username');
   const avatarEl = document.getElementById('user-avatar');
@@ -191,10 +201,11 @@ export function renderBreadcrumbs() {
     segments.forEach((seg, idx) => {
       accum += seg + '/';
       const isLast = idx === segments.length - 1;
+      const displaySeg = decodeSafe(seg);
       html += `
         <span class="breadcrumb-sep">${icons.chevronRight}</span>
         <span class="breadcrumb-item ${isLast ? 'active' : ''}" data-path="${escapeHtml(accum)}">
-          ${escapeHtml(seg)}
+          ${escapeHtml(displaySeg)}
         </span>
       `;
     });
@@ -295,7 +306,8 @@ function renderTableView(container, folders, files) {
 
   // Folders
   folders.forEach((folderPrefix) => {
-    const folderName = folderPrefix.replace(state.currentPrefix, '').replace(/\/$/, '');
+    const rawFolderName = folderPrefix.replace(state.currentPrefix, '').replace(/\/$/, '');
+    const folderName = decodeSafe(rawFolderName);
     html += `
       <tr class="clickable folder-row" data-prefix="${escapeHtml(folderPrefix)}">
         <td>
@@ -320,7 +332,8 @@ function renderTableView(container, folders, files) {
 
   // Files
   files.forEach((file) => {
-    const fileName = file.key.replace(state.currentPrefix, '');
+    const rawFileName = file.key.replace(state.currentPrefix, '');
+    const fileName = decodeSafe(rawFileName);
     const iconSvg = getFileIcon(fileName);
     const shortEtag = file.etag ? file.etag.substring(0, 8) + '...' : '—';
 
@@ -434,7 +447,8 @@ function renderGridView(container, folders, files) {
   }
 
   folders.forEach((folderPrefix) => {
-    const folderName = folderPrefix.replace(state.currentPrefix, '').replace(/\/$/, '');
+    const rawFolderName = folderPrefix.replace(state.currentPrefix, '').replace(/\/$/, '');
+    const folderName = decodeSafe(rawFolderName);
     html += `
       <div class="grid-card folder-card" data-prefix="${escapeHtml(folderPrefix)}">
         <div class="grid-icon">${icons.folder}</div>
@@ -445,7 +459,8 @@ function renderGridView(container, folders, files) {
   });
 
   files.forEach((file) => {
-    const fileName = file.key.replace(state.currentPrefix, '');
+    const rawFileName = file.key.replace(state.currentPrefix, '');
+    const fileName = decodeSafe(rawFileName);
     const iconSvg = getFileIcon(fileName);
     html += `
       <div class="grid-card file-card" data-key="${escapeHtml(file.key)}">
@@ -516,12 +531,13 @@ function renderGridView(container, folders, files) {
 // Download helper
 export async function triggerDownload(bucket, key, filename) {
   try {
-    showToast(`Downloading ${filename || key}...`, 'info', 2000);
+    const downloadName = decodeSafe(filename || key.split('/').pop() || 'download');
+    showToast(`Downloading ${downloadName}...`, 'info', 2000);
     const { blob } = await api.getObjectBlob(bucket, key);
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = filename || key.split('/').pop() || 'download';
+    a.download = downloadName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -540,7 +556,8 @@ export async function openInspector(key) {
   if (!overlay || !content) return;
 
   overlay.classList.add('open');
-  title.textContent = key.split('/').pop() || key;
+  const displayTitle = decodeSafe(key.split('/').pop() || key);
+  title.textContent = displayTitle;
   content.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:center;height:200px;">
       <div class="spinner"></div>
@@ -593,14 +610,14 @@ export async function openInspector(key) {
           <div class="meta-group-title">${icons.tag} User Metadata (X-Amz-Meta)</div>
           <div class="meta-tags">
             ${userMetaEntries
-              .map(
-                ([k, v]) => `
+          .map(
+            ([k, v]) => `
               <div class="meta-tag">
                 <strong>${escapeHtml(k)}:</strong> ${escapeHtml(v)}
               </div>
             `
-              )
-              .join('')}
+          )
+          .join('')}
           </div>
         </div>
       `;
@@ -615,14 +632,14 @@ export async function openInspector(key) {
           <div class="meta-group-title">System Headers</div>
           <div class="meta-tags">
             ${sysMetaEntries
-              .map(
-                ([k, v]) => `
+          .map(
+            ([k, v]) => `
               <div class="meta-tag">
                 <strong>${escapeHtml(k)}:</strong> ${escapeHtml(v)}
               </div>
             `
-              )
-              .join('')}
+          )
+          .join('')}
           </div>
         </div>
       `;
@@ -637,7 +654,7 @@ export async function openInspector(key) {
         <div class="meta-row">
           <span class="meta-label">Full Key (Path)</span>
           <div class="meta-val">
-            <span>${escapeHtml(meta.key)}</span>
+            <span title="${escapeHtml(meta.key)}">${escapeHtml(decodeSafe(meta.key))}</span>
             <button class="btn btn-ghost btn-sm btn-icon-only copy-key-btn" title="Copy Key">${icons.copy}</button>
           </div>
         </div>
