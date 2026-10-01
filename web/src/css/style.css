@@ -110,7 +110,9 @@ body {
   width: 36px;
   height: 36px;
   border-radius: var(--radius-md);
-  background: var(--accent-gradient);
+  background: var(--accent-gradient) no-repeat;
+  background-origin: border-box;
+  background-clip: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -465,6 +467,9 @@ body {
   transition: all var(--transition-fast);
   user-select: none;
   font-family: var(--font-sans);
+  background-repeat: no-repeat;
+  background-origin: border-box;
+  background-clip: border-box;
 }
 
 .btn-sm {
@@ -478,7 +483,9 @@ body {
 }
 
 .btn-primary {
-  background: var(--accent-gradient);
+  background: var(--accent-gradient) no-repeat;
+  background-origin: border-box;
+  background-clip: border-box;
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.16);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
@@ -1125,7 +1132,9 @@ body {
 
 .progress-fill {
   height: 100%;
-  background: var(--accent-gradient);
+  background: var(--accent-gradient) no-repeat;
+  background-origin: border-box;
+  background-clip: border-box;
   transition: width 0.2s ease;
   width: 0%;
 }
