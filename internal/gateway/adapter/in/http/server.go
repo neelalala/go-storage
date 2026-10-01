@@ -54,7 +54,7 @@ func NewServer(
 	server := &http.Server{
 		Addr:        addr,
 		ReadTimeout: timeout,
-		Handler:     mux,
+		Handler:     middleware.CORS(mux),
 	}
 
 	return &Server{
