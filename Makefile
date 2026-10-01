@@ -13,3 +13,10 @@ build:
 	go build -o bin/storage cmd/storage/main.go
 	go build -o bin/metadata cmd/metadata/main.go
 	go build -o bin/users cmd/users/main.go
+
+web:
+	cd web && npm run dev
+
+build-web:
+	cd web && npm run build
+
