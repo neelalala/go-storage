@@ -218,20 +218,21 @@
     <div class="modal-overlay" id="modal-user">
       <div class="modal">
         <div class="modal-header">
-          <h3 class="modal-title">User Account</h3>
-          <button class="btn btn-ghost btn-icon-only modal-close-btn">&times;</button>
+          <h3 class="modal-title" id="modal-user-title">User Account</h3>
+          <button class="btn btn-ghost btn-icon-only modal-close-btn" id="modal-user-close">&times;</button>
         </div>
         <div class="modal-body">
+          <div id="user-modal-alert" style="display:none; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: var(--radius-md); padding: 12px; font-size: 0.85rem; color: #bae6fd; line-height: 1.4;"></div>
           <div class="form-group">
             <label class="form-label" for="input-username">Username</label>
-            <input type="text" id="input-username" class="form-input" placeholder="e.g. new-user" />
-            <span class="form-helper">In Go Storage, authorization header is `Authorization: Username &lt;username&gt;`.</span>
+            <input type="text" id="input-username" class="form-input" placeholder="e.g. alice" autocomplete="off" />
+            <span class="form-helper">In Go Storage, authorization header is <code>Authorization: Username &lt;username&gt;</code>.</span>
           </div>
         </div>
         <div class="modal-footer" style="justify-content: space-between;">
-          <button class="btn btn-secondary modal-cancel-btn">Cancel</button>
+          <button class="btn btn-secondary modal-cancel-btn" id="btn-cancel-user">Cancel</button>
           <div style="display:flex;gap:8px;">
-            <button class="btn btn-secondary" id="btn-switch-user">Switch User</button>
+            <button class="btn btn-secondary" id="btn-switch-user">Sign In</button>
             <button class="btn btn-primary" id="btn-register-user">Register New User</button>
           </div>
         </div>

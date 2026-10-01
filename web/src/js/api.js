@@ -4,7 +4,7 @@ import { state } from './state.js';
 export class StorageApi {
   constructor() {
     this.baseUrl = localStorage.getItem('gs_api_url') || '';
-    this.username = localStorage.getItem('gs_username') || 'new-user';
+    this.username = localStorage.getItem('gs_username') || '';
   }
 
   setBaseUrl(url) {

@@ -2,7 +2,7 @@
 
 class State {
   constructor() {
-    this.username = localStorage.getItem('gs_username') || 'new-user';
+    this.username = localStorage.getItem('gs_username') || '';
     this.buckets = [];
     this.activeBucket = localStorage.getItem('gs_active_bucket') || '';
     this.currentPrefix = '';

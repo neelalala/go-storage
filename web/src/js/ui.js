@@ -66,9 +66,9 @@ export function escapeHtml(str = '') {
 export function renderUser() {
   const nameEl = document.getElementById('current-username');
   const avatarEl = document.getElementById('user-avatar');
-  if (nameEl) nameEl.textContent = state.username || 'Anonymous';
+  if (nameEl) nameEl.textContent = state.username || 'Sign In';
   if (avatarEl) {
-    const initial = (state.username || 'U').charAt(0).toUpperCase();
+    const initial = state.username ? state.username.charAt(0).toUpperCase() : '?';
     avatarEl.textContent = initial;
   }
 }
@@ -99,6 +99,15 @@ export function renderGatewayStatus() {
 export function renderBuckets() {
   const listEl = document.getElementById('bucket-list');
   if (!listEl) return;
+
+  if (!state.username) {
+    listEl.innerHTML = `
+      <div style="padding: 16px 8px; text-align: center; color: var(--text-muted); font-size: 0.8rem;">
+        Sign in to view your buckets.
+      </div>
+    `;
+    return;
+  }
 
   if (state.buckets.length === 0) {
     listEl.innerHTML = `
@@ -158,6 +167,11 @@ export function renderBreadcrumbs() {
   const container = document.getElementById('breadcrumbs');
   if (!container) return;
 
+  if (!state.username) {
+    container.innerHTML = `<span class="breadcrumb-item active">Please sign in</span>`;
+    return;
+  }
+
   if (!state.activeBucket) {
     container.innerHTML = `<span class="breadcrumb-item active">Select a bucket</span>`;
     return;
@@ -199,6 +213,21 @@ export function renderBreadcrumbs() {
 export function renderExplorer() {
   const container = document.getElementById('explorer-container');
   if (!container) return;
+
+  if (!state.username) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">${icons.user}</div>
+        <div class="empty-title">Welcome to Go Storage</div>
+        <div class="empty-sub">Sign in or register a new user to start storing and managing files.</div>
+        <button class="btn btn-primary" id="btn-empty-user-prompt" style="margin-top: 14px;">Sign In / Register</button>
+      </div>
+    `;
+    container.querySelector('#btn-empty-user-prompt')?.addEventListener('click', () => {
+      document.getElementById('btn-user-profile')?.click();
+    });
+    return;
+  }
 
   if (!state.activeBucket) {
     container.innerHTML = `

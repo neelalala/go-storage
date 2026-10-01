@@ -19,10 +19,47 @@ async function init() {
 
   renderUser();
   renderGatewayStatus();
+  renderBreadcrumbs();
+  renderExplorer();
+
   api.checkGatewayHealth();
   setInterval(() => api.checkGatewayHealth(), 15000);
 
-  await loadBuckets();
+  if (!state.username) {
+    openUserModal({
+      isFirstSetup: true,
+      alertMessage: 'Welcome to Go Storage! To start managing files and buckets, please enter your username or register a new user.',
+    });
+  } else {
+    await loadBuckets();
+  }
+}
+
+function openUserModal({ isFirstSetup = false, alertMessage = '' } = {}) {
+  const modal = document.getElementById('modal-user');
+  const input = document.getElementById('input-username');
+  const alertEl = document.getElementById('user-modal-alert');
+  const titleEl = document.getElementById('modal-user-title');
+
+  if (titleEl) {
+    titleEl.textContent = isFirstSetup ? 'Welcome to Go Storage' : 'User Account';
+  }
+
+  if (alertEl) {
+    if (alertMessage) {
+      alertEl.textContent = alertMessage;
+      alertEl.style.display = 'block';
+    } else {
+      alertEl.style.display = 'none';
+    }
+  }
+
+  if (input) {
+    input.value = state.username || '';
+  }
+
+  modal?.classList.add('open');
+  setTimeout(() => input?.focus(), 50);
 }
 
 function setupIcons() {
@@ -61,12 +98,27 @@ function updateViewModeButtons() {
 }
 
 async function loadBuckets() {
+  if (!state.username) {
+    state.setBuckets([]);
+    return;
+  }
+
   try {
     state.setLoading(true);
     const { buckets } = await api.listBuckets();
     state.setBuckets(buckets);
   } catch (err) {
     console.error('Failed to load buckets:', err);
+    // If 401 Unauthorized or user not found, prompt for user setup
+    if (err.status === 401 || err.message?.toLowerCase().includes('user') || err.message?.toLowerCase().includes('verify')) {
+      showToast(`User "${state.username}" not found in system`, 'error');
+      openUserModal({
+        isFirstSetup: true,
+        alertMessage: `User "${state.username}" was not found (database may have been reset). Please register this username or enter an existing one.`,
+      });
+      state.setBuckets([]);
+      return;
+    }
     showToast(`Could not load buckets: ${err.message}`, 'error');
   } finally {
     state.setLoading(false);
@@ -141,12 +193,10 @@ function setupEventListeners() {
 
   // User switcher modal
   document.getElementById('btn-user-profile')?.addEventListener('click', () => {
-    const input = document.getElementById('input-username');
-    if (input) input.value = state.username;
-    document.getElementById('modal-user')?.classList.add('open');
+    openUserModal({ isFirstSetup: false });
   });
 
-  document.getElementById('btn-switch-user')?.addEventListener('click', () => {
+  document.getElementById('btn-switch-user')?.addEventListener('click', async () => {
     const username = document.getElementById('input-username')?.value.trim();
     if (!username) {
       showToast('Please enter a username', 'error');
@@ -155,7 +205,8 @@ function setupEventListeners() {
     api.setUsername(username);
     state.setUsername(username);
     document.getElementById('modal-user')?.classList.remove('open');
-    showToast(`Active user: ${username}`, 'success');
+    showToast(`Signed in as: ${username}`, 'success');
+    await loadBuckets();
   });
 
   document.getElementById('btn-register-user')?.addEventListener('click', async () => {
@@ -169,9 +220,16 @@ function setupEventListeners() {
       api.setUsername(username);
       state.setUsername(username);
       document.getElementById('modal-user')?.classList.remove('open');
-      showToast(`User "${username}" registered and switched!`, 'success');
+      showToast(`User "${username}" registered and signed in!`, 'success');
+      await loadBuckets();
     } catch (err) {
       showToast(`Registration failed: ${err.message}`, 'error');
+    }
+  });
+
+  document.getElementById('input-username')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      document.getElementById('btn-switch-user')?.click();
     }
   });
 
