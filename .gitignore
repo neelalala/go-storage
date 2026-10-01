@@ -1,8 +1,8 @@
 .DS_Store
 bin/
-docs/architecture.jpg
 pgdata/
 uploads/
 .env
 .idea/
-docs/TODO.md
+web/node_modules/
+web/dist/
