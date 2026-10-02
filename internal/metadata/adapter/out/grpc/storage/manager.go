@@ -72,7 +72,7 @@ func (m *NodeManager) DeleteObjectOn(ctx context.Context, nodeID uuid.UUID, path
 	}
 
 	if client == nil {
-		fmt.Errorf("error getting node with ID %s", nodeID)
+		return fmt.Errorf("error getting node with ID %s", nodeID)
 	}
 
 	return client.DeleteObject(ctx, path)
