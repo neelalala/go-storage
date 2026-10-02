@@ -14,7 +14,6 @@ COPY cmd/metadata ./cmd/metadata
 COPY internal/metadata ./internal/metadata
 COPY pkg/proto/storage/storage.proto ./pkg/proto/storage/
 COPY pkg/proto/metadata/metadata.proto ./pkg/proto/metadata/
-COPY migrations/metadata ./migrations/metadata
 
 RUN protoc --go_out=. --go_opt=paths=source_relative \
   --go-grpc_out=. --go-grpc_opt=paths=source_relative \
@@ -30,7 +29,6 @@ FROM alpine:latest
 WORKDIR /app
 
 COPY --from=builder /bin/metadata /app/metadata
-COPY --from=builder /app/migrations/metadata ./migrations/metadata
 
 EXPOSE 50051
 

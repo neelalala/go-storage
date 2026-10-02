@@ -1,9 +1,6 @@
 logger:
   level: DEBUG
 
-database:
-  migrations_dir: file://migrations/metadata
-
 server:
   address: ":50051"
 

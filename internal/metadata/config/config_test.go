@@ -30,9 +30,6 @@ func TestMetadataConfig_LoadWithoutConfigFile(t *testing.T) {
 	if cfg.Database.URL != "postgres://user:pass@localhost:5432/db" {
 		t.Errorf("expected Database.URL, got %s", cfg.Database.URL)
 	}
-	if cfg.Database.MigrationsDir != "file://migrations/metadata" {
-		t.Errorf("expected default MigrationsDir file://migrations/metadata, got %s", cfg.Database.MigrationsDir)
-	}
 	if cfg.Server.Address != ":50060" {
 		t.Errorf("expected Address :50060, got %s", cfg.Server.Address)
 	}
@@ -61,7 +58,6 @@ func TestMetadataConfig_LoadDefaults(t *testing.T) {
 		"CONFIG_PATH",
 		"LOG_LEVEL",
 		"DATABASE_URL",
-		"MIGRATIONS_DIRECTORY",
 		"SERVER_ADDRESS",
 		"REDIS_URL",
 		"HEARTBEAT_INTERVAL",
@@ -80,9 +76,6 @@ func TestMetadataConfig_LoadDefaults(t *testing.T) {
 
 	if cfg.Logger.LogLevel != "DEBUG" {
 		t.Errorf("expected default LogLevel DEBUG, got %s", cfg.Logger.LogLevel)
-	}
-	if cfg.Database.MigrationsDir != "file://migrations/metadata" {
-		t.Errorf("expected default MigrationsDir file://migrations/metadata, got %s", cfg.Database.MigrationsDir)
 	}
 	if cfg.Server.Address != ":50051" {
 		t.Errorf("expected default Address :50051, got %s", cfg.Server.Address)

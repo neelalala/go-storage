@@ -14,8 +14,7 @@ type LoggerConfig struct {
 }
 
 type DatabaseConfig struct {
-	URL           string `yaml:"url" env:"DATABASE_URL"`
-	MigrationsDir string `yaml:"migrations_dir" env:"MIGRATIONS_DIRECTORY" env-default:"file://migrations/metadata"`
+	URL string `yaml:"url" env:"DATABASE_URL"`
 }
 
 type ServerConfig struct {

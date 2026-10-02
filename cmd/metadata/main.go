@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -11,13 +10,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/golang-migrate/migrate/v4"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/neelalala/go-storage/internal/metadata/adapter/in/grpc"
 	"github.com/neelalala/go-storage/internal/metadata/adapter/out/grpc/storage"
 	"github.com/neelalala/go-storage/internal/metadata/adapter/out/hasher"
-	"github.com/neelalala/go-storage/internal/metadata/adapter/out/migrations"
 	"github.com/neelalala/go-storage/internal/metadata/adapter/out/nodes"
 	"github.com/neelalala/go-storage/internal/metadata/adapter/out/repository/sql"
 	"github.com/neelalala/go-storage/internal/metadata/application"
@@ -50,11 +47,6 @@ func run(cfg config.Config, log *slog.Logger) error {
 
 	pool, err := pgxpool.New(ctx, cfg.Database.URL)
 	if err != nil {
-		return err
-	}
-
-	err = migrations.RunMigrationsFromFile(cfg.Database.URL, cfg.Database.MigrationsDir, log)
-	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		return err
 	}
 
