@@ -44,6 +44,7 @@ service Metadata {
 
 service NodeDiscovery {
   rpc Heartbeat(HeartbeatRequest) returns (google.protobuf.Empty) {}
+  rpc Deregister(DeregisterRequest) returns (google.protobuf.Empty) {}
 }
 
 // DTOs
@@ -181,4 +182,9 @@ message DeleteObjectRequest {
 message HeartbeatRequest {
   string node_id = 1;
   string node_address = 2;
+  uint64 free_space_bytes = 3;
+}
+
+message DeregisterRequest {
+  string node_id = 1;
 }
