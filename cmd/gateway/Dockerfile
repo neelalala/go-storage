@@ -33,7 +33,6 @@ FROM alpine:latest
 
 WORKDIR /app
 
-COPY cmd/gateway/config.yaml ./config.yaml
 COPY --from=builder /bin/gateway /app/gateway
 
 EXPOSE 80

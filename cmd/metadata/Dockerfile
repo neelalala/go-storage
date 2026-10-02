@@ -29,7 +29,6 @@ FROM alpine:latest
 
 WORKDIR /app
 
-COPY cmd/metadata/config.yaml ./config.yaml
 COPY --from=builder /bin/metadata /app/metadata
 COPY --from=builder /app/migrations/metadata ./migrations/metadata
 

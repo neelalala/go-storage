@@ -24,7 +24,6 @@ FROM alpine:latest
 
 WORKDIR /app
 
-COPY cmd/users/config.yaml ./config.yaml
 COPY --from=builder /bin/users /app/users
 
 EXPOSE 50051

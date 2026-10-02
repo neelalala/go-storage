@@ -28,7 +28,6 @@ FROM alpine:latest
 
 WORKDIR /app
 
-COPY cmd/storage/config.yaml ./config.yaml
 COPY --from=builder /bin/storage /app/storage
 
 EXPOSE 50051
