@@ -11,10 +11,10 @@ protobuf:
 build:
 	docker compose build
 
-run:
+up:
 	docker compose up -d
 
-stop:
+down:
 	docker compose down
 
 clear:
@@ -24,5 +24,5 @@ clear:
 	rm -rf ./uploads/node1 ./uploads/node2 ./uploads/node3
 	mkdir -p ./uploads/node1 ./uploads/node2 ./uploads/node3
 
-.PHONY: protobuf build run stop clear
+.PHONY: protobuf build up down clear
 
