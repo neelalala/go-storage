@@ -16,6 +16,7 @@ type Hasher interface {
 
 type NodeRegistry interface {
 	ProcessHeartbeat(context.Context, domain.StorageNode)
+	DeregisterNode(context.Context, uuid.UUID) error
 	GetNode(context.Context, uuid.UUID) (domain.StorageNode, error)
 }
 
@@ -230,4 +231,8 @@ func (s *MetadataService) HeadObject(ctx context.Context, userID uuid.UUID, buck
 
 func (s *MetadataService) Heartbeat(ctx context.Context, node domain.StorageNode) {
 	s.registry.ProcessHeartbeat(ctx, node)
+}
+
+func (s *MetadataService) Deregister(ctx context.Context, nodeID uuid.UUID) error {
+	return s.registry.DeregisterNode(ctx, nodeID)
 }

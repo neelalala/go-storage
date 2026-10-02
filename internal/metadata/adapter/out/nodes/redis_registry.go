@@ -103,6 +103,31 @@ func (r *RedisNodeRegistry) ProcessHeartbeat(ctx context.Context, node domain.St
 	}
 }
 
+func (r *RedisNodeRegistry) DeregisterNode(ctx context.Context, id uuid.UUID) error {
+	key := r.nodeKeyPrefix + id.String()
+
+	pipe := r.client.Pipeline()
+	pipe.Del(ctx, key)
+	pipe.SRem(ctx, r.nodeSetKey, id.String())
+
+	_, err := pipe.Exec(ctx)
+	if err != nil {
+		r.log.ErrorContext(ctx, "failed to deregister node in redis",
+			slog.String("error", err.Error()),
+			slog.String("node_id", id.String()),
+		)
+		return err
+	}
+
+	r.log.InfoContext(ctx, "node deregistered",
+		slog.Group(
+			"node",
+			slog.String("id", id.String()),
+		),
+	)
+	return nil
+}
+
 func (r *RedisNodeRegistry) GetAllNodes(ctx context.Context) ([]domain.StorageNode, error) {
 	members, err := r.client.SMembers(ctx, r.nodeSetKey).Result()
 	if err != nil {

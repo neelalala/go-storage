@@ -430,3 +430,16 @@ func (s *Server) Heartbeat(ctx context.Context, req *metadatapb.HeartbeatRequest
 
 	return &emptypb.Empty{}, nil
 }
+
+func (s *Server) Deregister(ctx context.Context, req *metadatapb.DeregisterRequest) (*emptypb.Empty, error) {
+	id, err := uuid.Parse(req.GetNodeId())
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "error parsing node id as UUID: %v", err)
+	}
+
+	if err := s.service.Deregister(ctx, id); err != nil {
+		return nil, status.Errorf(codes.Internal, "error deregistering node: %v", err)
+	}
+
+	return &emptypb.Empty{}, nil
+}

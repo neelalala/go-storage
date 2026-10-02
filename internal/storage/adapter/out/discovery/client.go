@@ -43,3 +43,16 @@ func (c *Client) Heartbeat(ctx context.Context, id uuid.UUID, addr string) error
 
 	return nil
 }
+
+func (c *Client) Deregister(ctx context.Context, id uuid.UUID) error {
+	req := &metadatapb.DeregisterRequest{
+		NodeId: id.String(),
+	}
+
+	_, err := c.client.Deregister(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
