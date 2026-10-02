@@ -1,19 +1,21 @@
 package config
 
 import (
+	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type LoggerConfig struct {
-	LogLevel string `yaml:"log_level" env:"LOG_LEVEL" env-default:"ERROR"`
+	LogLevel string `yaml:"log_level" env:"LOG_LEVEL" env-default:"DEBUG"`
 }
 
 type DatabaseConfig struct {
 	URL           string `yaml:"url" env:"DATABASE_URL"`
-	MigrationsDir string `yaml:"migrations_dir" env:"DATABASE_MIGRATIONS_DIRECTORY"`
+	MigrationsDir string `yaml:"migrations_dir" env:"DATABASE_MIGRATIONS_DIRECTORY" env-default:"file://migrations/metadata"`
 }
 
 type GRPCConfig struct {
@@ -21,13 +23,13 @@ type GRPCConfig struct {
 }
 
 type StorageConfig struct {
-	HeartbeatInterval time.Duration `yaml:"heartbeat_interval" env:"HEARTBEAT_INTERVAL" env-default:"1m"`
+	HeartbeatInterval time.Duration `yaml:"heartbeat_interval" env:"HEARTBEAT_INTERVAL" env-default:"10s"`
 }
 
 type GarbageCollectorConfig struct {
 	Interval    time.Duration `yaml:"interval" env:"GC_INTERVAL" env-default:"1m"`
-	TaskLimit   int           `yaml:"task_limit" env:"GC_TASK_LIMIT" env-default:"50"`
-	TaskTimeout time.Duration `yaml:"task_timeout" env:"GC_TASK_TIMEOUT" env-default:"10s"`
+	TaskLimit   int           `yaml:"task_limit" env:"GC_TASK_LIMIT" env-default:"100"`
+	TaskTimeout time.Duration `yaml:"task_timeout" env:"GC_TASK_TIMEOUT" env-default:"5s"`
 }
 
 type Config struct {
@@ -38,10 +40,31 @@ type Config struct {
 	GarbageCollector GarbageCollectorConfig `yaml:"garbage_collector"`
 }
 
-func MustLoad(configPath string) Config {
+func Load(configPath string) (Config, error) {
 	var cfg Config
-	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
-		log.Fatalf("cannot read config %q: %s", configPath, err)
+
+	if configPath == "" {
+		configPath = os.Getenv("CONFIG_PATH")
+	}
+
+	if configPath != "" {
+		if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
+			return Config{}, fmt.Errorf("read config %q: %w", configPath, err)
+		}
+		return cfg, nil
+	}
+
+	if err := cleanenv.ReadEnv(&cfg); err != nil {
+		return Config{}, fmt.Errorf("read environment variables: %w", err)
+	}
+
+	return cfg, nil
+}
+
+func MustLoad(configPath string) Config {
+	cfg, err := Load(configPath)
+	if err != nil {
+		log.Fatalf("failed to load configuration: %s", err)
 	}
 	return cfg
 }

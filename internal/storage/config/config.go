@@ -1,14 +1,16 @@
 package config
 
 import (
+	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type LoggerConfig struct {
-	LogLevel string `yaml:"log_level" env:"LOG_LEVEL" env-default:"ERROR"`
+	LogLevel string `yaml:"log_level" env:"LOG_LEVEL" env-default:"DEBUG"`
 }
 
 type GRPCConfig struct {
@@ -16,8 +18,8 @@ type GRPCConfig struct {
 }
 
 type DiscoveryServiceConfig struct {
-	Address           string        `yaml:"address" env:"DISCOVERY_SERVICE_ADDRESS"`
-	HeartbeatInterval time.Duration `yaml:"heartbeat_interval" env:"HEARTBEAT_INTERVAL" env-default:"1m"`
+	Address           string        `yaml:"address" env:"DISCOVERY_SERVICE_ADDRESS" env-default:"metadata:50051"`
+	HeartbeatInterval time.Duration `yaml:"heartbeat_interval" env:"HEARTBEAT_INTERVAL" env-default:"10s"`
 }
 
 type NodeConfig struct {
@@ -32,10 +34,31 @@ type Config struct {
 	Node             NodeConfig             `yaml:"node"`
 }
 
-func MustLoad(configPath string) Config {
+func Load(configPath string) (Config, error) {
 	var cfg Config
-	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
-		log.Fatalf("cannot read config %q: %s", configPath, err)
+
+	if configPath == "" {
+		configPath = os.Getenv("CONFIG_PATH")
+	}
+
+	if configPath != "" {
+		if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
+			return Config{}, fmt.Errorf("read config %q: %w", configPath, err)
+		}
+		return cfg, nil
+	}
+
+	if err := cleanenv.ReadEnv(&cfg); err != nil {
+		return Config{}, fmt.Errorf("read environment variables: %w", err)
+	}
+
+	return cfg, nil
+}
+
+func MustLoad(configPath string) Config {
+	cfg, err := Load(configPath)
+	if err != nil {
+		log.Fatalf("failed to load configuration: %s", err)
 	}
 	return cfg
 }

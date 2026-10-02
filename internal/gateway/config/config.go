@@ -1,7 +1,9 @@
 package config
 
 import (
+	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
@@ -12,7 +14,7 @@ type LoggerConfig struct {
 }
 
 type HTTPConfig struct {
-	Address string        `yaml:"address" env:"GATEWAY_ADDRESS_HTTP" env-default:"localhost:80"`
+	Address string        `yaml:"address" env:"GATEWAY_ADDRESS_HTTP" env-default:":80"`
 	Timeout time.Duration `yaml:"timeout" env:"GATEWAY_TIMEOUT" env-default:"5s"`
 }
 
@@ -31,10 +33,31 @@ type Config struct {
 	UsersService    UsersServiceConfig    `yaml:"users"`
 }
 
-func MustLoad(configPath string) Config {
+func Load(configPath string) (Config, error) {
 	var cfg Config
-	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
-		log.Fatalf("cannot read config %q: %s", configPath, err)
+
+	if configPath == "" {
+		configPath = os.Getenv("CONFIG_PATH")
+	}
+
+	if configPath != "" {
+		if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
+			return Config{}, fmt.Errorf("read config %q: %w", configPath, err)
+		}
+		return cfg, nil
+	}
+
+	if err := cleanenv.ReadEnv(&cfg); err != nil {
+		return Config{}, fmt.Errorf("read environment variables: %w", err)
+	}
+
+	return cfg, nil
+}
+
+func MustLoad(configPath string) Config {
+	cfg, err := Load(configPath)
+	if err != nil {
+		log.Fatalf("failed to load configuration: %s", err)
 	}
 	return cfg
 }

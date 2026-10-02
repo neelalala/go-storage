@@ -1,13 +1,15 @@
 package config
 
 import (
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type LoggerConfig struct {
-	LogLevel string `yaml:"log_level" env:"LOG_LEVEL" env-default:"ERROR"`
+	LogLevel string `yaml:"log_level" env:"LOG_LEVEL" env-default:"DEBUG"`
 }
 
 type DatabaseConfig struct {
@@ -15,7 +17,7 @@ type DatabaseConfig struct {
 }
 
 type GRPCConfig struct {
-	Address string `yaml:"address" env:"METADATA_ADDRESS_GRPC" env-default:":50051"`
+	Address string `yaml:"address" env:"USERS_ADDRESS_GRPC" env-default:":50051"`
 }
 
 type Config struct {
@@ -24,10 +26,31 @@ type Config struct {
 	GRPC     GRPCConfig     `yaml:"grpc"`
 }
 
-func MustLoad(configPath string) Config {
+func Load(configPath string) (Config, error) {
 	var cfg Config
-	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
-		log.Fatalf("cannot read config %q: %s", configPath, err)
+
+	if configPath == "" {
+		configPath = os.Getenv("CONFIG_PATH")
+	}
+
+	if configPath != "" {
+		if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
+			return Config{}, fmt.Errorf("read config %q: %w", configPath, err)
+		}
+		return cfg, nil
+	}
+
+	if err := cleanenv.ReadEnv(&cfg); err != nil {
+		return Config{}, fmt.Errorf("read environment variables: %w", err)
+	}
+
+	return cfg, nil
+}
+
+func MustLoad(configPath string) Config {
+	cfg, err := Load(configPath)
+	if err != nil {
+		log.Fatalf("failed to load configuration: %s", err)
 	}
 	return cfg
 }
