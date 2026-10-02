@@ -10,12 +10,12 @@ import (
 )
 
 type LoggerConfig struct {
-	LogLevel string `yaml:"log_level" env:"LOG_LEVEL" env-default:"DEBUG"`
+	LogLevel string `yaml:"level" env:"LOG_LEVEL" env-default:"DEBUG"`
 }
 
-type HTTPConfig struct {
-	Address string        `yaml:"address" env:"GATEWAY_ADDRESS_HTTP" env-default:":80"`
-	Timeout time.Duration `yaml:"timeout" env:"GATEWAY_TIMEOUT" env-default:"5s"`
+type ServerConfig struct {
+	Address string        `yaml:"address" env:"SERVER_ADDRESS" env-default:":80"`
+	Timeout time.Duration `yaml:"timeout" env:"SERVER_TIMEOUT" env-default:"5s"`
 }
 
 type MetadataServiceConfig struct {
@@ -28,7 +28,7 @@ type UsersServiceConfig struct {
 
 type Config struct {
 	Logger          LoggerConfig          `yaml:"logger"`
-	HTTP            HTTPConfig            `yaml:"http"`
+	Server          ServerConfig          `yaml:"server"`
 	MetadataService MetadataServiceConfig `yaml:"metadata"`
 	UsersService    UsersServiceConfig    `yaml:"users"`
 }

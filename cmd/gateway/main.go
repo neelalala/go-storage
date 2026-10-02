@@ -60,7 +60,7 @@ func run(cfg config.Config, log *slog.Logger) error {
 	marshaller := marshal.JSONMarshaller{}
 	verifier := auth.NewSimpleVerifier(users)
 
-	server := http.NewServer(gateway, marshaller, cfg.HTTP.Address, cfg.HTTP.Timeout, verifier, log)
+	server := http.NewServer(gateway, marshaller, cfg.Server.Address, cfg.Server.Timeout, verifier, log)
 
 	go func() {
 		<-ctx.Done()
