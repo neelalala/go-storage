@@ -21,17 +21,30 @@ func NewGCRepository(pool *pgxpool.Pool) *GCRepository {
 }
 
 func (r *GCRepository) GetPendingGCTasks(ctx context.Context, limit int) ([]domain.GCTask, error) {
+	if limit <= 0 {
+		return nil, nil
+	}
+
 	query := `
-		SELECT deletion_id, object_path, storage_node_id, attempts, created_at
-		FROM gc_queue
-		WHERE status = $1
-		ORDER BY created_at, attempts 
-		LIMIT $2 
+		WITH next_tasks AS (
+			SELECT deletion_id
+			FROM gc_queue
+			WHERE status = $1 OR (status = $2 AND updated_at < CURRENT_TIMESTAMP - INTERVAL '5 minutes')
+			ORDER BY created_at, attempts 
+			LIMIT $3 
+			FOR UPDATE SKIP LOCKED
+		)
+		UPDATE gc_queue
+		SET status = $2,
+		    updated_at = CURRENT_TIMESTAMP
+		FROM next_tasks
+		WHERE gc_queue.deletion_id = next_tasks.deletion_id
+		RETURNING gc_queue.deletion_id, gc_queue.object_path, gc_queue.storage_node_id, gc_queue.status, gc_queue.attempts, gc_queue.created_at, gc_queue.updated_at
 	`
 
 	db := GetDB(ctx, r.pool)
 
-	rows, err := db.Query(ctx, query, domain.StatusPending, limit)
+	rows, err := db.Query(ctx, query, domain.StatusPending, domain.StatusProcessing, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -46,13 +59,14 @@ func (r *GCRepository) GetPendingGCTasks(ctx context.Context, limit int) ([]doma
 			&task.DeletionID,
 			&task.ObjectPath,
 			&task.StorageNodeID,
+			&task.Status,
 			&task.Attempts,
 			&task.CreatedAt,
+			&task.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err
 		}
-		task.Status = domain.StatusPending
 		tasks = append(tasks, task)
 	}
 
@@ -86,13 +100,15 @@ func (r *GCRepository) CompleteGCTask(ctx context.Context, deletionID int64) err
 func (r *GCRepository) IncrementGCTaskAttempts(ctx context.Context, deletionID int64) error {
 	query := `
 		UPDATE gc_queue
-		SET attempts = attempts + 1
+		SET attempts = attempts + 1,
+		    status = CASE WHEN attempts + 1 >= $2 THEN $3 ELSE $4 END,
+		    updated_at = CURRENT_TIMESTAMP
 		WHERE deletion_id = $1
 	`
 
 	db := GetDB(ctx, r.pool)
 
-	tag, err := db.Exec(ctx, query, deletionID)
+	tag, err := db.Exec(ctx, query, deletionID, domain.MaxGCAttempts, domain.StatusError, domain.StatusPending)
 	if err != nil {
 		return err
 	}
