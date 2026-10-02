@@ -22,8 +22,13 @@ type ServerConfig struct {
 	Address string `yaml:"address" env:"SERVER_ADDRESS" env-default:":50051"`
 }
 
+type RedisConfig struct {
+	URL string `yaml:"url" env:"REDIS_URL" env-default:"redis://localhost:6379/0"`
+}
+
 type StorageConfig struct {
-	HeartbeatInterval time.Duration `yaml:"heartbeat_interval" env:"HEARTBEAT_INTERVAL" env-default:"10s"`
+	HeartbeatInterval  time.Duration `yaml:"heartbeat_interval" env:"HEARTBEAT_INTERVAL" env-default:"10s"`
+	TTLCountToMarkDead int           `yaml:"ttl_count_to_mark_dead" env:"TTL_COUNT_TO_MARK_DEAD" env-default:"3"`
 }
 
 type GarbageCollectorConfig struct {
@@ -36,6 +41,7 @@ type Config struct {
 	Logger           LoggerConfig           `yaml:"logger"`
 	Database         DatabaseConfig         `yaml:"database"`
 	Server           ServerConfig           `yaml:"server"`
+	Redis            RedisConfig            `yaml:"redis"`
 	Storage          StorageConfig          `yaml:"storage"`
 	GarbageCollector GarbageCollectorConfig `yaml:"garbage_collector"`
 }

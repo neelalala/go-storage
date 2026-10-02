@@ -12,7 +12,9 @@ func TestMetadataConfig_LoadWithoutConfigFile(t *testing.T) {
 	t.Setenv("LOG_LEVEL", "INFO")
 	t.Setenv("DATABASE_URL", "postgres://user:pass@localhost:5432/db")
 	t.Setenv("SERVER_ADDRESS", ":50060")
+	t.Setenv("REDIS_URL", "redis://custom:6379/1")
 	t.Setenv("HEARTBEAT_INTERVAL", "15s")
+	t.Setenv("TTL_COUNT_TO_MARK_DEAD", "5")
 	t.Setenv("GC_INTERVAL", "2m")
 	t.Setenv("GC_TASK_LIMIT", "200")
 	t.Setenv("GC_TASK_TIMEOUT", "8s")
@@ -34,8 +36,14 @@ func TestMetadataConfig_LoadWithoutConfigFile(t *testing.T) {
 	if cfg.Server.Address != ":50060" {
 		t.Errorf("expected Address :50060, got %s", cfg.Server.Address)
 	}
+	if cfg.Redis.URL != "redis://custom:6379/1" {
+		t.Errorf("expected Redis.URL redis://custom:6379/1, got %s", cfg.Redis.URL)
+	}
 	if cfg.Storage.HeartbeatInterval != 15*time.Second {
 		t.Errorf("expected HeartbeatInterval 15s, got %v", cfg.Storage.HeartbeatInterval)
+	}
+	if cfg.Storage.TTLCountToMarkDead != 5 {
+		t.Errorf("expected TTLCountToMarkDead 5, got %d", cfg.Storage.TTLCountToMarkDead)
 	}
 	if cfg.GarbageCollector.Interval != 2*time.Minute {
 		t.Errorf("expected GC Interval 2m, got %v", cfg.GarbageCollector.Interval)
@@ -55,7 +63,9 @@ func TestMetadataConfig_LoadDefaults(t *testing.T) {
 		"DATABASE_URL",
 		"MIGRATIONS_DIRECTORY",
 		"SERVER_ADDRESS",
+		"REDIS_URL",
 		"HEARTBEAT_INTERVAL",
+		"TTL_COUNT_TO_MARK_DEAD",
 		"GC_INTERVAL",
 		"GC_TASK_LIMIT",
 		"GC_TASK_TIMEOUT",
@@ -77,8 +87,14 @@ func TestMetadataConfig_LoadDefaults(t *testing.T) {
 	if cfg.Server.Address != ":50051" {
 		t.Errorf("expected default Address :50051, got %s", cfg.Server.Address)
 	}
+	if cfg.Redis.URL != "redis://localhost:6379/0" {
+		t.Errorf("expected default Redis.URL redis://localhost:6379/0, got %s", cfg.Redis.URL)
+	}
 	if cfg.Storage.HeartbeatInterval != 10*time.Second {
 		t.Errorf("expected default HeartbeatInterval 10s, got %v", cfg.Storage.HeartbeatInterval)
+	}
+	if cfg.Storage.TTLCountToMarkDead != 3 {
+		t.Errorf("expected default TTLCountToMarkDead 3, got %d", cfg.Storage.TTLCountToMarkDead)
 	}
 	if cfg.GarbageCollector.Interval != 1*time.Minute {
 		t.Errorf("expected default Interval 1m, got %v", cfg.GarbageCollector.Interval)
@@ -100,8 +116,11 @@ logger:
   level: WARN
 server:
   address: ":50055"
+redis:
+  url: "redis://my-redis:6379/2"
 storage:
   heartbeat_interval: 20s
+  ttl_count_to_mark_dead: 4
 garbage_collector:
   interval: 5m
   task_limit: 50
@@ -122,8 +141,14 @@ garbage_collector:
 	if cfg.Server.Address != ":50055" {
 		t.Errorf("expected Address :50055, got %s", cfg.Server.Address)
 	}
+	if cfg.Redis.URL != "redis://my-redis:6379/2" {
+		t.Errorf("expected Redis.URL redis://my-redis:6379/2, got %s", cfg.Redis.URL)
+	}
 	if cfg.Storage.HeartbeatInterval != 20*time.Second {
 		t.Errorf("expected HeartbeatInterval 20s, got %v", cfg.Storage.HeartbeatInterval)
+	}
+	if cfg.Storage.TTLCountToMarkDead != 4 {
+		t.Errorf("expected TTLCountToMarkDead 4, got %d", cfg.Storage.TTLCountToMarkDead)
 	}
 }
 
