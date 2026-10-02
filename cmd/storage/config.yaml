@@ -5,7 +5,7 @@ server:
   address: ":50051"
 
 node:
-  upload_root: /uploads/ver1
+  upload_root: /uploads
   
 discovery_service:
   address: "metadata:50051"
