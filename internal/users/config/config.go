@@ -9,21 +9,21 @@ import (
 )
 
 type LoggerConfig struct {
-	LogLevel string `yaml:"log_level" env:"LOG_LEVEL" env-default:"DEBUG"`
+	LogLevel string `yaml:"level" env:"LOG_LEVEL" env-default:"DEBUG"`
 }
 
 type DatabaseConfig struct {
 	URL string `yaml:"url" env:"DATABASE_URL"`
 }
 
-type GRPCConfig struct {
-	Address string `yaml:"address" env:"USERS_ADDRESS_GRPC" env-default:":50051"`
+type ServerConfig struct {
+	Address string `yaml:"address" env:"SERVER_ADDRESS" env-default:":50051"`
 }
 
 type Config struct {
 	Logger   LoggerConfig   `yaml:"logger"`
 	Database DatabaseConfig `yaml:"database"`
-	GRPC     GRPCConfig     `yaml:"grpc"`
+	Server   ServerConfig   `yaml:"server"`
 }
 
 func Load(configPath string) (Config, error) {

@@ -1,5 +1,5 @@
 logger:
-  log_level: DEBUG
+  level: DEBUG
 
-grpc:
+server:
   address: ":50051"

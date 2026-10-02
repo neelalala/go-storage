@@ -49,7 +49,7 @@ func run(cfg config.Config, log *slog.Logger) error {
 	userRepo := sql.NewUserRepository(pool)
 
 	users := application.NewUsersService(userRepo)
-	server := grpc.NewServer(cfg.GRPC.Address, users, log)
+	server := grpc.NewServer(cfg.Server.Address, users, log)
 
 	go func() {
 		<-ctx.Done()
