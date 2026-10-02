@@ -24,5 +24,17 @@ clear:
 	rm -rf ./uploads/node1 ./uploads/node2 ./uploads/node3
 	mkdir -p ./uploads/node1 ./uploads/node2 ./uploads/node3
 
-.PHONY: protobuf build up down clear
+migrate-up:
+	docker compose run --rm migrate up $(step)
+
+migrate-down:
+	docker compose run --rm migrate down $(step)
+
+migrate-version:
+	docker compose run --rm migrate version
+
+migrate-force:
+	docker compose run --rm migrate force $(version)
+
+.PHONY: protobuf build up down clear migrate-up migrate-down migrate-version migrate-force
 
