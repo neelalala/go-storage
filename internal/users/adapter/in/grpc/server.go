@@ -102,7 +102,7 @@ func (s *Server) CreateUser(ctx context.Context, req *userspb.CreateUserRequest)
 func (s *Server) GetUserByName(ctx context.Context, req *userspb.GetUserByNameRequest) (*userspb.User, error) {
 	s.log.Debug("get user by name request")
 
-	name  := req.GetDisplayName()
+	name := req.GetDisplayName()
 
 	user, err := s.service.GetUserByName(ctx, name)
 	if err != nil {
@@ -120,7 +120,7 @@ func (s *Server) GetUserByName(ctx context.Context, req *userspb.GetUserByNameRe
 	}
 
 	return &userspb.User{
-		Id: user.ID.String(),
+		Id:          user.ID.String(),
 		DisplayName: user.DisplayName,
 	}, nil
 }
