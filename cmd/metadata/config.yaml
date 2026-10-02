@@ -7,8 +7,12 @@ database:
 server:
   address: ":50051"
 
+redis:
+  url: redis://localhost:6379/0
+
 storage:
   heartbeat_interval: 10s
+  ttl_count_to_mark_dead: 3
 
 garbage_collector:
   interval: 1m
