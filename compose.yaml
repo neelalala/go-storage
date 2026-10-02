@@ -19,7 +19,10 @@ services:
         condition: service_started
     ports:
       - "8080:80"
+    volumes:
+      - ./cmd/gateway/config.yaml:/app/config.yaml:ro
     environment:
+      - CONFIG_PATH=config.yaml
       - NO_PROXY=postgres,localhost,127.0.0.1
 
   metadata:
@@ -30,6 +33,10 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - ./cmd/metadata/config.yaml:/app/config.yaml:ro
+    environment:
+      - CONFIG_PATH=config.yaml
     env_file:
       - .env
 
@@ -41,6 +48,10 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - ./cmd/users/config.yaml:/app/config.yaml:ro
+    environment:
+      - CONFIG_PATH=config.yaml
     env_file:
       - .env
 
@@ -49,9 +60,11 @@ services:
       context: .
       dockerfile: cmd/storage/Dockerfile
     volumes:
+      - ./cmd/storage/config.yaml:/app/config.yaml:ro
       - ./uploads/node1:/uploads/ver1
     restart: unless-stopped
     environment:
+      - CONFIG_PATH=config.yaml
       - NODE_ID=78463b59-79ee-44c6-b610-18b4549d60f6
       - SERVER_ADDRESS_GRPC=storage-1:50051
       - NO_PROXY=postgres,localhost,127.0.0.1
@@ -61,9 +74,11 @@ services:
       context: .
       dockerfile: cmd/storage/Dockerfile
     volumes:
+      - ./cmd/storage/config.yaml:/app/config.yaml:ro
       - ./uploads/node2:/uploads/ver1
     restart: unless-stopped
     environment:
+      - CONFIG_PATH=config.yaml
       - NODE_ID=203faea7-1211-4234-8733-05cc840e348f
       - SERVER_ADDRESS_GRPC=storage-2:50051
       - NO_PROXY=postgres,localhost,127.0.0.1
@@ -73,9 +88,11 @@ services:
       context: .
       dockerfile: cmd/storage/Dockerfile
     volumes:
+      - ./cmd/storage/config.yaml:/app/config.yaml:ro
       - ./uploads/node3:/uploads/ver1
     restart: unless-stopped
     environment:
+      - CONFIG_PATH=config.yaml
       - NODE_ID=111ebee6-29c7-46fe-ac62-85489820eec9
       - SERVER_ADDRESS_GRPC=storage-3:50051
       - NO_PROXY=postgres,localhost,127.0.0.1
