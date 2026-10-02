@@ -25,6 +25,20 @@ services:
       - CONFIG_PATH=config.yaml
       - NO_PROXY=postgres,localhost,127.0.0.1
 
+  migrate:
+    build:
+      context: .
+      dockerfile: cmd/migrate/Dockerfile
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - MIGRATIONS_DIRECTORY=file://migrations/metadata
+      - NO_PROXY=postgres,localhost,127.0.0.1
+
   metadata:
     build:
       context: .
@@ -35,6 +49,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     volumes:
       - ./cmd/metadata/config.yaml:/app/config.yaml:ro
     environment:
@@ -51,6 +67,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     volumes:
       - ./cmd/users/config.yaml:/app/config.yaml:ro
     environment:
