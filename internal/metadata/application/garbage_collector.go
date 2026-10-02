@@ -39,7 +39,11 @@ func (gc *GarbageCollector) Start(ctx context.Context, interval time.Duration, t
 			gc.log.Info("garbage collector stop")
 			return
 		case <-ticker.C:
-			if err := gc.deleteObjects(taskLimit, taskTimeout); err != nil {
+			if err := gc.deleteObjects(ctx, taskLimit, taskTimeout); err != nil {
+				if errors.Is(err, context.Canceled) {
+					gc.log.Info("garbage collector canceled")
+					return
+				}
 				gc.log.Error(
 					"garbage collector",
 					"method", "start",
@@ -51,11 +55,11 @@ func (gc *GarbageCollector) Start(ctx context.Context, interval time.Duration, t
 	}
 }
 
-func (gc *GarbageCollector) deleteObjects(limit int, timeout time.Duration) error {
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+func (gc *GarbageCollector) deleteObjects(ctx context.Context, limit int, timeout time.Duration) error {
+	opCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	tasks, err := gc.gcRepo.GetPendingGCTasks(ctx, limit)
+	tasks, err := gc.gcRepo.GetPendingGCTasks(opCtx, limit)
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
 			gc.log.Error(
@@ -78,9 +82,13 @@ func (gc *GarbageCollector) deleteObjects(limit int, timeout time.Duration) erro
 	)
 
 	for _, task := range tasks {
-		err := gc.storage.DeleteObjectOn(ctx, task.StorageNodeID, task.ObjectPath)
+		if opCtx.Err() != nil {
+			return opCtx.Err()
+		}
+
+		err := gc.storage.DeleteObjectOn(opCtx, task.StorageNodeID, task.ObjectPath)
 		if err != nil {
-			if err := gc.gcRepo.IncrementGCTaskAttempts(ctx, task.DeletionID); err != nil {
+			if err := gc.gcRepo.IncrementGCTaskAttempts(opCtx, task.DeletionID); err != nil {
 				gc.log.Error(
 					"garbage collector",
 					"method", "delete objects",
@@ -97,7 +105,7 @@ func (gc *GarbageCollector) deleteObjects(limit int, timeout time.Duration) erro
 			continue
 		}
 
-		if err := gc.gcRepo.CompleteGCTask(ctx, task.DeletionID); err != nil {
+		if err := gc.gcRepo.CompleteGCTask(opCtx, task.DeletionID); err != nil {
 			gc.log.Error(
 				"garbage collector",
 				"method", "delete objects",
