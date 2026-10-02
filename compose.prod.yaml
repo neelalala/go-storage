@@ -1,0 +1,60 @@
+name: go-storage-prod
+
+services:
+  web:
+    ports:
+      - "${WEB_PORT:-80}:80"
+    restart: always
+
+  gateway:
+    restart: always
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+
+  metadata:
+    restart: always
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+
+  users:
+    restart: always
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+
+  storage-1:
+    restart: always
+    volumes:
+      - storage-node1-data:/uploads
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+
+  storage-2:
+    restart: always
+    volumes:
+      - storage-node2-data:/uploads
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+
+  storage-3:
+    restart: always
+    volumes:
+      - storage-node3-data:/uploads
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+
+  postgres:
+    restart: always
+    volumes:
+      - postgres-data:${PGDATA:-/var/lib/postgresql/data/pgdata}
+
+  redis:
+    restart: always
+    volumes:
+      - redis-data:/data
+
+volumes:
+  postgres-data:
+  redis-data:
+  storage-node1-data:
+  storage-node2-data:
+  storage-node3-data:

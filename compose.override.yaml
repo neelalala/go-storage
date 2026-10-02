@@ -1,0 +1,70 @@
+services:
+  web:
+    ports:
+      - "${WEB_PORT:-3000}:80"
+
+  gateway:
+    ports:
+      - "${GATEWAY_PORT:-8080}:80"
+    volumes:
+      - ./cmd/gateway/config.yaml:/app/config.yaml:ro
+    environment:
+      - CONFIG_PATH=config.yaml
+      - LOG_LEVEL=${LOG_LEVEL:-DEBUG}
+
+  metadata:
+    volumes:
+      - ./cmd/metadata/config.yaml:/app/config.yaml:ro
+    environment:
+      - CONFIG_PATH=config.yaml
+      - LOG_LEVEL=${LOG_LEVEL:-DEBUG}
+
+  users:
+    volumes:
+      - ./cmd/users/config.yaml:/app/config.yaml:ro
+    environment:
+      - CONFIG_PATH=config.yaml
+      - LOG_LEVEL=${LOG_LEVEL:-DEBUG}
+
+  storage-1:
+    volumes:
+      - ./cmd/storage/config.yaml:/app/config.yaml:ro
+      - dev-storage-node1-data:/uploads
+    environment:
+      - CONFIG_PATH=config.yaml
+      - LOG_LEVEL=${LOG_LEVEL:-DEBUG}
+
+  storage-2:
+    volumes:
+      - ./cmd/storage/config.yaml:/app/config.yaml:ro
+      - dev-storage-node2-data:/uploads
+    environment:
+      - CONFIG_PATH=config.yaml
+      - LOG_LEVEL=${LOG_LEVEL:-DEBUG}
+
+  storage-3:
+    volumes:
+      - ./cmd/storage/config.yaml:/app/config.yaml:ro
+      - dev-storage-node3-data:/uploads
+    environment:
+      - CONFIG_PATH=config.yaml
+      - LOG_LEVEL=${LOG_LEVEL:-DEBUG}
+
+  postgres:
+    ports:
+      - "${POSTGRES_HOST_PORT:-5430}:5432"
+    volumes:
+      - dev-postgres-data:${PGDATA:-/var/lib/postgresql/data/pgdata}
+
+  redis:
+    ports:
+      - "${REDIS_HOST_PORT:-6379}:6379"
+    volumes:
+      - dev-redis-data:/data
+
+volumes:
+  dev-postgres-data:
+  dev-redis-data:
+  dev-storage-node1-data:
+  dev-storage-node2-data:
+  dev-storage-node3-data:

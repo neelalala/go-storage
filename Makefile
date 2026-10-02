@@ -19,10 +19,6 @@ down:
 
 clear:
 	docker compose down -v --remove-orphans
-	rm -rf ./pgdata
-	mkdir -p ./pgdata
-	rm -rf ./uploads/node1 ./uploads/node2 ./uploads/node3
-	mkdir -p ./uploads/node1 ./uploads/node2 ./uploads/node3
 
 migrate-up:
 	docker compose run --rm migrate up $(step)
@@ -36,5 +32,23 @@ migrate-version:
 migrate-force:
 	docker compose run --rm migrate force $(version)
 
-.PHONY: protobuf build up down clear migrate-up migrate-down migrate-version migrate-force
+prod-build:
+	docker compose -f compose.yaml -f compose.prod.yaml build
+
+prod-up:
+	docker compose -f compose.yaml -f compose.prod.yaml up -d
+
+prod-down:
+	docker compose -f compose.yaml -f compose.prod.yaml down
+
+prod-migrate-up:
+	docker compose -f compose.yaml -f compose.prod.yaml run --rm migrate up $(step)
+
+prod-migrate-down:
+	docker compose -f compose.yaml -f compose.prod.yaml run --rm migrate down $(step)
+
+prod-migrate-version:
+	docker compose -f compose.yaml -f compose.prod.yaml run --rm migrate version
+
+.PHONY: protobuf build up down clear migrate-up migrate-down migrate-version migrate-force prod-build prod-up prod-down prod-migrate-up prod-migrate-down
 

@@ -6,8 +6,8 @@ services:
     restart: unless-stopped
     depends_on:
       - gateway
-    ports:
-      - "3000:80"
+    environment:
+      - GATEWAY_URL=${GATEWAY_URL:-http://gateway:80}
 
   gateway:
     build:
@@ -17,13 +17,6 @@ services:
     depends_on:
       metadata:
         condition: service_started
-    ports:
-      - "8080:80"
-    volumes:
-      - ./cmd/gateway/config.yaml:/app/config.yaml:ro
-    environment:
-      - CONFIG_PATH=config.yaml
-      - NO_PROXY=postgres,localhost,127.0.0.1
 
   migrate:
     build:
@@ -37,7 +30,6 @@ services:
       - .env
     environment:
       - MIGRATIONS_DIRECTORY=file://migrations/metadata
-      - NO_PROXY=postgres,localhost,127.0.0.1
 
   metadata:
     build:
@@ -51,11 +43,6 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
-    volumes:
-      - ./cmd/metadata/config.yaml:/app/config.yaml:ro
-    environment:
-      - CONFIG_PATH=config.yaml
-      - NO_PROXY=postgres,redis,localhost,127.0.0.1
     env_file:
       - .env
 
@@ -69,10 +56,6 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
-    volumes:
-      - ./cmd/users/config.yaml:/app/config.yaml:ro
-    environment:
-      - CONFIG_PATH=config.yaml
     env_file:
       - .env
 
@@ -80,52 +63,39 @@ services:
     build:
       context: .
       dockerfile: cmd/storage/Dockerfile
-    volumes:
-      - ./cmd/storage/config.yaml:/app/config.yaml:ro
-      - ./uploads/node1:/uploads/ver1
     restart: unless-stopped
     environment:
-      - CONFIG_PATH=config.yaml
       - NODE_ID=78463b59-79ee-44c6-b610-18b4549d60f6
-      - SERVER_ADDRESS=storage-1:50051
-      - NO_PROXY=postgres,localhost,127.0.0.1
+      - LISTEN_ADDRESS=:50051
+      - ADVERTISE_ADDRESS=storage-1:50051
+      - UPLOAD_ROOT=/uploads
 
   storage-2:
     build:
       context: .
       dockerfile: cmd/storage/Dockerfile
-    volumes:
-      - ./cmd/storage/config.yaml:/app/config.yaml:ro
-      - ./uploads/node2:/uploads/ver1
     restart: unless-stopped
     environment:
-      - CONFIG_PATH=config.yaml
       - NODE_ID=203faea7-1211-4234-8733-05cc840e348f
-      - SERVER_ADDRESS=storage-2:50051
-      - NO_PROXY=postgres,localhost,127.0.0.1
+      - LISTEN_ADDRESS=:50051
+      - ADVERTISE_ADDRESS=storage-2:50051
+      - UPLOAD_ROOT=/uploads
 
   storage-3:
     build:
       context: .
       dockerfile: cmd/storage/Dockerfile
-    volumes:
-      - ./cmd/storage/config.yaml:/app/config.yaml:ro
-      - ./uploads/node3:/uploads/ver1
     restart: unless-stopped
     environment:
-      - CONFIG_PATH=config.yaml
       - NODE_ID=111ebee6-29c7-46fe-ac62-85489820eec9
-      - SERVER_ADDRESS=storage-3:50051
-      - NO_PROXY=postgres,localhost,127.0.0.1
+      - LISTEN_ADDRESS=:50051
+      - ADVERTISE_ADDRESS=storage-3:50051
+      - UPLOAD_ROOT=/uploads
 
   postgres:
     image: postgres:17-alpine
     env_file:
       - .env
-    ports:
-      - "5430:5432"
-    volumes:
-      - ./pgdata:${PGDATA}
     restart: unless-stopped
     tty: true
     stdin_open: true
@@ -134,20 +104,12 @@ services:
       interval: 3s
       timeout: 3s
       retries: 5
-    environment:
-      - NO_PROXY=postgres,localhost,127.0.0.1
 
   redis:
     image: redis:8.10-alpine
-    ports:
-      - "6379:6379"
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 3s
       timeout: 3s
       retries: 5
-
-networks:
-  go-storage-network:
-    driver: bridge

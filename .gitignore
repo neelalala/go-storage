@@ -1,8 +1,6 @@
 .DS_Store
-bin/
-pgdata/
-uploads/
-.env
 .idea/
+
+.env
 web/node_modules/
 web/dist/
