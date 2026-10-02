@@ -7,9 +7,11 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/neelalala/go-storage/internal/storage/adapter/in/grpc"
 	"github.com/neelalala/go-storage/internal/storage/adapter/out/discovery"
 	"github.com/neelalala/go-storage/internal/storage/adapter/out/hash"
@@ -48,7 +50,7 @@ func run(cfg config.Config, log *slog.Logger) error {
 
 	storage := application.NewStorage(store, cfg.Node.ID, log)
 
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
 	discoveryService, err := discovery.New(cfg.DiscoveryService.Address)

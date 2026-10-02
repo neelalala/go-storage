@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/neelalala/go-storage/internal/gateway/adapter/in/http"
@@ -54,7 +55,7 @@ func run(cfg config.Config, log *slog.Logger) error {
 
 	gateway := application.NewGateway(metadata, users, nodes, log)
 
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
 	marshaller := marshal.JSONMarshaller{}
