@@ -94,6 +94,7 @@ func (gc *GarbageCollector) deleteObjects(limit int, timeout time.Duration) erro
 				"context", "StorageDeleter.DeleteObject",
 				"error", err,
 			)
+			continue
 		}
 
 		if err := gc.gcRepo.CompleteGCTask(ctx, task.DeletionID); err != nil {
