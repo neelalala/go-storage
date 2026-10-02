@@ -20,7 +20,7 @@ import (
 
 func main() {
 	var configPath string
-	flag.StringVar(&configPath, "config", "config.yaml", "server configuration file")
+	flag.StringVar(&configPath, "config", "", "path to configuration file (optional)")
 	flag.Parse()
 
 	cfg := config.MustLoad(configPath)
@@ -37,7 +37,7 @@ func run(cfg config.Config, log *slog.Logger) error {
 	log.Info("starting server")
 	log.Debug("debug messages are enabled")
 
-	log.Debug("config", fmt.Sprintf("%+v", cfg))
+	log.Debug("config", "value", fmt.Sprintf("%+v", cfg))
 
 	hasher := hash.NewMD5()
 

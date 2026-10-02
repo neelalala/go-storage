@@ -25,7 +25,7 @@ import (
 
 func main() {
 	var configPath string
-	flag.StringVar(&configPath, "config", "config.yaml", "service configuration file")
+	flag.StringVar(&configPath, "config", "", "path to configuration file (optional)")
 	flag.Parse()
 
 	cfg := config.MustLoad(configPath)
@@ -42,7 +42,7 @@ func run(cfg config.Config, log *slog.Logger) error {
 	log.Info("starting service")
 	log.Debug("debug messages are enabled")
 
-	log.Debug("config", fmt.Sprintf("%+v", cfg))
+	log.Debug("config", "value", fmt.Sprintf("%+v", cfg))
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
