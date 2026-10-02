@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
@@ -88,6 +89,14 @@ func run(cfg config.Config, log *slog.Logger) error {
 
 	server := grpc.NewServer(cfg.Server.Address, metadata, log)
 
+	var wg sync.WaitGroup
+
+	wg.Go(func() {
+		log.Info("starting garbage collector")
+
+		garbageCollector.Start(ctx, cfg.GarbageCollector.Interval, cfg.GarbageCollector.TaskLimit, cfg.GarbageCollector.TaskTimeout)
+	})
+
 	go func() {
 		<-ctx.Done()
 		log.Info("shutting down server")
@@ -100,15 +109,11 @@ func run(cfg config.Config, log *slog.Logger) error {
 		}
 	}()
 
-	go func() {
-		log.Info("starting garbage collector")
-
-		garbageCollector.Start(ctx, cfg.GarbageCollector.Interval, cfg.GarbageCollector.TaskLimit, cfg.GarbageCollector.TaskTimeout)
-	}()
-
 	if err := server.Start(); err != nil {
 		return fmt.Errorf("server returned unexpectedly: %w", err)
 	}
+
+	wg.Wait()
 
 	return nil
 }
