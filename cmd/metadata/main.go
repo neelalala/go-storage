@@ -63,8 +63,16 @@ func run(cfg config.Config, log *slog.Logger) error {
 	uploadRepo := sql.NewUploadRepository(pool)
 	objRepo := sql.NewObjectRepository(pool)
 
-	registry := nodes.NewNodeRegistry(cfg.Storage.HeartbeatInterval, log)
-	go registry.RunSweeper(ctx)
+	registry, err := nodes.NewRedisNodeRegistry(ctx, cfg.Redis.URL, cfg.Storage.HeartbeatInterval, cfg.Storage.TTLCountToMarkDead, log)
+	if err != nil {
+		return fmt.Errorf("failed to initialize redis node registry: %w", err)
+	}
+	defer func() {
+		if err := registry.Close(); err != nil {
+			log.Error("error closing redis registry", "error", err)
+		}
+	}()
+
 	manager := nodes.NewRoundRobinNodeManager(registry)
 
 	hasher := hasher.NewSHA256()
