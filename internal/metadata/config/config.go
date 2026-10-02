@@ -10,16 +10,16 @@ import (
 )
 
 type LoggerConfig struct {
-	LogLevel string `yaml:"log_level" env:"LOG_LEVEL" env-default:"DEBUG"`
+	LogLevel string `yaml:"level" env:"LOG_LEVEL" env-default:"DEBUG"`
 }
 
 type DatabaseConfig struct {
 	URL           string `yaml:"url" env:"DATABASE_URL"`
-	MigrationsDir string `yaml:"migrations_dir" env:"DATABASE_MIGRATIONS_DIRECTORY" env-default:"file://migrations/metadata"`
+	MigrationsDir string `yaml:"migrations_dir" env:"MIGRATIONS_DIRECTORY" env-default:"file://migrations/metadata"`
 }
 
-type GRPCConfig struct {
-	Address string `yaml:"address" env:"METADATA_ADDRESS_GRPC" env-default:":50051"`
+type ServerConfig struct {
+	Address string `yaml:"address" env:"SERVER_ADDRESS" env-default:":50051"`
 }
 
 type StorageConfig struct {
@@ -35,7 +35,7 @@ type GarbageCollectorConfig struct {
 type Config struct {
 	Logger           LoggerConfig           `yaml:"logger"`
 	Database         DatabaseConfig         `yaml:"database"`
-	GRPC             GRPCConfig             `yaml:"grpc"`
+	Server           ServerConfig           `yaml:"server"`
 	Storage          StorageConfig          `yaml:"storage"`
 	GarbageCollector GarbageCollectorConfig `yaml:"garbage_collector"`
 }

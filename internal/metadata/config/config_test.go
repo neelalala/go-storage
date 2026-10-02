@@ -11,7 +11,7 @@ func TestMetadataConfig_LoadWithoutConfigFile(t *testing.T) {
 	t.Setenv("CONFIG_PATH", "")
 	t.Setenv("LOG_LEVEL", "INFO")
 	t.Setenv("DATABASE_URL", "postgres://user:pass@localhost:5432/db")
-	t.Setenv("METADATA_ADDRESS_GRPC", ":50060")
+	t.Setenv("SERVER_ADDRESS", ":50060")
 	t.Setenv("HEARTBEAT_INTERVAL", "15s")
 	t.Setenv("GC_INTERVAL", "2m")
 	t.Setenv("GC_TASK_LIMIT", "200")
@@ -31,8 +31,8 @@ func TestMetadataConfig_LoadWithoutConfigFile(t *testing.T) {
 	if cfg.Database.MigrationsDir != "file://migrations/metadata" {
 		t.Errorf("expected default MigrationsDir file://migrations/metadata, got %s", cfg.Database.MigrationsDir)
 	}
-	if cfg.GRPC.Address != ":50060" {
-		t.Errorf("expected Address :50060, got %s", cfg.GRPC.Address)
+	if cfg.Server.Address != ":50060" {
+		t.Errorf("expected Address :50060, got %s", cfg.Server.Address)
 	}
 	if cfg.Storage.HeartbeatInterval != 15*time.Second {
 		t.Errorf("expected HeartbeatInterval 15s, got %v", cfg.Storage.HeartbeatInterval)
@@ -53,11 +53,8 @@ func TestMetadataConfig_LoadDefaults(t *testing.T) {
 		"CONFIG_PATH",
 		"LOG_LEVEL",
 		"DATABASE_URL",
-		"DATABASE_MIGRATIONS_DIRECTORY",
-		"MIGRATIONS_DIR",
-		"METADATA_ADDRESS_GRPC",
-		"SERVER_ADDRESS_GRPC",
-		"GRPC_ADDRESS",
+		"MIGRATIONS_DIRECTORY",
+		"SERVER_ADDRESS",
 		"HEARTBEAT_INTERVAL",
 		"GC_INTERVAL",
 		"GC_TASK_LIMIT",
@@ -77,8 +74,8 @@ func TestMetadataConfig_LoadDefaults(t *testing.T) {
 	if cfg.Database.MigrationsDir != "file://migrations/metadata" {
 		t.Errorf("expected default MigrationsDir file://migrations/metadata, got %s", cfg.Database.MigrationsDir)
 	}
-	if cfg.GRPC.Address != ":50051" {
-		t.Errorf("expected default Address :50051, got %s", cfg.GRPC.Address)
+	if cfg.Server.Address != ":50051" {
+		t.Errorf("expected default Address :50051, got %s", cfg.Server.Address)
 	}
 	if cfg.Storage.HeartbeatInterval != 10*time.Second {
 		t.Errorf("expected default HeartbeatInterval 10s, got %v", cfg.Storage.HeartbeatInterval)
@@ -100,8 +97,8 @@ func TestMetadataConfig_LoadFromFile(t *testing.T) {
 
 	yamlContent := `
 logger:
-  log_level: WARN
-grpc:
+  level: WARN
+server:
   address: ":50055"
 storage:
   heartbeat_interval: 20s
@@ -122,8 +119,8 @@ garbage_collector:
 	if cfg.Logger.LogLevel != "WARN" {
 		t.Errorf("expected LogLevel WARN, got %s", cfg.Logger.LogLevel)
 	}
-	if cfg.GRPC.Address != ":50055" {
-		t.Errorf("expected Address :50055, got %s", cfg.GRPC.Address)
+	if cfg.Server.Address != ":50055" {
+		t.Errorf("expected Address :50055, got %s", cfg.Server.Address)
 	}
 	if cfg.Storage.HeartbeatInterval != 20*time.Second {
 		t.Errorf("expected HeartbeatInterval 20s, got %v", cfg.Storage.HeartbeatInterval)

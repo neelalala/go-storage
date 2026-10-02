@@ -1,10 +1,10 @@
 logger:
-  log_level: DEBUG
+  level: DEBUG
 
 database:
   migrations_dir: file://migrations/metadata
 
-grpc:
+server:
   address: ":50051"
 
 storage:

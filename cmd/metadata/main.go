@@ -85,7 +85,7 @@ func run(cfg config.Config, log *slog.Logger) error {
 
 	garbageCollector := application.NewGarbageCollector(gcRepo, storage, log)
 
-	server := grpc.NewServer(cfg.GRPC.Address, metadata, log)
+	server := grpc.NewServer(cfg.Server.Address, metadata, log)
 
 	go func() {
 		<-ctx.Done()
