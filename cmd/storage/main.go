@@ -61,9 +61,9 @@ func run(cfg config.Config, log *slog.Logger) error {
 		return err
 	}
 
-	go application.RunHeartbeat(ctx, discoveryService, cfg.DiscoveryService.HeartbeatInterval, nodeID, cfg.GRPC.Address, log)
+	go application.RunHeartbeat(ctx, discoveryService, cfg.DiscoveryService.HeartbeatInterval, nodeID, cfg.Server.Address, log)
 
-	server := grpc.NewServer(cfg.GRPC.Address, storage, log)
+	server := grpc.NewServer(cfg.Server.Address, storage, log)
 
 	go func() {
 		<-ctx.Done()

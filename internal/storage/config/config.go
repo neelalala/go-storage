@@ -10,11 +10,11 @@ import (
 )
 
 type LoggerConfig struct {
-	LogLevel string `yaml:"log_level" env:"LOG_LEVEL" env-default:"DEBUG"`
+	LogLevel string `yaml:"level" env:"LOG_LEVEL" env-default:"DEBUG"`
 }
 
-type GRPCConfig struct {
-	Address string `yaml:"address" env:"SERVER_ADDRESS_GRPC" env-default:":50051"`
+type ServerConfig struct {
+	Address string `yaml:"address" env:"SERVER_ADDRESS" env-default:":50051"`
 }
 
 type DiscoveryServiceConfig struct {
@@ -24,11 +24,11 @@ type DiscoveryServiceConfig struct {
 
 type NodeConfig struct {
 	ID         string `yaml:"id" env:"NODE_ID"`
-	UploadRoot string `yaml:"upload_root" env:"STORAGE_UPLOAD_ROOT" env-default:"uploads/"`
+	UploadRoot string `yaml:"upload_root" env:"UPLOAD_ROOT" env-default:"uploads/"`
 }
 
 type Config struct {
-	GRPC             GRPCConfig             `yaml:"grpc"`
+	Server           ServerConfig           `yaml:"server"`
 	Logger           LoggerConfig           `yaml:"logger"`
 	DiscoveryService DiscoveryServiceConfig `yaml:"discovery_service"`
 	Node             NodeConfig             `yaml:"node"`

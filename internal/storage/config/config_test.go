@@ -10,11 +10,11 @@ import (
 func TestStorageConfig_LoadWithoutConfigFile(t *testing.T) {
 	t.Setenv("CONFIG_PATH", "")
 	t.Setenv("LOG_LEVEL", "INFO")
-	t.Setenv("SERVER_ADDRESS_GRPC", "node1:50051")
+	t.Setenv("SERVER_ADDRESS", "node1:50051")
 	t.Setenv("DISCOVERY_SERVICE_ADDRESS", "custom-meta:50051")
 	t.Setenv("HEARTBEAT_INTERVAL", "15s")
 	t.Setenv("NODE_ID", "test-node-uuid")
-	t.Setenv("STORAGE_UPLOAD_ROOT", "/data/uploads")
+	t.Setenv("UPLOAD_ROOT", "/data/uploads")
 
 	cfg, err := Load("")
 	if err != nil {
@@ -24,8 +24,8 @@ func TestStorageConfig_LoadWithoutConfigFile(t *testing.T) {
 	if cfg.Logger.LogLevel != "INFO" {
 		t.Errorf("expected LogLevel INFO, got %s", cfg.Logger.LogLevel)
 	}
-	if cfg.GRPC.Address != "node1:50051" {
-		t.Errorf("expected Address node1:50051, got %s", cfg.GRPC.Address)
+	if cfg.Server.Address != "node1:50051" {
+		t.Errorf("expected Address node1:50051, got %s", cfg.Server.Address)
 	}
 	if cfg.DiscoveryService.Address != "custom-meta:50051" {
 		t.Errorf("expected DiscoveryService Address custom-meta:50051, got %s", cfg.DiscoveryService.Address)
@@ -45,12 +45,11 @@ func TestStorageConfig_LoadDefaults(t *testing.T) {
 	for _, env := range []string{
 		"CONFIG_PATH",
 		"LOG_LEVEL",
-		"SERVER_ADDRESS_GRPC",
-		"GRPC_ADDRESS",
+		"SERVER_ADDRESS",
 		"DISCOVERY_SERVICE_ADDRESS",
 		"HEARTBEAT_INTERVAL",
 		"NODE_ID",
-		"STORAGE_UPLOAD_ROOT",
+		"UPLOAD_ROOT",
 	} {
 		os.Unsetenv(env)
 	}
@@ -63,8 +62,8 @@ func TestStorageConfig_LoadDefaults(t *testing.T) {
 	if cfg.Logger.LogLevel != "DEBUG" {
 		t.Errorf("expected default LogLevel DEBUG, got %s", cfg.Logger.LogLevel)
 	}
-	if cfg.GRPC.Address != ":50051" {
-		t.Errorf("expected default Address :50051, got %s", cfg.GRPC.Address)
+	if cfg.Server.Address != ":50051" {
+		t.Errorf("expected default Address :50051, got %s", cfg.Server.Address)
 	}
 	if cfg.DiscoveryService.Address != "metadata:50051" {
 		t.Errorf("expected default DiscoveryService Address metadata:50051, got %s", cfg.DiscoveryService.Address)
@@ -83,8 +82,8 @@ func TestStorageConfig_LoadFromFile(t *testing.T) {
 
 	yamlContent := `
 logger:
-  log_level: WARN
-grpc:
+  level: WARN
+server:
   address: ":50052"
 node:
   upload_root: /custom/uploads
@@ -104,8 +103,8 @@ discovery_service:
 	if cfg.Logger.LogLevel != "WARN" {
 		t.Errorf("expected LogLevel WARN, got %s", cfg.Logger.LogLevel)
 	}
-	if cfg.GRPC.Address != ":50052" {
-		t.Errorf("expected Address :50052, got %s", cfg.GRPC.Address)
+	if cfg.Server.Address != ":50052" {
+		t.Errorf("expected Address :50052, got %s", cfg.Server.Address)
 	}
 	if cfg.Node.UploadRoot != "/custom/uploads" {
 		t.Errorf("expected UploadRoot /custom/uploads, got %s", cfg.Node.UploadRoot)
