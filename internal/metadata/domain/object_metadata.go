@@ -38,9 +38,12 @@ type Upload struct {
 type Status string
 
 const (
-	StatusPending Status = "PENDING"
-	StatusError   Status = "ERROR"
+	StatusPending    Status = "PENDING"
+	StatusProcessing Status = "PROCESSING"
+	StatusError      Status = "ERROR"
 )
+
+const MaxGCAttempts = 5
 
 type GCTask struct {
 	DeletionID    int64
@@ -49,4 +52,5 @@ type GCTask struct {
 	Status        Status
 	Attempts      int
 	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
