@@ -14,7 +14,8 @@ type LoggerConfig struct {
 }
 
 type ServerConfig struct {
-	Address string `yaml:"address" env:"SERVER_ADDRESS" env-default:":50051"`
+	ListenAddress    string `yaml:"listen_address" env:"LISTEN_ADDRESS" env-default:":50051"`
+	AdvertiseAddress string `yaml:"advertise_address" env:"ADVERTISE_ADDRESS"`
 }
 
 type DiscoveryServiceConfig struct {

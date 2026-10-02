@@ -63,9 +63,9 @@ func run(cfg config.Config, log *slog.Logger) error {
 		return err
 	}
 
-	go application.RunHeartbeat(ctx, discoveryService, cfg.DiscoveryService.HeartbeatInterval, nodeID, cfg.Server.Address, log)
+	go application.RunHeartbeat(ctx, discoveryService, cfg.DiscoveryService.HeartbeatInterval, nodeID, cfg.Server.AdvertiseAddress, log)
 
-	server := grpc.NewServer(cfg.Server.Address, storage, log)
+	server := grpc.NewServer(cfg.Server.ListenAddress, storage, log)
 
 	go func() {
 		<-ctx.Done()
@@ -74,8 +74,16 @@ func run(cfg config.Config, log *slog.Logger) error {
 		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer shutdownCancel()
 
+		if err := discoveryService.Deregister(shutdownCtx, nodeID); err != nil {
+			log.Error("error deregistering node from discovery", "error", err)
+		}
+
 		if err := server.Stop(shutdownCtx); err != nil {
 			log.Error("error shutting down", "error", err)
+		}
+
+		if err := discoveryService.Close(); err != nil {
+			log.Error("error closing discovery connection", "error", err)
 		}
 	}()
 
