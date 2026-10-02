@@ -25,16 +25,16 @@ const (
 )
 
 type RedisNodeRegistry struct {
-	client            *redis.Client
+	client *redis.Client
 
 	heartbeatInterval time.Duration
 	nodeTTL           time.Duration
 	sweepInterval     time.Duration
 
-	nodeKeyPrefix     string
-	nodeSetKey        string
+	nodeKeyPrefix string
+	nodeSetKey    string
 
-	log               *slog.Logger
+	log *slog.Logger
 }
 
 func NewRedisNodeRegistry(
