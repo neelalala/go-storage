@@ -33,22 +33,37 @@ migrate-force:
 	docker compose run --rm migrate force $(version)
 
 prod-build:
-	docker compose -f compose.yaml -f compose.prod.yaml build
+	@./scripts/release.sh build $(version)
 
-prod-up:
-	docker compose -f compose.yaml -f compose.prod.yaml up -d
+prod-release:
+	@./scripts/release.sh release $(version) "$(desc)"
+
+prod-run:
+	@./scripts/release.sh run
 
 prod-down:
-	docker compose -f compose.yaml -f compose.prod.yaml down
+	@./scripts/release.sh down
+
+prod-rollback:
+	@./scripts/release.sh rollback "$(release)"
+
+prod-releases:
+	@./scripts/release.sh list
+
+prod-current:
+	@./scripts/release.sh current
 
 prod-migrate-up:
-	docker compose -f compose.yaml -f compose.prod.yaml run --rm migrate up $(step)
+	@./scripts/release.sh migrate up "$(step)"
 
 prod-migrate-down:
-	docker compose -f compose.yaml -f compose.prod.yaml run --rm migrate down $(step)
+	@./scripts/release.sh migrate down "$(step)"
 
 prod-migrate-version:
-	docker compose -f compose.yaml -f compose.prod.yaml run --rm migrate version
+	@./scripts/release.sh migrate version
 
-.PHONY: protobuf build up down clear migrate-up migrate-down migrate-version migrate-force prod-build prod-up prod-down prod-migrate-up prod-migrate-down
+prod-migrate-force:
+	@./scripts/release.sh migrate force "$(version)"
+
+.PHONY: protobuf build up down clear migrate-up migrate-down migrate-version migrate-force prod-build prod-release prod-run prod-down prod-rollback prod-releases prod-current prod-migrate-up prod-migrate-down prod-migrate-version prod-migrate-force
 
