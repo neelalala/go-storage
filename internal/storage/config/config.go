@@ -24,7 +24,6 @@ type DiscoveryServiceConfig struct {
 }
 
 type NodeConfig struct {
-	ID         string `yaml:"id" env:"NODE_ID"`
 	UploadRoot string `yaml:"upload_root" env:"UPLOAD_ROOT" env-default:"uploads/"`
 }
 

@@ -14,7 +14,6 @@ func TestStorageConfig_LoadWithoutConfigFile(t *testing.T) {
 	t.Setenv("ADVERTISE_ADDRESS", "node1:50070")
 	t.Setenv("DISCOVERY_SERVICE_ADDRESS", "custom-meta:50051")
 	t.Setenv("HEARTBEAT_INTERVAL", "15s")
-	t.Setenv("NODE_ID", "test-node-uuid")
 	t.Setenv("UPLOAD_ROOT", "/data/uploads")
 
 	cfg, err := Load("")
@@ -37,9 +36,6 @@ func TestStorageConfig_LoadWithoutConfigFile(t *testing.T) {
 	if cfg.DiscoveryService.HeartbeatInterval != 15*time.Second {
 		t.Errorf("expected HeartbeatInterval 15s, got %v", cfg.DiscoveryService.HeartbeatInterval)
 	}
-	if cfg.Node.ID != "test-node-uuid" {
-		t.Errorf("expected Node.ID test-node-uuid, got %s", cfg.Node.ID)
-	}
 	if cfg.Node.UploadRoot != "/data/uploads" {
 		t.Errorf("expected Node.UploadRoot /data/uploads, got %s", cfg.Node.UploadRoot)
 	}
@@ -54,7 +50,6 @@ func TestStorageConfig_LoadDefaults(t *testing.T) {
 		"ADVERTISE_ADDRESS",
 		"DISCOVERY_SERVICE_ADDRESS",
 		"HEARTBEAT_INTERVAL",
-		"NODE_ID",
 		"UPLOAD_ROOT",
 	} {
 		os.Unsetenv(env)

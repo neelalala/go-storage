@@ -7,6 +7,8 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -48,17 +50,17 @@ func run(cfg config.Config, log *slog.Logger) error {
 		return fmt.Errorf("could not create store: %w", err)
 	}
 
-	storage := application.NewStorage(store, cfg.Node.ID, log)
+	nodeID, err := resolveNodeID(cfg.Node.UploadRoot)
+	if err != nil {
+		return fmt.Errorf("could not resolve node id: %w", err)
+	}
+
+	storage := application.NewStorage(store, nodeID.String(), log)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
 	discoveryService, err := discovery.New(cfg.DiscoveryService.Address)
-	if err != nil {
-		return err
-	}
-
-	nodeID, err := uuid.Parse(cfg.Node.ID)
 	if err != nil {
 		return err
 	}
@@ -108,4 +110,27 @@ func mustMakeLogger(logLevel string) *slog.Logger {
 	}
 	handler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: level, AddSource: true})
 	return slog.New(handler)
+}
+
+func resolveNodeID(uploadRoot string) (uuid.UUID, error) {
+	idPath := filepath.Join(uploadRoot, ".node_id")
+
+	if data, err := os.ReadFile(idPath); err == nil {
+		return uuid.Parse(strings.TrimSpace(string(data)))
+	}
+
+	newNodeId, err := uuid.NewRandom()
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("create new node id: %w", err)
+	}
+
+	if err := os.MkdirAll(uploadRoot, 0o755); err != nil {
+		return uuid.Nil, fmt.Errorf("create upload directory: %w", err)
+	}
+
+	if err := os.WriteFile(idPath, []byte(newNodeId.String()), 0o755); err != nil {
+		return uuid.Nil, fmt.Errorf("write node id: %w", err)
+	}
+
+	return newNodeId, nil
 }
