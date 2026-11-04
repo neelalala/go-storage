@@ -71,7 +71,6 @@ services:
       dockerfile: cmd/storage/Dockerfile
     restart: unless-stopped
     environment:
-      - NODE_ID=78463b59-79ee-44c6-b610-18b4549d60f6
       - LISTEN_ADDRESS=:50051
       - ADVERTISE_ADDRESS=storage-1:50051
       - UPLOAD_ROOT=/uploads
@@ -83,7 +82,6 @@ services:
       dockerfile: cmd/storage/Dockerfile
     restart: unless-stopped
     environment:
-      - NODE_ID=203faea7-1211-4234-8733-05cc840e348f
       - LISTEN_ADDRESS=:50051
       - ADVERTISE_ADDRESS=storage-2:50051
       - UPLOAD_ROOT=/uploads
@@ -95,7 +93,6 @@ services:
       dockerfile: cmd/storage/Dockerfile
     restart: unless-stopped
     environment:
-      - NODE_ID=111ebee6-29c7-46fe-ac62-85489820eec9
       - LISTEN_ADDRESS=:50051
       - ADVERTISE_ADDRESS=storage-3:50051
       - UPLOAD_ROOT=/uploads
