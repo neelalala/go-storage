@@ -36,7 +36,7 @@ prod-build:
 	@./scripts/release.sh build $(version)
 
 prod-release:
-	@./scripts/release.sh release $(version) "$(desc)"
+	@./scripts/release.sh release "$(desc)"
 
 prod-run:
 	@./scripts/release.sh run
