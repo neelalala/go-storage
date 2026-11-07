@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: storage
+spec:
+  clusterIP: None
+  selector:
+    app: storage
+  ports:
+    - name: grpc
+      port: 50051
+      targetPort: 50051
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: storage
+spec:
+  serviceName: storage
+  replicas: 3
+  selector:
+    matchLabels:
+      app: storage
+  template:
+    metadata:
+      labels: 
+        app: storage
+    spec: 
+      containers:
+        - name: storage
+          image: go-storage/storage:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 50051
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: ADVERTISE_ADDRESS
+              value: "$(POD_NAME).storage:50051"
+            - name: LISTEN_ADDRESS
+              value: ":50051"
+            - name: UPLOAD_ROOT
+              value: "/uploads"
+            - name: DISCOVERY_SERVICE_ADDRESS
+              value: "metadata:50051"
+            - name: LOG_LEVEL
+              value: "DEBUG"
+          volumeMounts:
+            - name: storage-data
+              mountPath: /uploads
+  volumeClaimTemplates:
+    - metadata:
+        name: storage-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

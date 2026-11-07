@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metadata
+  labels:
+    app: metadata
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: metadata
+  template:
+    metadata:
+      labels:
+        app: metadata
+    spec:
+      containers:
+        - name: metadata
+          image: go-storage/metadata:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 50051
+          env:
+            - name: SERVER_ADDRESS
+              value: ":50051"
+            - name: LOG_LEVEL
+              value: "DEBUG"
+            - name: REDIS_URL
+              value: "redis://redis:6379/0"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: DATABASE_URL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: metadata
+spec:
+  selector:
+    app: metadata
+  ports:
+    - name: grpc
+      port: 50051
+      targetPort: 50051
