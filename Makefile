@@ -65,5 +65,17 @@ prod-migrate-version:
 prod-migrate-force:
 	@./scripts/release.sh migrate force "$(version)"
 
+k8s-minikube-start:
+	minikube start
+	docker compose build
+	minikube image load go-storage/users:latest go-storage/metadata:latest go-storage/migrate:latest go-storage/web:latest go-storage/gateway:latest go-storage/storage:latest
+	kubectl apply -f k8s/
+
+k8s-minikube-web:
+	minikube service web
+
+k8s-minikube-stop:
+	minikube delete
+
 .PHONY: protobuf build up down clear migrate-up migrate-down migrate-version migrate-force prod-build prod-release prod-run prod-down prod-rollback prod-releases prod-current prod-migrate-up prod-migrate-down prod-migrate-version prod-migrate-force
 
