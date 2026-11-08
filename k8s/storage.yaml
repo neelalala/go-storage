@@ -37,7 +37,7 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: configmap
-                  key: storage.server.port
+                  key: storage.port
             - name: LISTEN_ADDRESS
               value: ":$(SERVER_PORT)"
             - name: POD_NAME
@@ -48,11 +48,18 @@ spec:
               value: "$(POD_NAME).storage:$(SERVER_PORT)"
             - name: UPLOAD_ROOT
               value: "/uploads"
-            - name: DISCOVERY_SERVICE_ADDRESS
+            - name: DISCOVERY_HOST
               valueFrom:
                 configMapKeyRef:
                   name: configmap
-                  key: metadata.address
+                  key: metadata.host
+            - name: DISCOVERY_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: metadata.port
+            - name: DISCOVERY_SERVICE_ADDRESS
+              value: "$(DISCOVERY_HOST):$(DISCOVERY_PORT)"
             - name: LOG_LEVEL
               valueFrom:
                 configMapKeyRef:

@@ -25,7 +25,7 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: configmap
-                  key: gateway.server.port
+                  key: gateway.port
             - name: SERVER_ADDRESS
               value: ":$(SERVER_PORT)"
             - name: LOG_LEVEL
@@ -33,16 +33,30 @@ spec:
                 configMapKeyRef:
                   name: configmap
                   key: log.level
+            - name: METADATA_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: metadata.host
+            - name: METADATA_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: metadata.port 
             - name: METADATA_SERVICE_ADDRESS
+              value: "$(METADATA_HOST):$(METADATA_PORT)"
+            - name: USERS_HOST
               valueFrom:
                 configMapKeyRef:
                   name: configmap
-                  key: metadata.address
+                  key: users.host
+            - name: USERS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: users.port 
             - name: USERS_SERVICE_ADDRESS
-              valueFrom:
-                configMapKeyRef:
-                  name: configmap
-                  key: users.address
+              value: "$(USERS_HOST):$(USERS_PORT)"
 ---
 apiVersion: v1
 kind: Service

@@ -7,26 +7,26 @@ data:
   db.host: postgres
   db.port: "5432"
   db.name: postgres_db
-  pgdata: /var/lib/postgresql/data/pgdata
+  db.data: /var/lib/postgresql/data/pgdata
   
   # Redis
   redis.host: redis
   redis.port: "6379"
 
   # Gateway
-  gateway.server.port: "80"
-  gateway.url: "http://gateway:80"
+  gateway.host: "gateway"
+  gateway.port: "80"
 
   # Metadata
-  metadata.address: metadata:50051
-  metadata.server.port: "50051"
+  metadata.host: metadata
+  metadata.port: "50051"
 
   # Users
-  users.address: users:50051
-  users.server.port: "50051"
+  users.host: users
+  users.port: "50051"
 
   # Storage
-  storage.server.port: "50051"
+  storage.port: "50051"
 
   # Logs
   log.level: INFO

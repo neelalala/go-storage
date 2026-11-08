@@ -59,7 +59,7 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: configmap
-                  key: pgdata
+                  key: db.data
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data

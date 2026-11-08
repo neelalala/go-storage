@@ -25,7 +25,7 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: configmap
-                  key: metadata.server.port
+                  key: metadata.port
             - name: SERVER_ADDRESS
               value: ":$(SERVER_PORT)"
             - name: LOG_LEVEL
