@@ -10,6 +10,29 @@ spec:
         app: migrate
     spec:
       restartPolicy: OnFailure
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.38
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Waiting for PostgreSQL at $DB_HOST:$DB_PORT..."
+              until nc -z -w 2 "$DB_HOST" "$DB_PORT"; do
+                sleep 2
+              done
+              echo "PostgreSQL is reachable!"
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: db.host
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: db.port
       containers:
         - name: migrate
           image: go-storage/migrate:latest

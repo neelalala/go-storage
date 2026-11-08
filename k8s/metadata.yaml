@@ -14,6 +14,45 @@ spec:
       labels:
         app: metadata
     spec:
+      initContainers:
+        - name: wait-for-dependencies
+          image: busybox:1.38
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Waiting for PostgreSQL $DB_HOST:$DB_PORT..."
+              until nc -z -w 2 "$DB_HOST" "$DB_PORT"; do
+                sleep 2
+              done
+              echo "PostgreSQL is reachable!"
+
+              echo "Waiting for Redis at $REDIS_HOST:$REDIS_PORT..."
+              until nc -z -w 2 "$REDIS_HOST" "$REDIS_PORT"; do
+                sleep 2
+              done
+              echo "Redis is reachable!"
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: db.host
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: db.port
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: redis.host
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: redis.port
       containers:
         - name: metadata
           image: go-storage/metadata:latest

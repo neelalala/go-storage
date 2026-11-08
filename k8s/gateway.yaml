@@ -14,6 +14,45 @@ spec:
       labels:
         app: gateway
     spec:
+      initContainers:
+        - name: wait-for-services
+          image: busybox:1.38
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Waiting for metadata service at $METADATA_HOST:$METADATA_PORT..."
+              until nc -z -w 2 "$METADATA_HOST" "$METADATA_PORT"; do
+                sleep 2
+              done
+              echo "Metadata service is reachable!"
+
+              echo "Waiting for users service at $USERS_HOST:$USERS_PORT..."
+              until nc -z -w 2 "$USERS_HOST" "$USERS_PORT"; do
+                sleep 2
+              done
+              echo "Users service is reachable!"
+          env:
+            - name: METADATA_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: metadata.host
+            - name: METADATA_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: metadata.port 
+            - name: USERS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: users.host
+            - name: USERS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: users.port 
       containers:
         - name: gateway
           image: go-storage/gateway:latest
