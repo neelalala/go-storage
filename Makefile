@@ -8,6 +8,7 @@ protobuf:
 	protoc --go_out=. --go_opt=paths=source_relative \
                    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
                    pkg/proto/users/users.proto
+
 build:
 	docker compose build
 
@@ -17,7 +18,7 @@ up:
 down:
 	docker compose down
 
-clear:
+clean:
 	docker compose down -v --remove-orphans
 
 migrate-up:
@@ -33,13 +34,13 @@ migrate-force:
 	docker compose run --rm migrate force $(version)
 
 prod-build:
-	@./scripts/release.sh build $(version)
+	@./scripts/release.sh build
 
 prod-release:
 	@./scripts/release.sh release "$(desc)"
 
-prod-run:
-	@./scripts/release.sh run
+prod-up:
+	@./scripts/release.sh up
 
 prod-down:
 	@./scripts/release.sh down
@@ -65,17 +66,20 @@ prod-migrate-version:
 prod-migrate-force:
 	@./scripts/release.sh migrate force "$(version)"
 
-k8s-minikube-start:
-	minikube start
-	docker compose build
-	minikube image load go-storage/users:latest go-storage/metadata:latest go-storage/migrate:latest go-storage/web:latest go-storage/gateway:latest go-storage/storage:latest
-	kubectl apply -f k8s/
+prod-web:
+	@./scripts/release.sh web
 
-k8s-minikube-web:
-	minikube service web
+prod-status:
+	@./scripts/release.sh status
 
-k8s-minikube-stop:
-	minikube delete
+prod-stop:
+	@./scripts/release.sh stop
 
-.PHONY: protobuf build up down clear migrate-up migrate-down migrate-version migrate-force prod-build prod-release prod-run prod-down prod-rollback prod-releases prod-current prod-migrate-up prod-migrate-down prod-migrate-version prod-migrate-force
+prod-clean:
+	@./scripts/release.sh clean
 
+.PHONY: protobuf build up down clean \
+        migrate-up migrate-down migrate-version migrate-force \
+        prod-build prod-release prod-up prod-down prod-rollback \
+        prod-releases prod-current prod-migrate-up prod-migrate-down \
+        prod-migrate-version prod-migrate-force prod-web prod-status prod-stop prod-clean
