@@ -21,14 +21,28 @@ spec:
           ports:
             - containerPort: 80
           env:
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: gateway.server.port
             - name: SERVER_ADDRESS
-              value: ":80"
+              value: ":$(SERVER_PORT)"
             - name: LOG_LEVEL
-              value: "DEBUG"
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: log.level
             - name: METADATA_SERVICE_ADDRESS
-              value: "metadata:50051"
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: metadata.address
             - name: USERS_SERVICE_ADDRESS
-              value: "users:50051"
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: users.address
 ---
 apiVersion: v1
 kind: Service

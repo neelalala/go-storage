@@ -15,8 +15,30 @@ spec:
           image: go-storage/migrate:latest
           imagePullPolicy: Never
           env:
-            - name: DATABASE_URL
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: db.host
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: db.port
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: db.name
+            - name: DB_USER
               valueFrom:
                 secretKeyRef:
                   name: postgres-secret
-                  key: DATABASE_URL
+                  key: user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: password
+            - name: DATABASE_URL
+              value: "postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable"

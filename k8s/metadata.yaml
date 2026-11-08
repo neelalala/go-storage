@@ -21,17 +21,57 @@ spec:
           ports:
             - containerPort: 50051
           env:
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: metadata.server.port
             - name: SERVER_ADDRESS
-              value: ":50051"
+              value: ":$(SERVER_PORT)"
             - name: LOG_LEVEL
-              value: "DEBUG"
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: log.level
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: redis.host
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: redis.port
             - name: REDIS_URL
-              value: "redis://redis:6379/0"
-            - name: DATABASE_URL
+              value: "redis://$(REDIS_HOST):$(REDIS_PORT)/0"
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: db.host
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: db.port
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: db.name
+            - name: DB_USER
               valueFrom:
                 secretKeyRef:
                   name: postgres-secret
-                  key: DATABASE_URL
+                  key: user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: password
+            - name: DATABASE_URL
+              value: "postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable"
 ---
 apiVersion: v1
 kind: Service

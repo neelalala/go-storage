@@ -22,7 +22,10 @@ spec:
             - containerPort: 80
           env:
             - name: GATEWAY_URL
-              value: "http://gateway:80"
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: gateway.url
 ---
 apiVersion: v1
 kind: Service

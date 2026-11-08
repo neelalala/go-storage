@@ -33,20 +33,31 @@ spec:
           ports:
             - containerPort: 50051
           env:
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: storage.server.port
+            - name: LISTEN_ADDRESS
+              value: ":$(SERVER_PORT)"
             - name: POD_NAME
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
             - name: ADVERTISE_ADDRESS
-              value: "$(POD_NAME).storage:50051"
-            - name: LISTEN_ADDRESS
-              value: ":50051"
+              value: "$(POD_NAME).storage:$(SERVER_PORT)"
             - name: UPLOAD_ROOT
               value: "/uploads"
             - name: DISCOVERY_SERVICE_ADDRESS
-              value: "metadata:50051"
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: metadata.address
             - name: LOG_LEVEL
-              value: "DEBUG"
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: log.level
           volumeMounts:
             - name: storage-data
               mountPath: /uploads
