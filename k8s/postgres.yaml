@@ -4,10 +4,8 @@ metadata:
   name: postgres-secret
 type: Opaque
 stringData:
-  POSTGRES_USER: postgres_user 
-  POSTGRES_PASSWORD: postgres_password 
-  POSTGRES_DB: postgres_db
-  DATABASE_URL: "postgres://postgres_user:postgres_password@postgres:5432/postgres_db?sslmode=disable"
+  user: postgres_user 
+  password: postgres_password 
 ---
 apiVersion: v1
 kind: Service
@@ -46,19 +44,22 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: postgres-secret
-                  key: POSTGRES_USER
+                  key: user
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: postgres-secret
-                  key: POSTGRES_PASSWORD
+                  key: password
             - name: POSTGRES_DB 
               valueFrom:
-                secretKeyRef:
-                  name: postgres-secret
-                  key: POSTGRES_DB
+                configMapKeyRef:
+                  name: configmap
+                  key: db.name
             - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: pgdata
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
