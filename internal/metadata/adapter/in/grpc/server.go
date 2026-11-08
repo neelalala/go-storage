@@ -10,6 +10,8 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -24,9 +26,10 @@ type Server struct {
 	metadatapb.UnimplementedMetadataServer
 	metadatapb.UnimplementedNodeDiscoveryServer
 
-	addr       string
-	grpcServer *grpc.Server
-	service    *application.MetadataService
+	addr         string
+	grpcServer   *grpc.Server
+	healthServer *health.Server
+	service      *application.MetadataService
 
 	log *slog.Logger
 }
@@ -34,11 +37,16 @@ type Server struct {
 func NewServer(addr string, service *application.MetadataService, log *slog.Logger) *Server {
 	grpcServer := grpc.NewServer()
 
+	healthServer := health.NewServer()
+	grpc_health_v1.RegisterHealthServer(grpcServer, healthServer)
+	healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
+
 	server := &Server{
-		addr:       addr,
-		grpcServer: grpcServer,
-		service:    service,
-		log:        log,
+		addr:         addr,
+		grpcServer:   grpcServer,
+		healthServer: healthServer,
+		service:      service,
+		log:          log,
 	}
 
 	metadatapb.RegisterMetadataServer(grpcServer, server)
@@ -63,6 +71,8 @@ func (s *Server) Start() error {
 
 func (s *Server) Stop(ctx context.Context) error {
 	s.log.Info("Shutting down gRPC server...")
+
+	s.healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_NOT_SERVING)
 
 	stopped := make(chan struct{})
 	go func() {

@@ -9,6 +9,8 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/status"
 
 	"github.com/neelalala/go-storage/internal/users/application"
@@ -18,9 +20,10 @@ import (
 
 type Server struct {
 	userspb.UnimplementedUsersServer
-	addr       string
-	grpcServer *grpc.Server
-	service    *application.UsersService
+	addr         string
+	grpcServer   *grpc.Server
+	healthServer *health.Server
+	service      *application.UsersService
 
 	log *slog.Logger
 }
@@ -28,11 +31,16 @@ type Server struct {
 func NewServer(addr string, service *application.UsersService, log *slog.Logger) *Server {
 	grpcServer := grpc.NewServer()
 
+	healthServer := health.NewServer()
+	grpc_health_v1.RegisterHealthServer(grpcServer, healthServer)
+	healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
+
 	server := &Server{
-		addr:       addr,
-		grpcServer: grpcServer,
-		service:    service,
-		log:        log,
+		addr:         addr,
+		grpcServer:   grpcServer,
+		healthServer: healthServer,
+		service:      service,
+		log:          log,
 	}
 
 	userspb.RegisterUsersServer(server.grpcServer, server)
@@ -56,6 +64,8 @@ func (s *Server) Start() error {
 
 func (s *Server) Stop(ctx context.Context) error {
 	s.log.Info("Shutting down gRPC server...")
+
+	s.healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_NOT_SERVING)
 
 	stopped := make(chan struct{})
 	go func() {

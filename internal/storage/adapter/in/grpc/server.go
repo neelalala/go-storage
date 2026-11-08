@@ -9,6 +9,8 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 
@@ -24,9 +26,10 @@ type Storage interface {
 
 type Server struct {
 	storagepb.UnimplementedStorageServer
-	addr       string
-	grpcServer *grpc.Server
-	storage    Storage
+	addr         string
+	grpcServer   *grpc.Server
+	healthServer *health.Server
+	storage      Storage
 
 	log *slog.Logger
 }
@@ -34,11 +37,16 @@ type Server struct {
 func NewServer(addr string, storage Storage, log *slog.Logger) *Server {
 	grpcServer := grpc.NewServer()
 
+	healthServer := health.NewServer()
+	grpc_health_v1.RegisterHealthServer(grpcServer, healthServer)
+	healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
+
 	server := &Server{
-		addr:       addr,
-		grpcServer: grpcServer,
-		storage:    storage,
-		log:        log,
+		addr:         addr,
+		grpcServer:   grpcServer,
+		healthServer: healthServer,
+		storage:      storage,
+		log:          log,
 	}
 
 	storagepb.RegisterStorageServer(grpcServer, server)
@@ -62,6 +70,8 @@ func (s *Server) Start() error {
 
 func (s *Server) Stop(ctx context.Context) error {
 	s.log.Info("Shutting down gRPC server...")
+
+	s.healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_NOT_SERVING)
 
 	stopped := make(chan struct{})
 	go func() {
