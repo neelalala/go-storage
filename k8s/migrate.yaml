@@ -33,10 +33,24 @@ spec:
                 configMapKeyRef:
                   name: configmap
                   key: db.port
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 32Mi
       containers:
         - name: migrate
           image: go-storage/migrate:latest
           imagePullPolicy: Never
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
           env:
             - name: DB_HOST
               valueFrom:

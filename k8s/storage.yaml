@@ -50,12 +50,44 @@ spec:
                 configMapKeyRef:
                   name: configmap
                   key: metadata.port
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 32Mi
       containers:
         - name: storage
           image: go-storage/storage:latest
           imagePullPolicy: Never
           ports:
             - containerPort: 50051
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          startupProbe:
+            grpc:
+              port: 50051
+            initialDelaySeconds: 2
+            periodSeconds: 2
+            failureThreshold: 15
+          readinessProbe:
+            grpc:
+              port: 50051
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            grpc:
+              port: 50051
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
           env:
             - name: SERVER_PORT
               valueFrom:
